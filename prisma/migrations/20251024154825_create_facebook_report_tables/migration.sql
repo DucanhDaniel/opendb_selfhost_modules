@@ -1,0 +1,16 @@
+-- AlterTable
+ALTER TABLE "FbBillingData" ADD COLUMN     "accountId" TEXT,
+ADD COLUMN     "accountName" TEXT,
+ADD COLUMN     "action" TEXT,
+ADD COLUMN     "billingHubLink" TEXT,
+ADD COLUMN     "currency" TEXT,
+ADD COLUMN     "dateTimeInTimezone" TEXT,
+ADD COLUMN     "downloadInvoiceLink" TEXT,
+ADD COLUMN     "eventType" TEXT,
+ADD COLUMN     "fetchTimestamp" TIMESTAMP(3),
+ADD COLUMN     "tax" DECIMAL(65,30),
+ADD COLUMN     "taxAndFeePercent" DOUBLE PRECISION,
+ADD COLUMN     "totalValue" DECIMAL(65,30),
+ADD COLUMN     "transactionId" TEXT,
+ADD COLUMN     "type" TEXT,
+ADD COLUMN     "value" DECIMAL(65,30);

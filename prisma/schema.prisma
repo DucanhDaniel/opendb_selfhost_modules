@@ -1,0 +1,763 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+// ===============================================
+// (FAD) Facebook Ads Data
+// ===============================================
+
+// Campaign Overview Report
+model CampaignOverviewReport {
+  pkId String @id @default(cuid())
+  createdAt DateTime @default(now())
+
+  // 1.Thông tin định danh
+  id           String?
+  name         String?
+  objective    String?
+  account_id   String?
+  account_name String?
+
+  // 2.Trạng thái & Thời gian
+  status           String?
+  effective_status String?
+  start_time       DateTime?
+  stop_time        DateTime?
+  created_time     DateTime?
+  updated_time     DateTime?
+
+  // 3.Cấu hình Đấu thầu
+  buying_type  String?
+  bid_strategy String?
+
+  // 4.Chỉ số Hiệu suất
+  spend  Float?
+  reach  Int?
+  clicks Int?
+  cpc    Float?
+  cpm    Float?
+  ctr    Float?
+
+  // 5.Khoảng thời gian tải dữ liệu
+  date_start DateTime?
+  date_stop  DateTime?
+
+  // 6.Chỉ số Hiệu suất & Chuyển đổi
+  newMessagingConnections Int? // "New Messaging Connections"
+  costPerNewMessaging     Float? // "Cost per New Messaging"
+  leads                   Int? // "Leads"
+  costLeads               Float? // "Cost Leads"
+  purchases               Int? // "Purchases"
+  costPurchases           Float? // "Cost Purchases"
+  purchaseValue           Float? // "Purchase Value"
+  purchaseROAS            Float? // "Purchase ROAS"
+  websitePurchases        Int? // "Website Purchases"
+  onFacebookPurchases     Int? // "On-Facebook Purchases"
+}
+
+// Campaign Performance by Age
+model CampaignPerformanceByAge {
+  pkId String @id @default(cuid())
+  createdAt DateTime @default(now())
+
+  // 1.Thông tin Chiến dịch
+  campaign_id   String?
+  campaign_name String?
+  account_id    String?
+  account_name  String?
+
+  // 2.Phân loại (Breakdown)
+  age String?
+
+  // 3.Chỉ số Hiệu suất & Chuyển đổi
+  spend                   Float?
+  newMessagingConnections Int?
+  costPerNewMessaging     Float?
+  leads                   Int?
+  costLeads               Float?
+  purchases               Int?
+  costPurchases           Float?
+  purchaseValue           Float?
+  purchaseROAS            Float?
+  websitePurchases        Int?
+  onFacebookPurchases     Int?
+
+  // 4.Khoảng thời gian tải dữ liệu
+  date_start DateTime?
+  date_stop  DateTime?
+}
+
+// Campaign Performance by Gender
+model CampaignPerformanceByGender {
+  pkId String @id @default(cuid())
+  createdAt DateTime @default(now())
+
+  // 1.Thông tin Chiến dịch
+  campaign_id   String?
+  campaign_name String?
+  account_id    String?
+  account_name  String?
+
+  // 2.Phân loại (Breakdown)
+  gender String?
+
+  // 3.Chỉ số Hiệu suất & Chuyển đổi
+  spend                   Float?
+  newMessagingConnections Int?
+  costPerNewMessaging     Float?
+  leads                   Int?
+  costLeads               Float?
+  purchases               Int?
+  costPurchases           Float?
+  purchaseValue           Float?
+  purchaseROAS            Float?
+  websitePurchases        Int?
+  onFacebookPurchases     Int?
+
+  // 4.Khoảng thời gian tải dữ liệu
+  date_start DateTime?
+  date_stop  DateTime?
+}
+
+// Campaign Performance by Platform
+model CampaignPerformanceByPlatform {
+  pkId String @id @default(cuid())
+  createdAt DateTime @default(now())
+
+  // 1.Thông tin Định danh
+  account_id    String?
+  account_name  String?
+  campaign_id   String?
+  campaign_name String?
+
+  // 2.Phân loại (Breakdown)
+  publisher_platform String?
+  platform_position  String?
+
+  // 3.Thời gian
+  date_start DateTime?
+  date_stop  DateTime?
+
+  // 4.Chỉ số Hiệu suất
+  spend       Float?
+  impressions Int?
+  clicks      Int?
+
+  // 5.Chỉ số Chuyển đổi (Conversion)
+  newMessagingConnections Int?
+  costPerNewMessaging     Float?
+  leads                   Int?
+  costLeads               Float?
+  purchases               Int?
+  costPurchases           Float?
+  purchaseValue           Float?
+  purchaseROAS            Float?
+  websitePurchases        Int?
+  onFacebookPurchases     Int?
+}
+
+// Campaign Performance by Region
+model CampaignPerformanceByRegion {
+  pkId String @id @default(cuid())
+  createdAt DateTime @default(now())
+
+  // 1.Thông tin Chiến dịch
+  campaign_id   String?
+  campaign_name String?
+  account_id    String?
+  account_name  String?
+
+  // 2.Phân loại (Breakdown)
+  region String?
+
+  // 3.Chỉ số Hiệu suất
+  spend       Float?
+  impressions Int?
+  clicks      Int?
+  ctr         Float?
+
+  // 4.Chỉ số Chuyển đổi (Conversion)
+  newMessagingConnections Int?
+  costPerNewMessaging     Float?
+  leads                   Int?
+  costLeads               Float?
+  purchases               Int?
+  costPurchases           Float?
+  purchaseValue           Float?
+  websitePurchases        Int?
+  onFacebookPurchases     Int?
+
+  // 5.Khoảng thời gian lấy dữ liệu
+  date_start DateTime?
+  date_stop  DateTime?
+}
+
+// Ad Set Performance Report
+model AdSetPerformanceReport {
+  pkId String @id @default(cuid())
+  createdAt DateTime @default(now())
+
+  // 1.Thông tin định danh
+  id            String?
+  name          String?
+  campaign_id   String?
+  campaign_name String?
+  account_id    String?
+  account_name  String?
+
+  // 2.Trạng thái & Chẩn đoán
+  status           String?
+  effective_status String?
+  created_time     DateTime?
+
+  // 3.Ngân sách
+  daily_budget    Float?
+  lifetime_budget Float?
+  budget_remaining Float?
+
+  // 4.Chỉ số Hiệu suất
+  spend       Float?
+  impressions Int?
+  reach       Int?
+  clicks      Int?
+  ctr         Float?
+  cpc         Float?
+  cpm         Float?
+
+  // 5.Chỉ số Chuyển đổi (Conversion)
+  newMessagingConnections Int?
+  costPerNewMessaging     Float?
+  leads                   Int?
+  costLeads               Float?
+  purchases               Int?
+  costPurchases           Float?
+  purchaseValue           Float?
+  purchaseROAS            Float?
+  websitePurchases        Int?
+  onFacebookPurchases     Int?
+
+  // Khoảng thời gian lấy dữ liệu
+  date_start DateTime?
+  date_stop  DateTime?
+}
+
+// Ad Performance Report
+model AdPerformanceReport {
+  pkId String @id @default(cuid())
+  createdAt DateTime @default(now())
+
+  // 1.Thông tin định danh
+  id            String?
+  name          String?
+  adset_id      String?
+  adset_name    String?
+  campaign_id   String?
+  campaign_name String?
+  account_id    String?
+  account_name  String?
+  created_time  DateTime?
+  updated_time  DateTime?
+
+  // 3.Trạng thái & Chẩn đoán
+  status           String?
+  effective_status String?
+
+  // 4.Chỉ số Hiệu suất
+  spend       Float?
+  impressions Int?
+  reach       Int?
+  clicks      Int?
+  ctr         Float?
+  cpc         Float?
+  cpm         Float?
+  frequency   Float?
+
+  // 5.Chỉ số Chuyển đổi (Conversion)
+  newMessagingConnections Int?
+  costPerNewMessaging     Float?
+  leads                   Int?
+  costLeads               Float?
+  purchases               Int?
+  costPurchases           Float?
+  purchaseValue           Float?
+  purchaseROAS            Float?
+  websitePurchases        Int?
+  onFacebookPurchases     Int?
+
+  // 6.Khoảng thời gian lấy dữ liệu
+  date_start DateTime?
+  date_stop  DateTime?
+}
+
+// Account Daily Report
+model AccountDailyReport {
+  pkId String @id @default(cuid())
+  createdAt DateTime @default(now())
+
+  // 1.Thông tin định danh
+  account_id       String?
+  account_name     String?
+  account_currency String?
+  date_start       DateTime?
+  date_stop        DateTime?
+
+  // 2.Chỉ số Hiệu suất
+  spend       Float?
+  impressions Int?
+  clicks      Int?
+  cpc         Float?
+  cpm         Float?
+  ctr         Float?
+  reach       Int?
+  frequency   Float?
+
+  // 3.Chỉ số Chuyển đổi (Conversion)
+  newMessagingConnections Int?
+  costPerNewMessaging     Float?
+  leads                   Int?
+  costLeads               Float?
+  purchases               Int?
+  costPurchases           Float?
+  purchaseValue           Float?
+  purchaseROAS            Float?
+  websitePurchases        Int?
+  onFacebookPurchases     Int?
+}
+
+// Campaign Daily Report
+model CampaignDailyReport {
+  pkId String @id @default(cuid())
+  createdAt DateTime @default(now())
+
+  // 1.Thông tin định danh
+  campaign_id   String?
+  campaign_name String?
+  account_id    String?
+  account_name  String?
+  date_start    DateTime?
+  date_stop     DateTime?
+
+  // 2.Chỉ số Hiệu suất
+  spend       Float?
+  impressions Int?
+  reach       Int?
+  clicks      Int?
+  cpc         Float?
+  cpm         Float?
+  ctr         Float?
+  frequency   Float?
+
+  // 3.Chỉ số Chuyển đổi (Conversion)
+  newMessagingConnections Int?
+  costPerNewMessaging     Float?
+  leads                   Int?
+  costLeads               Float?
+  purchases               Int?
+  costPurchases           Float?
+  purchaseValue           Float?
+  purchaseROAS            Float?
+  websitePurchases        Int?
+  onFacebookPurchases     Int?
+}
+
+// Ad Set Daily Report
+model AdSetDailyReport {
+  pkId String @id @default(cuid())
+  createdAt DateTime @default(now())
+
+  // Thông tin định danh
+  id            String?
+  name          String?
+  campaign_id   String?
+  campaign_name String?
+  account_id    String?
+  account_name  String?
+  date_start    DateTime?
+  date_stop     DateTime?
+
+  // 2.Trạng thái & Chẩn đoán
+  status           String?
+  effective_status String?
+
+  // 3.Ngân sách
+  daily_budget    Float?
+  lifetime_budget Float?
+  budget_remaining Float?
+
+  // 4.Chỉ số Hiệu suất
+  spend       Float?
+  impressions Int?
+  reach       Int?
+  clicks      Int?
+  ctr         Float?
+  cpc         Float?
+  cpm         Float?
+  frequency   Float?
+
+  // 5.Chỉ số Chuyển đổi (Conversion)
+  newMessagingConnections Int?
+  costPerNewMessaging     Float?
+  leads                   Int?
+  costLeads               Float?
+  purchases               Int?
+  costPurchases           Float?
+  purchaseValue           Float?
+  purchaseROAS            Float?
+  websitePurchases        Int?
+  onFacebookPurchases     Int?
+}
+
+// Ad Daily Report
+model AdDailyReport {
+  pkId String @id @default(cuid())
+  createdAt DateTime @default(now())
+
+  // 1.Thông tin định danh
+  id            String?
+  name          String?
+  adset_id      String?
+  adset_name    String?
+  campaign_id   String?
+  campaign_name String?
+  account_id    String?
+  account_name  String?
+  date_start    DateTime?
+  date_stop     DateTime?
+
+  // 2.Trạng thái & Thời gian
+  status           String?
+  effective_status String?
+  created_time     DateTime?
+
+  // 3.Chỉ số Hiệu suất
+  spend       Float?
+  impressions Int?
+  reach       Int?
+  clicks      Int?
+  ctr         Float?
+  cpc         Float?
+  cpm         Float?
+  frequency   Float?
+
+  // 4.Chỉ số Chuyển đổi (Conversion)
+  newMessagingConnections Int?
+  costPerNewMessaging     Float?
+  leads                   Int?
+  costLeads               Float?
+  purchases               Int?
+  costPurchases           Float?
+  purchaseValue           Float?
+  purchaseROAS            Float?
+  websitePurchases        Int?
+  onFacebookPurchases     Int?
+}
+
+// Ad Creative Report
+model AdCreativeReport {
+  pkId String @id @default(cuid())
+  createdAt DateTime @default(now())
+
+  // 1.Thông tin định danh
+  id            String?
+  name          String?
+  adset_id      String?
+  adset_name    String?
+  campaign_id   String?
+  campaign_name String?
+  account_id    String?
+  account_name  String?
+
+  // 2.Trạng thái
+  status           String?
+  effective_status String?
+
+  // 3.Thông tin Sáng tạo
+  creative_id                String?
+  actor_id                   String?
+  page_name                  String?
+  creative_title             String? @db.Text
+  creative_body              String? @db.Text
+  creative_thumbnail_url     String?
+  creative_thumbnail_raw_url String?
+  creative_link              String?
+
+  // 4.Chỉ số Hiệu suất
+  spend       Float?
+  impressions Int?
+  leads       Int?
+  costLeads   Float?
+  reach       Int?
+  clicks      Int?
+  ctr         Float?
+  cpc         Float?
+  cpm         Float?
+
+  // 5.Chỉ số Chuyển đổi (Conversion)
+  newMessagingConnections Int?
+  costPerNewMessaging     Float?
+  purchases               Int?
+  purchaseValue           Float?
+  purchaseROAS            Float?
+
+  // 6.Khoảng thời gian lấy dữ liệu
+  date_start DateTime?
+  date_stop  DateTime?
+}
+
+// BM & Ad Accounts
+model BmAndAdAccounts {
+  pkId String @id @default(cuid())
+  createdAt DateTime @default(now())
+
+  // 1.Thông tin Business Manager
+  bm_id                    String?
+  bm_name                  String?
+  bm_created_time          DateTime?
+  bm_verification_status   String?
+  bm_profile_picture_uri   String?
+
+  // 2.Thông tin Tài khoản QC
+  account_type             String?
+  account_id               String?
+  account_name             String?
+  account_status_text      String?
+  currency                 String?
+  timezone_name            String?
+  amount_spent             Float?
+  balance                  Float?
+  current_payment_method   String?
+  tax_and_fee              Float?
+}
+
+// ===============================================
+// (FBT) FB Billing Tool
+// ===============================================
+
+// FB Billing Data
+// Dựa trên các trường từ Google Sheet
+model FbBillingData {
+  pkId      String   @id @default(cuid())
+  createdAt DateTime @default(now())
+
+  // === Các trường từ Sheet ===
+  accountId           String? // "act_65024989..."
+  accountName         String? // "Cara Luna 02"
+  eventType           String? // "ad_account_bill"
+  dateTimeInTimezone  String? // "10/20/2025 at 10:04 AM" (Lưu dạng String vì không phải ISO)
+  fetchTimestamp      DateTime? // "2025-10-24 22:4..."
+  currency            String? // "VND"
+  
+  // Lưu ý: Dùng Decimal cho tiền tệ để tránh lỗi làm tròn
+  value               Decimal? // 53,102,500.00
+  totalValue          Decimal? // 53,102,500.00
+  tax                 Decimal? // (Từ cột 'Tax')
+
+  // Dùng String cho ID để đảm bảo an toàn
+  transactionId       String? // "2472147387087"
+  action              String? // "67"
+  type                String? // "payment_amour" (có thể là "payment_amount")
+  
+  // Dùng Float cho phần trăm
+  taxAndFeePercent    Float? // "0%" (sẽ được lưu là 0)
+
+  // Dùng @db.Text cho các link có thể rất dài
+  billingHubLink      String? @db.Text
+  downloadInvoiceLink String? @db.Text
+}
+
+// ===============================================
+// (MPI) Meta Page Insight
+// ===============================================
+
+// BC Tương tác & Tăng trưởng Cộng đồng
+model BcTuongTacTangTruongCongDong {
+  pkId String @id @default(cuid())
+  createdAt DateTime @default(now())
+
+  // 1.Tương tác Trang
+  page_daily_follows_unique   Int?
+  page_daily_unfollows_unique Int?
+  page_post_engagements       Int?
+
+  // 2.Tăng trưởng Fan & Theo dõi
+  page_fan_adds    Int?
+  page_fan_removes Int?
+  page_views_total Int?
+}
+
+// BC Hiển thị & Tiếp cận Trang
+model BcHienThiTiepCanTrang {
+  pkId String @id @default(cuid())
+  createdAt DateTime @default(now())
+
+  // 1.Hiển thị (Impressions)
+  page_impressions     Int?
+  page_impressions_paid Int?
+
+  // 2.Tiếp cận (Reach)
+  page_impressions_unique      Int?
+  page_impressions_paid_unique Int?
+}
+
+// BC Hiệu suất Bài viết (Tổng hợp)
+model BcHieuSuatBaiVietTongHop {
+  pkId String @id @default(cuid())
+  createdAt DateTime @default(now())
+
+  // 1.Hiệu suất chính
+  post_impressions        Int?
+  post_impressions_unique Int?
+  post_clicks             Int?
+
+  // 2.Phân loại Hiển thị
+  post_impressions_paid         Int?
+  post_impressions_paid_unique  Int?
+  post_impressions_organic      Int?
+  post_impressions_organic_unique Int?
+
+  // 3.Hiển thị theo Fan
+  post_impressions_fan        Int?
+  post_impressions_fan_unique Int?
+
+  // 4.Phân loại theo tương tác
+  post_reactions_like_total    Int?
+  post_reactions_love_total    Int?
+  post_reactions_wow_total     Int?
+  post_reactions_haha_total    Int?
+  post_reactions_sorry_total   Int?
+  post_reactions_anger_total   Int?
+  post_video_views             Int?
+  post_activity_by_action_type Json?
+}
+
+// BC Phân tích Cảm xúc Bài viết
+model BcPhanTichCamXucBaiViet {
+  pkId String @id @default(cuid())
+  createdAt DateTime @default(now())
+
+  // 1.Các loại Reactions
+  post_reactions_like_total  Int?
+  post_reactions_love_total  Int?
+  post_reactions_wow_total   Int?
+  post_reactions_haha_total  Int?
+  post_reactions_sorry_total Int?
+  post_reactions_anger_total Int?
+}
+
+// BC Phân tích: Fan theo Vị trí
+model BcPhanTichFanTheoViTri {
+  pkId String @id @default(cuid())
+  createdAt DateTime @default(now())
+
+  // Metric
+  page_fans_country Json?
+  page_fans_city    Json?
+}
+
+// BC Phân tích: Nguồn Lượt thích Mới
+model BcPhanTichNguonLuotThichMoi {
+  pkId String @id @default(cuid())
+  createdAt DateTime @default(now())
+
+  // Metric
+  page_fan_adds_by_paid_non_paid_unique Json?
+}
+
+// BC Hiệu suất Video (Từng video)
+model BcHieuSuatVideoTungVideo {
+  pkId String @id @default(cuid())
+  createdAt DateTime @default(now())
+
+  // 3. Tiếp cận & Lượt xem Video
+  post_impressions_unique    Int?
+  post_video_retention_graph Json?
+  post_video_followers       Int?
+
+  // 2. Thời gian xem & Tỷ lệ giữ chân
+  post_video_avg_time_watched Float?
+  post_video_social_actions   Int?
+  post_video_view_time        Float?
+
+  // 1. Tương tác trên Video
+  post_video_likes_by_reaction_type Json?
+}
+
+// BC Hiệu suất Video (Tổng hợp)
+model BcHieuSuatVideoTongHop {
+  pkId String @id @default(cuid())
+  createdAt DateTime @default(now())
+
+  // 1.Lượt xem Video
+  page_video_views        Int?
+  page_video_views_paid   Int?
+  page_video_views_organic Int?
+  page_video_views_unique Int?
+
+  // 2.Lượt xem Hoàn thành (30s)
+  page_video_complete_views_30s        Int?
+  page_video_complete_views_30s_unique Int?
+
+  // 3.Thời gian xem
+  page_video_view_time Float?
+}
+
+// BC Tổng hợp Hiệu suất Trang (Nâng cao)
+model BcTongHopHieuSuatTrangNangCao {
+  pkId String @id @default(cuid())
+  createdAt DateTime @default(now())
+
+  // 1.Thông tin cơ bản
+  platform  String?
+  page_id   String?
+  page_name String?
+  date      DateTime?
+
+  // 2.Tăng trưởng Follower
+  followers_total Int?
+  follows_new     Int?
+  unfollows       Int?
+  net_follows     Int?
+
+  // 3.Hiển thị & Tiếp cận (Tổng thể)
+  impressions_total Int?
+  reach_total       Int?
+  impressions_paid  Int?
+  reach_paid        Int?
+  frequency         Float?
+  page_views        Int?
+
+  // 4.Hiển thị & Tiếp cận (Bài viết)
+  post_impressions Int?
+  post_reach       Int?
+
+  // 5.Tương tác & Hành động
+  engagements     Int?
+  cta_clicks      Int?
+  engagement_rate Float?
+
+  // Video
+  video_views     Int?
+  video_view_time Float?
+}
+
+// BC Hiệu suất Bài viết (Lifetime)
+model BcHieuSuatBaiVietLifetime {
+  pkId String @id @default(cuid())
+  createdAt DateTime @default(now())
+
+  // Chỉ số Hiệu suất
+  post_impressions              Int?
+  post_impressions_unique       Int?
+  post_clicks                   Int?
+  post_reactions_by_type_total  Json?
+  post_video_views              Int?
+  post_video_views_unique       Int?
+}
