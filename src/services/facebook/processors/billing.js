@@ -81,7 +81,7 @@ export async function processBillingReport(options, accessToken) {
   // --- 1. Get Account Info (BM ID, Tax) from Database ---
   const accountInfoMap = new Map();
   try {
-    const accountsData = await prisma.bmAndAdAccounts.findMany({
+    const accountsData = await prisma.fAD_BmAndAdAccounts.findMany({
       select: {
         account_id: true,
         bm_id: true,

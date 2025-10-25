@@ -1,282 +1,476 @@
-// /src/db/dataWriter.js
 import prisma from './client.js';
 
-// --- [BƯỚC 1] ---
-// Xây dựng cấu hình kiểu dữ liệu dựa trên logic _formatSheetColumns của bạn.
-// Chúng ta sử dụng "Tên thân thiện" (friendly names) làm key.
+// --- TYPE_CONFIG và KEY_MAP ---
 const TYPE_CONFIG = {
-  TEXT: new Set([
-    "advertiser_id", "campaign_id", "store_id", "item_group_id", "item_id", 
-    "tt_user_id", "video_id", "id", "adset_id", "account_id", "name", 
-    "objective", "account_name", "status", "effective_status", "buying_type", 
-    "bid_strategy", "age", "gender", "publisher_platform", "platform_position", 
-    "region", "adset_name", "account_currency", "creative_id", "actor_id", 
-    "page_name", "creative_title", "creative_body", "creative_thumbnail_url", 
-    "creative_thumbnail_raw_url", "creative_link", "bm_id", "bm_name", 
-    "bm_verification_status", "bm_profile_picture_uri", "account_type", 
-    "account_status_text", "currency", "timezone_name", "current_payment_method",
-    "eventType", "dateTimeInTimezone", "transactionId", "action", "type",
-    "billingHubLink", "downloadInvoiceLink", "platform"
-  ]),
-  FLOAT: new Set([
-    "New Messaging Connections", // <-- Chú ý: Key này có dấu cách
-    "Cost Purchases", "Website Purchases", "On-Facebook Purchases", "Leads", 
-    "Purchases", "Cost Leads", "Cost per New Messaging", "Purchase Value", 
-    "Purchase ROAS", "frequency", "ctr", "spend", "cpc", "cpm", 
-    "cost_per_conversion", "total_onsite_shopping_value", "cost", 
-    "cost_per_order", "gross_revenue", "net_cost", "roas_bid", 
-    "target_roi_budget", "max_delivery_budget", "daily_budget", 
-    "budget_remaining", "lifetime_budget", "roi", "tax_and_fee",
-    "post_video_avg_time_watched", "post_video_view_time", "page_video_view_time",
-    "engagement_rate"
-    // Thêm "value", "totalValue", "tax" từ schema FbBillingData
-    ,"value", "totalValue", "tax", "taxAndFeePercent"
-  ]),
-  INTEGER: new Set([
-    "reach", "impressions", "clicks", "conversion", "video_play_actions", 
-    "orders", "product_impressions", "product_clicks", 
-    // Thêm các trường INT từ schema
-    "page_daily_follows_unique", "page_daily_unfollows_unique", "page_post_engagements",
-    "page_fan_adds", "page_fan_removes", "page_views_total", "page_impressions",
-    "page_impressions_paid", "page_impressions_unique", "page_impressions_paid_unique",
-    "post_impressions", "post_impressions_unique", "post_clicks", "post_impressions_paid",
-    "post_impressions_paid_unique", "post_impressions_organic", "post_impressions_organic_unique",
-    "post_impressions_fan", "post_impressions_fan_unique", "post_reactions_like_total",
-    "post_reactions_love_total", "post_reactions_wow_total", "post_reactions_haha_total",
-    "post_reactions_sorry_total", "post_reactions_anger_total", "post_video_views",
-    "post_video_followers", "post_video_social_actions", "page_video_views",
-    "page_video_views_paid", "page_video_views_organic", "page_video_views_unique",
-    "page_video_complete_views_30s", "page_video_complete_views_30s_unique",
-    "followers_total", "follows_new", "unfollows", "net_follows", "impressions_total",
-    "reach_total", "impressions_paid", "reach_paid", "page_views", "post_reach",
-    "engagements", "cta_clicks", "video_views", "post_video_views_unique"
-  ]),
-  DATE: new Set([
-    "start_time", "stop_time", "created_time", "updated_time", "date_start", 
-    "date_stop", "bm_created_time", "fetchTimestamp", "date"
-  ]),
-  JSON: new Set([
-    // Các trường này bạn định nghĩa là Json trong schema
-    "post_activity_by_action_type", "page_fans_country", "page_fans_city",
-    "page_fan_adds_by_paid_non_paid_unique", "post_video_retention_graph",
-    "post_video_likes_by_reaction_type", "post_reactions_by_type_total"
-  ])
+  TEXT: new Set([
+    "advertiser_id", "campaign_id", "store_id", "item_group_id", "item_id",
+    "tt_user_id", "video_id", "id", "adset_id", "account_id", "name",
+    "objective", "account_name", "status", "effective_status", "buying_type",
+    "bid_strategy", "age", "gender", "publisher_platform", "platform_position",
+    "region", "adset_name", "account_currency", "creative_id", "actor_id",
+    "page_name", "creative_title", "creative_body", "creative_thumbnail_url",
+    "creative_thumbnail_raw_url", "creative_link", "bm_id", "bm_name",
+    "bm_verification_status", "bm_profile_picture_uri", "account_type",
+    "account_status_text", "currency", "timezone_name", "current_payment_method",
+    "eventType", "dateTimeInTimezone", "transactionId", "action", "type",
+    "billingHubLink", "downloadInvoiceLink", "platform"
+  ]),
+  FLOAT: new Set([
+    "purchaseROAS", "frequency", "ctr", "spend", "cpc", "cpm",
+    "cost_per_conversion", "total_onsite_shopping_value", "cost",
+    "cost_per_order", "gross_revenue", "net_cost", "roas_bid",
+    "target_roi_budget", "max_delivery_budget", "daily_budget",
+    "budget_remaining", "lifetime_budget", "roi", "tax_and_fee",
+    "post_video_avg_time_watched", "post_video_view_time", "page_video_view_time",
+    "engagement_rate",
+    "taxAndFeePercent", "costPerNewMessaging", "costLeads", "purchaseValue", "costPurchases", "amount_spent", "balance"
+  ]),
+  DECIMAL: new Set(["value", "totalValue", "tax"]),
+  INTEGER: new Set([
+    "reach", "impressions", "clicks", "conversion", "video_play_actions",
+    "orders", "product_impressions", "product_clicks",
+    "page_daily_follows_unique", "page_daily_unfollows_unique", "page_post_engagements",
+    "page_fan_adds", "page_fan_removes", "page_views_total", "page_impressions",
+    "page_impressions_paid", "page_impressions_unique", "page_impressions_paid_unique",
+    "post_impressions", "post_impressions_unique", "post_clicks", "post_impressions_paid",
+    "post_impressions_paid_unique", "post_impressions_organic", "post_impressions_organic_unique",
+    "post_impressions_fan", "post_impressions_fan_unique", "post_reactions_like_total",
+    "post_reactions_love_total", "post_reactions_wow_total", "post_reactions_haha_total",
+    "post_reactions_sorry_total", "post_reactions_anger_total", "post_video_views",
+    "post_video_followers", "post_video_social_actions", "page_video_views",
+    "page_video_views_paid", "page_video_views_organic", "page_video_views_unique",
+    "page_video_complete_views_30s", "page_video_complete_views_30s_unique",
+    "followers_total", "follows_new", "unfollows", "net_follows", "impressions_total",
+    "reach_total", "impressions_paid", "reach_paid", "page_views", "post_reach",
+    "engagements", "cta_clicks", "video_views", "post_video_views_unique",
+    "newMessagingConnections", "leads", "websitePurchases", "onFacebookPurchases", "purchases"
+  ]),
+  DATE: new Set([
+    "start_time", "stop_time", "created_time", "updated_time", "date_start",
+    "date_stop", "bm_created_time", "fetchTimestamp", "date"
+  ]),
+  JSON: new Set([
+    "post_activity_by_action_type", "page_fans_country", "page_fans_city",
+    "page_fan_adds_by_paid_non_paid_unique", "post_video_retention_graph",
+    "post_video_likes_by_reaction_type", "post_reactions_by_type_total"
+  ])
 };
 
-// --- [BƯỚC 2] ---
-// Ánh xạ "Tên thân thiện" (từ selectable_fields) sang "Tên trường" (trong schema).
-// Chỉ cần định nghĩa những trường có tên khác nhau.
 const KEY_MAP = {
-  "New Messaging Connections": "newMessagingConnections",
-  "Cost per New Messaging": "costPerNewMessaging",
-  "Cost Leads": "costLeads",
-  "Cost Purchases": "costPurchases",
-  "Purchase Value": "purchaseValue",
-  "Purchase ROAS": "purchaseROAS",
-  "Website Purchases": "websitePurchases",
-  "On-Facebook Purchases": "onFacebookPurchases",
-  // Thêm các key đặc biệt cho Billing
-  "Account ID": "accountId",
-  "Account Name": "accountName",
-  "Event Type": "eventType",
-  "Date Time In Timezone": "dateTimeInTimezone",
-  "Fetch Timestamp": "fetchTimestamp",
-  "Currency": "currency",
-  "Value": "value",
-  "Transaction ID": "transactionId",
-  "Action": "action",
-  "Type": "type",
-  "Tax & Fee %": "taxAndFeePercent",
-  "Total Value": "totalValue",
-  "Billing Hub Link": "billingHubLink",
-  "Download Invoice Link": "downloadInvoiceLink",
-  "Leads" : "leads",
-  "Purchases" : "purchases"
+  "New Messaging Connections": "newMessagingConnections",
+  "Cost per New Messaging": "costPerNewMessaging",
+  "Leads": "leads",
+  "Cost Leads": "costLeads",
+  "Purchases": "purchases",
+  "Cost Purchases": "costPurchases",
+  "Purchase Value": "purchaseValue",
+  "Purchase ROAS": "purchaseROAS",
+  "Website Purchases": "websitePurchases",
+  "On-Facebook Purchases": "onFacebookPurchases",
+  "Account ID": "accountId",
+  "Account Name": "accountName",
+  "Event Type": "eventType",
+  "Date Time In Timezone": "dateTimeInTimezone",
+  "Fetch Timestamp": "fetchTimestamp",
+  "Currency": "currency",
+  "Value": "value",
+  "Transaction ID": "transactionId",
+  "Action": "action",
+  "Type": "type",
+  "Tax & Fee %": "taxAndFeePercent",
+  "Total Value": "totalValue",
+  "Billing Hub Link": "billingHubLink",
+  "Download Invoice Link": "downloadInvoiceLink"
 };
 
-// --- [BƯỚC 3] ---
-// Ánh xạ `templateName` đến `model` Prisma tương ứng.
-// Đây là bộ điều phối chính.
 const TEMPLATE_MAP = {
-  // FAD
-  "Campaign Overview Report": { model: prisma.campaignOverviewReport },
-  "Campaign Performance by Age": { model: prisma.campaignPerformanceByAge },
-  "Campaign Performance by Gender": { model: prisma.campaignPerformanceByGender },
-  "Campaign Performance by Platform": { model: prisma.campaignPerformanceByPlatform },
-  "Campaign Performance by Region": { model: prisma.campaignPerformanceByRegion },
-  "Ad Set Performance Report": { model: prisma.adSetPerformanceReport },
-  "Ad Performance Report": { model: prisma.adPerformanceReport },
-  "Account Daily Report": { model: prisma.accountDailyReport },
-  "Campaign Daily Report": { model: prisma.campaignDailyReport },
-  "Ad Set Daily Report": { model: prisma.adSetDailyReport },
-  "Ad Daily Report": { model: prisma.adDailyReport },
-  "Ad Creative Report": { model: prisma.adCreativeReport },
-  "BM & Ad Accounts": { model: prisma.bmAndAdAccounts },
-  // FBT
-  "FB Billing Data": { model: prisma.fbBillingData },
-  // MPI
-  "BC Tương tác & Tăng trưởng Cộng đồng": { model: prisma.bcTuongTacTangTruongCongDong },
-  "BC Hiển thị & Tiếp cận Trang": { model: prisma.bcHienThiTiepCanTrang },
-  "BC Hiệu suất Bài viết (Tổng hợp)": { model: prisma.bcHieuSuatBaiVietTongHop },
-  "BC Phân tích Cảm xúc Bài viết": { model: prisma.bcPhanTichCamXucBaiViet },
-  "BC Phân tích: Fan theo Vị trí": { model: prisma.bcPhanTichFanTheoViTri },
-  "BC Phân tích: Nguồn Lượt thích Mới": { model: prisma.bcPhanTichNguonLuotThichMoi },
-  "BC Hiệu suất Video (Từng video)": { model: prisma.bcHieuSuatVideoTungVideo },
-  "BC Hiệu suất Video (Tổng hợp)": { model: prisma.bcHieuSuatVideoTongHop },
-  "BC Tổng hợp Hiệu suất Trang (Nâng cao)": { model: prisma.bcTongHopHieuSuatTrangNangCao },
-  "BC Hiệu suất Bài viết (Lifetime)": { model: prisma.bcHieuSuatBaiVietLifetime },
+  // --- FAD ---
+  "Campaign Overview Report": {
+    tableName: "FAD_CampaignOverviewReport",
+    conflictTarget: ["account_id", "date_start", "date_stop"],
+    updateFields: [
+      "id", "name", "objective", "account_name", "status", "effective_status",
+      "start_time", "stop_time", "created_time", "updated_time", "buying_type", "bid_strategy",
+      "spend", "reach", "clicks", "cpc", "cpm", "ctr",
+      "newMessagingConnections", "costPerNewMessaging", "leads", "costLeads",
+      "purchases", "costPurchases", "purchaseValue", "purchaseROAS",
+      "websitePurchases", "onFacebookPurchases"
+    ]
+  },
+   "Campaign Performance by Age": {
+     tableName: "FAD_CampaignPerformanceByAge",
+     conflictTarget: ["account_id", "date_start", "date_stop"],
+     updateFields: [
+       "campaign_name", "account_id", "account_name", "spend", "newMessagingConnections",
+       "costPerNewMessaging", "leads", "costLeads", "purchases", "costPurchases",
+       "purchaseValue", "purchaseROAS", "websitePurchases", "onFacebookPurchases", "date_stop"
+     ]
+   },
+   "Campaign Performance by Gender": {
+     tableName: "FAD_CampaignPerformanceByGender",
+     conflictTarget: ["account_id", "date_start", "date_stop"],
+     updateFields: [
+       "campaign_name", "account_id", "account_name", "spend", "newMessagingConnections",
+       "costPerNewMessaging", "leads", "costLeads", "purchases", "costPurchases",
+       "purchaseValue", "purchaseROAS", "websitePurchases", "onFacebookPurchases", "date_stop"
+     ]
+   },
+   "Campaign Performance by Platform": {
+     tableName: "FAD_CampaignPerformanceByPlatform",
+     conflictTarget: ["account_id", "date_start", "date_stop"],
+     updateFields: [
+       "account_id", "account_name", "campaign_name", "spend", "impressions", "clicks",
+       "newMessagingConnections", "costPerNewMessaging", "leads", "costLeads", "purchases",
+       "costPurchases", "purchaseValue", "purchaseROAS", "websitePurchases", "onFacebookPurchases", "date_stop"
+     ]
+   },
+    "Campaign Performance by Region": {
+      tableName: "FAD_CampaignPerformanceByRegion",
+      conflictTarget: ["account_id", "date_start", "date_stop"],
+      updateFields: [
+          "campaign_name", "account_id", "account_name", "spend", "impressions", "clicks", "ctr",
+          "newMessagingConnections", "costPerNewMessaging", "leads", "costLeads", "purchases",
+          "costPurchases", "purchaseValue", "websitePurchases", "onFacebookPurchases", "date_stop"
+      ]
+  },
+  "Ad Set Performance Report": {
+      tableName: "FAD_AdSetPerformanceReport",
+      conflictTarget: ["account_id", "date_start", "date_stop"],
+      updateFields: [
+          "name", "campaign_id", "campaign_name", "account_id", "account_name", "status",
+          "effective_status", "created_time", "daily_budget", "lifetime_budget", "budget_remaining",
+          "spend", "impressions", "reach", "clicks", "ctr", "cpc", "cpm",
+          "newMessagingConnections", "costPerNewMessaging", "leads", "costLeads", "purchases",
+          "costPurchases", "purchaseValue", "purchaseROAS", "websitePurchases", "onFacebookPurchases"
+      ]
+  },
+ "Ad Performance Report": {
+     tableName: "FAD_AdPerformanceReport",
+     conflictTarget: ["account_id", "date_start", "date_stop"], 
+     updateFields: [
+         "name", "adset_id", "adset_name", "campaign_id", "campaign_name", "account_id",
+         "account_name", "created_time", "updated_time", "status", "effective_status",
+         "spend", "impressions", "reach", "clicks", "ctr", "cpc", "cpm", "frequency",
+         "newMessagingConnections", "costPerNewMessaging", "leads", "costLeads", "purchases",
+         "costPurchases", "purchaseValue", "purchaseROAS", "websitePurchases", "onFacebookPurchases"
+     ]
+ },
+ "Account Daily Report": {
+     tableName: "FAD_AccountDailyReport",
+     conflictTarget: ["account_id", "date_start", "date_stop"],
+     updateFields: [
+         "account_name", "account_currency", "spend", "impressions", "clicks", "cpc", "cpm",
+         "ctr", "reach", "frequency", "newMessagingConnections", "costPerNewMessaging",
+         "leads", "costLeads", "purchases", "costPurchases", "purchaseValue", "purchaseROAS",
+         "websitePurchases", "onFacebookPurchases", "date_stop"
+     ]
+ },
+ "Campaign Daily Report": {
+     tableName: "FAD_CampaignDailyReport",
+     conflictTarget: ["account_id", "date_start", "date_stop"],
+     updateFields: [
+         "campaign_name", "account_id", "account_name", "spend", "impressions", "reach",
+         "clicks", "cpc", "cpm", "ctr", "frequency", "newMessagingConnections",
+         "costPerNewMessaging", "leads", "costLeads", "purchases", "costPurchases",
+         "purchaseValue", "purchaseROAS", "websitePurchases", "onFacebookPurchases", "date_stop"
+     ]
+ },
+ "Ad Set Daily Report": {
+     tableName: "FAD_AdSetDailyReport",
+     conflictTarget: ["account_id", "date_start", "date_stop"],
+     updateFields: [
+         "name", "campaign_id", "campaign_name", "account_id", "account_name", "status",
+         "effective_status", "daily_budget", "lifetime_budget", "budget_remaining",
+         "spend", "impressions", "reach", "clicks", "ctr", "cpc", "cpm", "frequency",
+         "newMessagingConnections", "costPerNewMessaging", "leads", "costLeads", "purchases",
+         "costPurchases", "purchaseValue", "purchaseROAS", "websitePurchases", "onFacebookPurchases", "date_stop"
+     ]
+ },
+ "Ad Daily Report": {
+     tableName: "FAD_AdDailyReport",
+     conflictTarget: ["account_id", "date_start", "date_stop"],
+     updateFields: [
+         "name", "adset_id", "adset_name", "campaign_id", "campaign_name", "account_id",
+         "account_name", "status", "effective_status", "created_time", "spend", "impressions",
+         "reach", "clicks", "ctr", "cpc", "cpm", "frequency", "newMessagingConnections",
+         "costPerNewMessaging", "leads", "costLeads", "purchases", "costPurchases",
+         "purchaseValue", "purchaseROAS", "websitePurchases", "onFacebookPurchases", "date_stop"
+     ]
+ },
+ "Ad Creative Report": {
+    tableName: "FAD_AdCreativeReport",
+    conflictTarget: ["account_id", "date_start", "date_stop"],
+    updateFields: [
+       "name", "adset_id", "adset_name", "campaign_id", "campaign_name", "account_id",
+       "account_name", "status", "effective_status", "creative_id", "actor_id", "page_name",
+       "creative_title", "creative_body", "creative_thumbnail_url", "creative_thumbnail_raw_url",
+       "creative_link", "spend", "impressions", "leads", "costLeads", "reach", "clicks",
+       "ctr", "cpc", "cpm", "newMessagingConnections", "costPerNewMessaging", "purchases",
+       "purchaseValue", "purchaseROAS"
+    ]
+ },
+ "BM & Ad Accounts": {
+     tableName: "FAD_BmAndAdAccounts",
+     conflictTarget: ["bm_id", "account_id"], // <-- Sửa: conflict target của BmAndAdAccounts
+     updateFields: [
+         "bm_id", "bm_name", "bm_created_time", "bm_verification_status", "bm_profile_picture_uri",
+         "account_type", "account_name", "account_status_text", "currency", "timezone_name",
+         "amount_spent", "balance", "current_payment_method", "tax_and_fee"
+     ]
+ },
+ // FBT
+ "FB Billing Data": {
+   tableName: "FBT_FbBillingData",
+   conflictTarget: ["accountId", "transactionId"], 
+   updateFields: [
+     "accountId", "accountName", "eventType", "dateTimeInTimezone", "fetchTimestamp",
+     "currency", "value", "totalValue", "tax", "action", "type", "taxAndFeePercent",
+     "billingHubLink", "downloadInvoiceLink"
+   ]
+ },
 };
 
 /**
- * Hàm nội bộ: Chuyển đổi key và chuẩn hóa kiểu dữ liệu cho một dòng.
- * @param {object} rawRow - Dòng dữ liệu thô từ processor.
- * @returns {object} - Dòng dữ liệu đã được dọn dẹp để ghi vào DB.
- */
-function _transformAndSanitizeRow(rawRow) {
-  const sanitizedRow = {};
+ * Hàm nội bộ: Chuyển đổi key và chuẩn hóa kiểu dữ liệu cho một dòng.
+ * [SỬA] Đã sửa lỗi check type dùng friendlyKey thay vì newKey.
+ */
+function _transformAndSanitizeRow(rawRow, index) {
+  const sanitizedRow = {};
+  for (const friendlyKey in rawRow) {
+    if (Object.prototype.hasOwnProperty.call(rawRow, friendlyKey)) {
+      let originalValue = rawRow[friendlyKey];
+      let value = originalValue;
+      const newKey = KEY_MAP[friendlyKey] || friendlyKey;
 
-  for (const friendlyKey in rawRow) {
-    if (Object.prototype.hasOwnProperty.call(rawRow, friendlyKey)) {
-      // 1. Lấy giá trị gốc
-      let value = rawRow[friendlyKey];
+      if (value === null || value === undefined) {
+        // [SỬA] Dùng newKey
+         if (TYPE_CONFIG.FLOAT.has(newKey) || TYPE_CONFIG.INTEGER.has(newKey) || TYPE_CONFIG.DECIMAL.has(newKey)) {
+            value = 0;
+         } else {
+            value = null;
+         }
+        sanitizedRow[newKey] = value;
+        continue;
+      }
 
-      // 2. Tìm key mới (camelCase)
-      const newKey = KEY_MAP[friendlyKey] || friendlyKey;
-
-      // 3. Bỏ qua nếu giá trị là null hoặc undefined
-      if (value === null || value === undefined) {
-        sanitizedRow[newKey] = null;
-        continue;
-      }
-
-      // 4. Chuẩn hóa kiểu dữ liệu dựa trên "Tên thân thiện"
-      if (TYPE_CONFIG.FLOAT.has(friendlyKey)) {
-        value = parseFloat(value);
-        if (isNaN(value)) value = 0;
-      } 
-      else if (TYPE_CONFIG.INTEGER.has(friendlyKey)) {
-        value = parseInt(value, 10);
-        if (isNaN(value)) value = 0;
-      } 
-      else if (TYPE_CONFIG.DATE.has(friendlyKey)) {
-        try {
-          const date = new Date(value);
-          if (isNaN(date.getTime())) {
-            value = null; // Ngày tháng không hợp lệ
-          } else {
-            value = date;
-          }
-        } catch (e) {
-          value = null;
-        }
-      } 
-      else if (TYPE_CONFIG.JSON.has(friendlyKey)) {
-        // API có thể trả về object sẵn, hoặc stringified JSON
-        if (typeof value === 'string') {
-          try {
-            value = JSON.parse(value);
-          } catch (e) {
-            value = null; // Gán null nếu parse lỗi
-          }
-        } else if (typeof value !== 'object') {
-          value = null; // Chỉ chấp nhận string hoặc object
-        }
-      }
-      else if (TYPE_CONFIG.TEXT.has(friendlyKey)) {
-         // Đảm bảo là string
-        value = String(value);
-      }
-      // Các trường không xác định sẽ được giữ nguyên (ví dụ: boolean)
-
-      sanitizedRow[newKey] = value;
-    }
-  }
-
-  // Xử lý đặc biệt cho FbBillingData (dùng Decimal)
-  // Prisma cần string cho Decimal, nhưng `parseFloat` ở trên đã đổi nó thành number.
-  // Chúng ta cần giữ nó ở dạng string gốc nếu nó là Decimal.
-  if (sanitizedRow.value !== undefined && typeof rawRow['Value'] === 'string') {
-    sanitizedRow.value = rawRow['Value'];
-  }
-  if (sanitizedRow.totalValue !== undefined && typeof rawRow['Total Value'] === 'string') {
-    sanitizedRow.totalValue = rawRow['Total Value'];
-  }
-  if (sanitizedRow.tax !== undefined && typeof rawRow['Tax'] === 'string') {
-    sanitizedRow.tax = rawRow['Tax'];
-  }
-
-
-  return sanitizedRow;
+      // [SỬA] Dùng newKey
+      if (TYPE_CONFIG.FLOAT.has(newKey) || TYPE_CONFIG.INTEGER.has(newKey)) {
+         let numericValue = Number(value);
+         if (isNaN(numericValue)) {
+             numericValue = 0;
+         }
+         value = TYPE_CONFIG.INTEGER.has(newKey) ? Math.round(numericValue) : numericValue;
+      }
+      // [SỬA] Dùng newKey
+      else if (TYPE_CONFIG.DECIMAL.has(newKey)) {
+         if (typeof value !== 'string') {
+           value = String(value);
+         }
+      }
+      // [SỬA] Dùng newKey
+      else if (TYPE_CONFIG.DATE.has(newKey)) {
+        try {
+          const date = new Date(value);
+          value = isNaN(date.getTime()) ? null : date;
+        } catch (e) { value = null; }
+      }
+      // [SỬA] Dùng newKey
+      else if (TYPE_CONFIG.JSON.has(newKey)) {
+        if (typeof value === 'string') {
+          try { value = JSON.parse(value); } catch (e) { value = null; }
+        } else if (typeof value !== 'object') { value = null; }
+      }
+      // [SỬA] Dùng newKey
+      else if (TYPE_CONFIG.TEXT.has(newKey)) {
+        value = String(value);
+      }
+      sanitizedRow[newKey] = value;
+    }
+  }
+  return sanitizedRow;
 }
 
-/**
- * Hàm điều phối chính.
- * Nhận một mảng dữ liệu và tên template, sau đó ghi vào bảng Postgre tương ứng.
- *
- * @param {string} templateName - Tên của template (ví dụ: "Campaign Overview Report").
- * @param {Array<object>} dataRows - Mảng các đối tượng dữ liệu đã được làm phẳng.
- * @returns {Promise<{success: boolean, count: number, error?: string}>}
- */
 export async function writeDataToDatabase(templateName, dataRows) {
-  // 1. Kiểm tra đầu vào
-  if (!dataRows || dataRows.length === 0) {
-    console.log(`DB Writer: Không có dữ liệu để ghi cho "${templateName}".`);
-    return { success: true, count: 0 };
+  // 1. Kiểm tra đầu vào
+  if (!dataRows || dataRows.length === 0) {
+    console.log(`DB Writer: No data to write/upsert for "${templateName}".`);
+    return { success: true, count: 0 };
+  }
+
+  // 2. Tìm config
+  const config = TEMPLATE_MAP[templateName];
+  if (!config || !config.tableName || !config.conflictTarget || !config.updateFields) {
+    console.warn(`DB Writer: Incomplete config for template: "${templateName}"`);
+    return { success: false, count: 0, error: `Incomplete config for template: ${templateName}` };
+  }
+  const { tableName, conflictTarget } = config; // Chỉ cần conflictTarget cho logic mới
+
+  // 3. Chuẩn hóa dữ liệu
+  const sanitizedData = dataRows.map((row, index) => _transformAndSanitizeRow(row, index + 1));
+
+  // 4. Lọc spend (optional, bypassed)
+  let filteredData = sanitizedData
+  if (config.updateFields.includes('spend')) {
+    filteredData = sanitizedData.filter(row =>
+          row.spend !== undefined && row.spend !== null && typeof row.spend === 'number' && row.spend >= 0
+      );
   }
 
-  // 2. Tìm model và keyMap dựa trên templateName
-  const config = TEMPLATE_MAP[templateName];
-  if (!config) {
-    console.warn(`DB Writer: Không tìm thấy model nào cho template: "${templateName}"`);
-    return { 
-      success: false, 
-      count: 0, 
-      error: `Template không được hỗ trợ: ${templateName}` 
-    };
-  }
 
-  const { model } = config;
+  const originalCount = sanitizedData.length;
+  const filteredCount = filteredData.length;
 
-  // 3. [QUAN TRỌNG] Chuyển đổi key và chuẩn hóa kiểu dữ liệu
-  const sanitizedData = dataRows.map(row => _transformAndSanitizeRow(row));
+  if (originalCount > 0 && originalCount !== filteredCount) {
+    console.log(`DB Writer (${templateName}): Filtered out ${originalCount - filteredCount} rows due to invalid spend (negative?).`);
+  }
+  
 
-    // --- [LOGIC LỌC MỚI] ---
-  // Lọc bỏ các dòng mà 'spend' là null, undefined, hoặc 0 sau khi chuẩn hóa
-  const filteredData = sanitizedData.filter(row => {
-    // Kiểm tra xem trường 'spend' có tồn tại và có giá trị lớn hơn 0 không
-    // Lưu ý: hàm _transformAndSanitizeRow đã chuyển spend thành number, NaN thành 0
-    return row.spend !== undefined && row.spend !== null && row.spend > 0;
-  });
+  const deduplicatedData = filteredData;
 
-  const originalCount = sanitizedData.length;
-  const filteredCount = filteredData.length;
-  if (originalCount !== filteredCount) {
-    console.log(`DB Writer (${templateName}): Đã lọc bỏ ${originalCount - filteredCount} dòng do spend không hợp lệ.`);
-  }
+  if (deduplicatedData.length < filteredData.length) {
+    console.log(`DB Writer (${templateName}): Deduplicated ${filteredData.length - deduplicatedData.length} rows with the same conflict key (within the batch).`);
+  }
 
-  // Nếu sau khi lọc không còn dữ liệu
-  if (filteredCount === 0) {
-    console.log(`DB Writer (${templateName}): Không còn dòng nào hợp lệ sau khi lọc spend.`);
-    return { success: true, count: 0 };
-  }
-  // --- [KẾT THÚC LOGIC LỌC] ---
+  if (deduplicatedData.length === 0) {
+    console.log(`DB Writer (${templateName}): No valid rows remaining after filtering/deduplicating.`);
+    return { success: true, count: 0 };
+  }
 
-  // 4. Thực thi ghi vào Database
-  try {
-    const result = await model.createMany({
-      data: filteredData,
-      skipDuplicates: false, // Tạm thời tắt để debug, bật lên (true) khi bạn có @unique
-    });
-    
-    console.log(`DB Writer: Ghi thành công ${result.count} dòng vào bảng cho "${templateName}".`);
-    return { success: true, count: result.count };
-    
-  } catch (e) {
-    console.error(`DB Writer: Lỗi nghiêm trọng khi ghi dữ liệu cho "${templateName}":`, e.message);
-    // Log thêm 1 dòng dữ liệu đầu tiên (đã chuẩn hóa) để debug lỗi type
-    if (sanitizedData.length > 0) {
-      console.error("Dữ liệu mẫu (đã chuẩn hóa) gây lỗi:", JSON.stringify(sanitizedData[0], null, 2));
-    }
-    return { success: false, count: 0, error: e.message };
-  }
+  // 5: Chuẩn hóa cột (cho INSERT)
+  const allPossibleColumns = new Set();
+  deduplicatedData.forEach(row => {
+      Object.keys(row).forEach(key => {
+          if (key !== 'pkId' && key !== 'createdAt' && key !== 'updatedAt') {
+              allPossibleColumns.add(key);
+          }
+      });
+  });
+  
+  const finalColumns = Array.from(allPossibleColumns);
+
+  const normalizedData = deduplicatedData.map(row => {
+      const normalizedRow = {};
+      for (const col of finalColumns) {
+          normalizedRow[col] = Object.prototype.hasOwnProperty.call(row, col) ? row[col] : null;
+      }
+      return normalizedRow;
+  });
+
+  // 6. [LOGIC MỚI] Xây dựng 2 câu lệnh: DELETE và INSERT
+  if (normalizedData.length === 0) {
+      return { success: true, count: 0 };
+  }
+
+  // === 6.A. Xây dựng lệnh DELETE ===
+  // Dùng logic: DELETE ... WHERE (col1, col2) IN (($1, $2), ($3, $4), ...)
+  const conflictTargetSql = conflictTarget.map(col => `"${col}"`).join(", "); // vd: "account_id", "date_start"
+  let deleteParamIndex = 1;
+  const deleteValues = [];
+  const deletePlaceholders = normalizedData.map(row => {
+      const rowParams = [];
+      for (const col of conflictTarget) {
+          // [SỬA LỖI 42883] Thêm ép kiểu (cast) cho các tham số của DELETE
+          // Giống hệt logic của INSERT
+          let castType = "";
+          if (TYPE_CONFIG.DATE.has(col)) {
+              castType = "::timestamp";
+          } else if (TYPE_CONFIG.JSON.has(col)) { 
+              castType = "::jsonb";
+          } else if (TYPE_CONFIG.DECIMAL.has(col)) {
+              castType = "::decimal";
+          }
+          // Thêm placeholder đã ép kiểu
+          rowParams.push(`$${deleteParamIndex++}${castType}`);
+          // [HẾT SỬA LỖI 42883]
+
+          const val = row[col]; // Lấy từ row đã chuẩn hóa
+          if (val instanceof Date) {
+              deleteValues.push(val.toISOString());
+          } else {
+              deleteValues.push(val);
+          }
+      }
+      return `(${rowParams.join(", ")})`;
+  }).join(", ");
+
+  const deleteSql = `DELETE FROM "${tableName}" WHERE (${conflictTargetSql}) IN (${deletePlaceholders});`;
+
+  // === 6.B. Xây dựng lệnh INSERT ===
+  const columnsSql = finalColumns.map(col => `"${col}"`).join(", ");
+  const valuePlaceholders = normalizedData.map((_, rowIndex) =>
+        `(${finalColumns.map((col, colIndex) => {
+            const paramIndex = rowIndex * finalColumns.length + colIndex + 1;
+            let castType = "";
+            if (TYPE_CONFIG.DATE.has(col)) {
+                castType = "::timestamp";
+            } else if (TYPE_CONFIG.JSON.has(col)) {
+                castType = "::jsonb";
+            } else if (TYPE_CONFIG.DECIMAL.has(col)) {
+                castType = "::decimal";
+            }
+            return `$${paramIndex}${castType}`;
+        }).join(", ")})`
+    ).join(", ");
+
+  const allInsertValues = normalizedData.flatMap(row => finalColumns.map(col => {
+        const val = row[col];
+        if (val === null || val === undefined) {
+             return null;
+        }
+        if (val instanceof Date) {
+            return val.toISOString();
+        }
+        // [SỬA] Logic stringify JSON chính xác hơn
+        if (TYPE_CONFIG.JSON.has(col) && typeof val === 'object') {
+            return JSON.stringify(val);
+        }
+        if (TYPE_CONFIG.DECIMAL.has(col)) {
+             return String(val);
+        }
+        if (TYPE_CONFIG.INTEGER.has(col) || TYPE_CONFIG.FLOAT.has(col)) {
+            return Number(val);
+        }
+        return String(val);
+    }));
+  
+  const insertSql = `INSERT INTO "${tableName}" (${columnsSql}) VALUES ${valuePlaceholders};`;
+
+
+  // 7. [LOGIC MỚI] Thực thi trong Transaction
+  try {
+    
+    // Tạo các lệnh "raw" để đưa vào transaction
+    const deleteCommand = prisma.$executeRawUnsafe(deleteSql, ...deleteValues);
+    const insertCommand = prisma.$executeRawUnsafe(insertSql, ...allInsertValues);
+
+    console.log(`DB Writer (${templateName}): Starting Transaction for ${normalizedData.length} rows...`);
+    console.log(`   1. Deleting existing rows...`);
+    console.log(`   2. Inserting new rows...`);
+
+    // Chạy transaction
+    const [deleteResultCount, insertResultCount] = await prisma.$transaction([
+      deleteCommand,
+      insertCommand
+    ]);
+
+    console.log(`DB Writer (${templateName}): Transaction successful.`);
+    console.log(`   - Rows Deleted: ${deleteResultCount}`);
+    console.log(`   - Rows Inserted: ${insertResultCount}`);
+    
+    return { success: true, count: insertResultCount };
+
+  } catch (e) {
+    console.error(`DB Writer (${templateName}): Transaction Error:`, e.message);
+    console.error("   - SQL (DELETE template):", deleteSql.substring(0, 500) + "...");
+    console.error("   - SQL (INSERT template):", insertSql.substring(0, 500) + "...");
+    if (normalizedData.length > 0) {
+      console.error("   - Sample Data (1 row, normalized):", JSON.stringify(normalizedData[0], null, 2));
+    }
+     console.error("   - Delete Value count:", deleteValues.length);
+     console.error("   - Insert Value count:", allInsertValues.length);
+    if (e.message && e.message.includes("is of type")) {
+        console.error("   - Potential type mismatch detected by DB.");
+    }
+    return { success: false, count: 0, error: e.message };
+  }
 }

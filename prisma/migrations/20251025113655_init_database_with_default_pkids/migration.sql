@@ -1,5 +1,5 @@
 -- CreateTable
-CREATE TABLE "CampaignOverviewReport" (
+CREATE TABLE "FAD_CampaignOverviewReport" (
     "pkId" TEXT NOT NULL,
     "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
     "id" TEXT,
@@ -34,11 +34,11 @@ CREATE TABLE "CampaignOverviewReport" (
     "websitePurchases" INTEGER,
     "onFacebookPurchases" INTEGER,
 
-    CONSTRAINT "CampaignOverviewReport_pkey" PRIMARY KEY ("pkId")
+    CONSTRAINT "FAD_CampaignOverviewReport_pkey" PRIMARY KEY ("pkId")
 );
 
 -- CreateTable
-CREATE TABLE "CampaignPerformanceByAge" (
+CREATE TABLE "FAD_CampaignPerformanceByAge" (
     "pkId" TEXT NOT NULL,
     "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
     "campaign_id" TEXT,
@@ -60,11 +60,11 @@ CREATE TABLE "CampaignPerformanceByAge" (
     "date_start" TIMESTAMP(3),
     "date_stop" TIMESTAMP(3),
 
-    CONSTRAINT "CampaignPerformanceByAge_pkey" PRIMARY KEY ("pkId")
+    CONSTRAINT "FAD_CampaignPerformanceByAge_pkey" PRIMARY KEY ("pkId")
 );
 
 -- CreateTable
-CREATE TABLE "CampaignPerformanceByGender" (
+CREATE TABLE "FAD_CampaignPerformanceByGender" (
     "pkId" TEXT NOT NULL,
     "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
     "campaign_id" TEXT,
@@ -86,11 +86,11 @@ CREATE TABLE "CampaignPerformanceByGender" (
     "date_start" TIMESTAMP(3),
     "date_stop" TIMESTAMP(3),
 
-    CONSTRAINT "CampaignPerformanceByGender_pkey" PRIMARY KEY ("pkId")
+    CONSTRAINT "FAD_CampaignPerformanceByGender_pkey" PRIMARY KEY ("pkId")
 );
 
 -- CreateTable
-CREATE TABLE "CampaignPerformanceByPlatform" (
+CREATE TABLE "FAD_CampaignPerformanceByPlatform" (
     "pkId" TEXT NOT NULL,
     "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
     "account_id" TEXT,
@@ -115,11 +115,11 @@ CREATE TABLE "CampaignPerformanceByPlatform" (
     "websitePurchases" INTEGER,
     "onFacebookPurchases" INTEGER,
 
-    CONSTRAINT "CampaignPerformanceByPlatform_pkey" PRIMARY KEY ("pkId")
+    CONSTRAINT "FAD_CampaignPerformanceByPlatform_pkey" PRIMARY KEY ("pkId")
 );
 
 -- CreateTable
-CREATE TABLE "CampaignPerformanceByRegion" (
+CREATE TABLE "FAD_CampaignPerformanceByRegion" (
     "pkId" TEXT NOT NULL,
     "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
     "campaign_id" TEXT,
@@ -143,11 +143,11 @@ CREATE TABLE "CampaignPerformanceByRegion" (
     "date_start" TIMESTAMP(3),
     "date_stop" TIMESTAMP(3),
 
-    CONSTRAINT "CampaignPerformanceByRegion_pkey" PRIMARY KEY ("pkId")
+    CONSTRAINT "FAD_CampaignPerformanceByRegion_pkey" PRIMARY KEY ("pkId")
 );
 
 -- CreateTable
-CREATE TABLE "AdSetPerformanceReport" (
+CREATE TABLE "FAD_AdSetPerformanceReport" (
     "pkId" TEXT NOT NULL,
     "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
     "id" TEXT,
@@ -182,11 +182,11 @@ CREATE TABLE "AdSetPerformanceReport" (
     "date_start" TIMESTAMP(3),
     "date_stop" TIMESTAMP(3),
 
-    CONSTRAINT "AdSetPerformanceReport_pkey" PRIMARY KEY ("pkId")
+    CONSTRAINT "FAD_AdSetPerformanceReport_pkey" PRIMARY KEY ("pkId")
 );
 
 -- CreateTable
-CREATE TABLE "AdPerformanceReport" (
+CREATE TABLE "FAD_AdPerformanceReport" (
     "pkId" TEXT NOT NULL,
     "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
     "id" TEXT,
@@ -222,11 +222,11 @@ CREATE TABLE "AdPerformanceReport" (
     "date_start" TIMESTAMP(3),
     "date_stop" TIMESTAMP(3),
 
-    CONSTRAINT "AdPerformanceReport_pkey" PRIMARY KEY ("pkId")
+    CONSTRAINT "FAD_AdPerformanceReport_pkey" PRIMARY KEY ("pkId")
 );
 
 -- CreateTable
-CREATE TABLE "AccountDailyReport" (
+CREATE TABLE "FAD_AccountDailyReport" (
     "pkId" TEXT NOT NULL,
     "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
     "account_id" TEXT,
@@ -253,11 +253,11 @@ CREATE TABLE "AccountDailyReport" (
     "websitePurchases" INTEGER,
     "onFacebookPurchases" INTEGER,
 
-    CONSTRAINT "AccountDailyReport_pkey" PRIMARY KEY ("pkId")
+    CONSTRAINT "FAD_AccountDailyReport_pkey" PRIMARY KEY ("pkId")
 );
 
 -- CreateTable
-CREATE TABLE "CampaignDailyReport" (
+CREATE TABLE "FAD_CampaignDailyReport" (
     "pkId" TEXT NOT NULL,
     "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
     "campaign_id" TEXT,
@@ -285,11 +285,11 @@ CREATE TABLE "CampaignDailyReport" (
     "websitePurchases" INTEGER,
     "onFacebookPurchases" INTEGER,
 
-    CONSTRAINT "CampaignDailyReport_pkey" PRIMARY KEY ("pkId")
+    CONSTRAINT "FAD_CampaignDailyReport_pkey" PRIMARY KEY ("pkId")
 );
 
 -- CreateTable
-CREATE TABLE "AdSetDailyReport" (
+CREATE TABLE "FAD_AdSetDailyReport" (
     "pkId" TEXT NOT NULL,
     "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
     "id" TEXT,
@@ -324,11 +324,11 @@ CREATE TABLE "AdSetDailyReport" (
     "websitePurchases" INTEGER,
     "onFacebookPurchases" INTEGER,
 
-    CONSTRAINT "AdSetDailyReport_pkey" PRIMARY KEY ("pkId")
+    CONSTRAINT "FAD_AdSetDailyReport_pkey" PRIMARY KEY ("pkId")
 );
 
 -- CreateTable
-CREATE TABLE "AdDailyReport" (
+CREATE TABLE "FAD_AdDailyReport" (
     "pkId" TEXT NOT NULL,
     "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
     "id" TEXT,
@@ -363,11 +363,11 @@ CREATE TABLE "AdDailyReport" (
     "websitePurchases" INTEGER,
     "onFacebookPurchases" INTEGER,
 
-    CONSTRAINT "AdDailyReport_pkey" PRIMARY KEY ("pkId")
+    CONSTRAINT "FAD_AdDailyReport_pkey" PRIMARY KEY ("pkId")
 );
 
 -- CreateTable
-CREATE TABLE "AdCreativeReport" (
+CREATE TABLE "FAD_AdCreativeReport" (
     "pkId" TEXT NOT NULL,
     "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
     "id" TEXT,
@@ -405,11 +405,11 @@ CREATE TABLE "AdCreativeReport" (
     "date_start" TIMESTAMP(3),
     "date_stop" TIMESTAMP(3),
 
-    CONSTRAINT "AdCreativeReport_pkey" PRIMARY KEY ("pkId")
+    CONSTRAINT "FAD_AdCreativeReport_pkey" PRIMARY KEY ("pkId")
 );
 
 -- CreateTable
-CREATE TABLE "BmAndAdAccounts" (
+CREATE TABLE "FAD_BmAndAdAccounts" (
     "pkId" TEXT NOT NULL,
     "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
     "bm_id" TEXT,
@@ -428,19 +428,34 @@ CREATE TABLE "BmAndAdAccounts" (
     "current_payment_method" TEXT,
     "tax_and_fee" DOUBLE PRECISION,
 
-    CONSTRAINT "BmAndAdAccounts_pkey" PRIMARY KEY ("pkId")
+    CONSTRAINT "FAD_BmAndAdAccounts_pkey" PRIMARY KEY ("pkId")
 );
 
 -- CreateTable
-CREATE TABLE "FbBillingData" (
+CREATE TABLE "FBT_FbBillingData" (
     "pkId" TEXT NOT NULL,
     "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    "accountId" TEXT,
+    "accountName" TEXT,
+    "eventType" TEXT,
+    "dateTimeInTimezone" TEXT,
+    "fetchTimestamp" TIMESTAMP(3),
+    "currency" TEXT,
+    "value" DECIMAL(65,30),
+    "totalValue" DECIMAL(65,30),
+    "tax" DECIMAL(65,30),
+    "transactionId" TEXT,
+    "action" TEXT,
+    "type" TEXT,
+    "taxAndFeePercent" DOUBLE PRECISION,
+    "billingHubLink" TEXT,
+    "downloadInvoiceLink" TEXT,
 
-    CONSTRAINT "FbBillingData_pkey" PRIMARY KEY ("pkId")
+    CONSTRAINT "FBT_FbBillingData_pkey" PRIMARY KEY ("pkId")
 );
 
 -- CreateTable
-CREATE TABLE "BcTuongTacTangTruongCongDong" (
+CREATE TABLE "MPI_BcTuongTacTangTruongCongDong" (
     "pkId" TEXT NOT NULL,
     "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
     "page_daily_follows_unique" INTEGER,
@@ -450,11 +465,11 @@ CREATE TABLE "BcTuongTacTangTruongCongDong" (
     "page_fan_removes" INTEGER,
     "page_views_total" INTEGER,
 
-    CONSTRAINT "BcTuongTacTangTruongCongDong_pkey" PRIMARY KEY ("pkId")
+    CONSTRAINT "MPI_BcTuongTacTangTruongCongDong_pkey" PRIMARY KEY ("pkId")
 );
 
 -- CreateTable
-CREATE TABLE "BcHienThiTiepCanTrang" (
+CREATE TABLE "MPI_BcHienThiTiepCanTrang" (
     "pkId" TEXT NOT NULL,
     "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
     "page_impressions" INTEGER,
@@ -462,11 +477,11 @@ CREATE TABLE "BcHienThiTiepCanTrang" (
     "page_impressions_unique" INTEGER,
     "page_impressions_paid_unique" INTEGER,
 
-    CONSTRAINT "BcHienThiTiepCanTrang_pkey" PRIMARY KEY ("pkId")
+    CONSTRAINT "MPI_BcHienThiTiepCanTrang_pkey" PRIMARY KEY ("pkId")
 );
 
 -- CreateTable
-CREATE TABLE "BcHieuSuatBaiVietTongHop" (
+CREATE TABLE "MPI_BcHieuSuatBaiVietTongHop" (
     "pkId" TEXT NOT NULL,
     "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
     "post_impressions" INTEGER,
@@ -487,11 +502,11 @@ CREATE TABLE "BcHieuSuatBaiVietTongHop" (
     "post_video_views" INTEGER,
     "post_activity_by_action_type" JSONB,
 
-    CONSTRAINT "BcHieuSuatBaiVietTongHop_pkey" PRIMARY KEY ("pkId")
+    CONSTRAINT "MPI_BcHieuSuatBaiVietTongHop_pkey" PRIMARY KEY ("pkId")
 );
 
 -- CreateTable
-CREATE TABLE "BcPhanTichCamXucBaiViet" (
+CREATE TABLE "MPI_BcPhanTichCamXucBaiViet" (
     "pkId" TEXT NOT NULL,
     "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
     "post_reactions_like_total" INTEGER,
@@ -501,30 +516,30 @@ CREATE TABLE "BcPhanTichCamXucBaiViet" (
     "post_reactions_sorry_total" INTEGER,
     "post_reactions_anger_total" INTEGER,
 
-    CONSTRAINT "BcPhanTichCamXucBaiViet_pkey" PRIMARY KEY ("pkId")
+    CONSTRAINT "MPI_BcPhanTichCamXucBaiViet_pkey" PRIMARY KEY ("pkId")
 );
 
 -- CreateTable
-CREATE TABLE "BcPhanTichFanTheoViTri" (
+CREATE TABLE "MPI_BcPhanTichFanTheoViTri" (
     "pkId" TEXT NOT NULL,
     "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
     "page_fans_country" JSONB,
     "page_fans_city" JSONB,
 
-    CONSTRAINT "BcPhanTichFanTheoViTri_pkey" PRIMARY KEY ("pkId")
+    CONSTRAINT "MPI_BcPhanTichFanTheoViTri_pkey" PRIMARY KEY ("pkId")
 );
 
 -- CreateTable
-CREATE TABLE "BcPhanTichNguonLuotThichMoi" (
+CREATE TABLE "MPI_BcPhanTichNguonLuotThichMoi" (
     "pkId" TEXT NOT NULL,
     "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
     "page_fan_adds_by_paid_non_paid_unique" JSONB,
 
-    CONSTRAINT "BcPhanTichNguonLuotThichMoi_pkey" PRIMARY KEY ("pkId")
+    CONSTRAINT "MPI_BcPhanTichNguonLuotThichMoi_pkey" PRIMARY KEY ("pkId")
 );
 
 -- CreateTable
-CREATE TABLE "BcHieuSuatVideoTungVideo" (
+CREATE TABLE "MPI_BcHieuSuatVideoTungVideo" (
     "pkId" TEXT NOT NULL,
     "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
     "post_impressions_unique" INTEGER,
@@ -535,11 +550,11 @@ CREATE TABLE "BcHieuSuatVideoTungVideo" (
     "post_video_view_time" DOUBLE PRECISION,
     "post_video_likes_by_reaction_type" JSONB,
 
-    CONSTRAINT "BcHieuSuatVideoTungVideo_pkey" PRIMARY KEY ("pkId")
+    CONSTRAINT "MPI_BcHieuSuatVideoTungVideo_pkey" PRIMARY KEY ("pkId")
 );
 
 -- CreateTable
-CREATE TABLE "BcHieuSuatVideoTongHop" (
+CREATE TABLE "MPI_BcHieuSuatVideoTongHop" (
     "pkId" TEXT NOT NULL,
     "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
     "page_video_views" INTEGER,
@@ -550,11 +565,11 @@ CREATE TABLE "BcHieuSuatVideoTongHop" (
     "page_video_complete_views_30s_unique" INTEGER,
     "page_video_view_time" DOUBLE PRECISION,
 
-    CONSTRAINT "BcHieuSuatVideoTongHop_pkey" PRIMARY KEY ("pkId")
+    CONSTRAINT "MPI_BcHieuSuatVideoTongHop_pkey" PRIMARY KEY ("pkId")
 );
 
 -- CreateTable
-CREATE TABLE "BcTongHopHieuSuatTrangNangCao" (
+CREATE TABLE "MPI_BcTongHopHieuSuatTrangNangCao" (
     "pkId" TEXT NOT NULL,
     "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
     "platform" TEXT,
@@ -579,11 +594,11 @@ CREATE TABLE "BcTongHopHieuSuatTrangNangCao" (
     "video_views" INTEGER,
     "video_view_time" DOUBLE PRECISION,
 
-    CONSTRAINT "BcTongHopHieuSuatTrangNangCao_pkey" PRIMARY KEY ("pkId")
+    CONSTRAINT "MPI_BcTongHopHieuSuatTrangNangCao_pkey" PRIMARY KEY ("pkId")
 );
 
 -- CreateTable
-CREATE TABLE "BcHieuSuatBaiVietLifetime" (
+CREATE TABLE "MPI_BcHieuSuatBaiVietLifetime" (
     "pkId" TEXT NOT NULL,
     "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
     "post_impressions" INTEGER,
@@ -593,5 +608,47 @@ CREATE TABLE "BcHieuSuatBaiVietLifetime" (
     "post_video_views" INTEGER,
     "post_video_views_unique" INTEGER,
 
-    CONSTRAINT "BcHieuSuatBaiVietLifetime_pkey" PRIMARY KEY ("pkId")
+    CONSTRAINT "MPI_BcHieuSuatBaiVietLifetime_pkey" PRIMARY KEY ("pkId")
 );
+
+-- CreateIndex
+CREATE UNIQUE INDEX "FAD_CampaignOverviewReport_account_id_date_start_date_stop_key" ON "FAD_CampaignOverviewReport"("account_id", "date_start", "date_stop");
+
+-- CreateIndex
+CREATE UNIQUE INDEX "FAD_CampaignPerformanceByAge_account_id_date_start_date_sto_key" ON "FAD_CampaignPerformanceByAge"("account_id", "date_start", "date_stop");
+
+-- CreateIndex
+CREATE UNIQUE INDEX "FAD_CampaignPerformanceByGender_account_id_date_start_date__key" ON "FAD_CampaignPerformanceByGender"("account_id", "date_start", "date_stop");
+
+-- CreateIndex
+CREATE UNIQUE INDEX "FAD_CampaignPerformanceByPlatform_account_id_date_start_dat_key" ON "FAD_CampaignPerformanceByPlatform"("account_id", "date_start", "date_stop");
+
+-- CreateIndex
+CREATE UNIQUE INDEX "FAD_CampaignPerformanceByRegion_account_id_date_start_date__key" ON "FAD_CampaignPerformanceByRegion"("account_id", "date_start", "date_stop");
+
+-- CreateIndex
+CREATE UNIQUE INDEX "FAD_AdSetPerformanceReport_account_id_date_start_date_stop_key" ON "FAD_AdSetPerformanceReport"("account_id", "date_start", "date_stop");
+
+-- CreateIndex
+CREATE UNIQUE INDEX "FAD_AdPerformanceReport_account_id_date_start_date_stop_key" ON "FAD_AdPerformanceReport"("account_id", "date_start", "date_stop");
+
+-- CreateIndex
+CREATE UNIQUE INDEX "FAD_AccountDailyReport_account_id_date_start_date_stop_key" ON "FAD_AccountDailyReport"("account_id", "date_start", "date_stop");
+
+-- CreateIndex
+CREATE UNIQUE INDEX "FAD_CampaignDailyReport_account_id_date_start_date_stop_key" ON "FAD_CampaignDailyReport"("account_id", "date_start", "date_stop");
+
+-- CreateIndex
+CREATE UNIQUE INDEX "FAD_AdSetDailyReport_account_id_date_start_date_stop_key" ON "FAD_AdSetDailyReport"("account_id", "date_start", "date_stop");
+
+-- CreateIndex
+CREATE UNIQUE INDEX "FAD_AdDailyReport_account_id_date_start_date_stop_key" ON "FAD_AdDailyReport"("account_id", "date_start", "date_stop");
+
+-- CreateIndex
+CREATE UNIQUE INDEX "FAD_AdCreativeReport_account_id_date_start_date_stop_key" ON "FAD_AdCreativeReport"("account_id", "date_start", "date_stop");
+
+-- CreateIndex
+CREATE UNIQUE INDEX "FAD_BmAndAdAccounts_bm_id_account_id_key" ON "FAD_BmAndAdAccounts"("bm_id", "account_id");
+
+-- CreateIndex
+CREATE UNIQUE INDEX "FBT_FbBillingData_accountId_transactionId_key" ON "FBT_FbBillingData"("accountId", "transactionId");

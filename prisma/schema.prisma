@@ -15,8 +15,8 @@ datasource db {
 // ===============================================
 
 // Campaign Overview Report
-model CampaignOverviewReport {
-  pkId String @id @default(cuid())
+model FAD_CampaignOverviewReport {
+  pkId String @id @default(dbgenerated("gen_random_uuid()"))
   createdAt DateTime @default(now())
 
   // 1.Thông tin định danh
@@ -61,11 +61,13 @@ model CampaignOverviewReport {
   purchaseROAS            Float? // "Purchase ROAS"
   websitePurchases        Int? // "Website Purchases"
   onFacebookPurchases     Int? // "On-Facebook Purchases"
+
+  // @@unique([account_id, date_start, date_stop])
 }
 
 // Campaign Performance by Age
-model CampaignPerformanceByAge {
-  pkId String @id @default(cuid())
+model FAD_CampaignPerformanceByAge {
+  pkId String @id @default(dbgenerated("gen_random_uuid()"))
   createdAt DateTime @default(now())
 
   // 1.Thông tin Chiến dịch
@@ -93,11 +95,13 @@ model CampaignPerformanceByAge {
   // 4.Khoảng thời gian tải dữ liệu
   date_start DateTime?
   date_stop  DateTime?
+
+  // @@unique([account_id, date_start, date_stop])
 }
 
 // Campaign Performance by Gender
-model CampaignPerformanceByGender {
-  pkId String @id @default(cuid())
+model FAD_CampaignPerformanceByGender {
+  pkId String @id @default(dbgenerated("gen_random_uuid()"))
   createdAt DateTime @default(now())
 
   // 1.Thông tin Chiến dịch
@@ -125,11 +129,13 @@ model CampaignPerformanceByGender {
   // 4.Khoảng thời gian tải dữ liệu
   date_start DateTime?
   date_stop  DateTime?
+
+  // @@unique([account_id, date_start, date_stop])
 }
 
 // Campaign Performance by Platform
-model CampaignPerformanceByPlatform {
-  pkId String @id @default(cuid())
+model FAD_CampaignPerformanceByPlatform {
+  pkId String @id @default(dbgenerated("gen_random_uuid()"))
   createdAt DateTime @default(now())
 
   // 1.Thông tin Định danh
@@ -162,11 +168,13 @@ model CampaignPerformanceByPlatform {
   purchaseROAS            Float?
   websitePurchases        Int?
   onFacebookPurchases     Int?
+
+  // @@unique([account_id, date_start, date_stop])
 }
 
 // Campaign Performance by Region
-model CampaignPerformanceByRegion {
-  pkId String @id @default(cuid())
+model FAD_CampaignPerformanceByRegion {
+  pkId String @id @default(dbgenerated("gen_random_uuid()"))
   createdAt DateTime @default(now())
 
   // 1.Thông tin Chiến dịch
@@ -198,11 +206,13 @@ model CampaignPerformanceByRegion {
   // 5.Khoảng thời gian lấy dữ liệu
   date_start DateTime?
   date_stop  DateTime?
+
+  // @@unique([account_id, date_start, date_stop])
 }
 
 // Ad Set Performance Report
-model AdSetPerformanceReport {
-  pkId String @id @default(cuid())
+model FAD_AdSetPerformanceReport {
+  pkId String @id @default(dbgenerated("gen_random_uuid()"))
   createdAt DateTime @default(now())
 
   // 1.Thông tin định danh
@@ -247,11 +257,13 @@ model AdSetPerformanceReport {
   // Khoảng thời gian lấy dữ liệu
   date_start DateTime?
   date_stop  DateTime?
+
+  // @@unique([account_id, date_start, date_stop])
 }
 
 // Ad Performance Report
-model AdPerformanceReport {
-  pkId String @id @default(cuid())
+model FAD_AdPerformanceReport {
+  pkId String @id @default(dbgenerated("gen_random_uuid()"))
   createdAt DateTime @default(now())
 
   // 1.Thông tin định danh
@@ -295,11 +307,13 @@ model AdPerformanceReport {
   // 6.Khoảng thời gian lấy dữ liệu
   date_start DateTime?
   date_stop  DateTime?
+
+  // @@unique([account_id, date_start, date_stop])
 }
 
 // Account Daily Report
-model AccountDailyReport {
-  pkId String @id @default(cuid())
+model FAD_AccountDailyReport {
+  pkId String @id @default(dbgenerated("gen_random_uuid()"))
   createdAt DateTime @default(now())
 
   // 1.Thông tin định danh
@@ -330,11 +344,13 @@ model AccountDailyReport {
   purchaseROAS            Float?
   websitePurchases        Int?
   onFacebookPurchases     Int?
+
+  // @@unique([account_id, date_start, date_stop])
 }
 
 // Campaign Daily Report
-model CampaignDailyReport {
-  pkId String @id @default(cuid())
+model FAD_CampaignDailyReport {
+  pkId String @id @default(dbgenerated("gen_random_uuid()"))
   createdAt DateTime @default(now())
 
   // 1.Thông tin định danh
@@ -366,11 +382,13 @@ model CampaignDailyReport {
   purchaseROAS            Float?
   websitePurchases        Int?
   onFacebookPurchases     Int?
+
+  // @@unique([account_id, date_start, date_stop])
 }
 
 // Ad Set Daily Report
-model AdSetDailyReport {
-  pkId String @id @default(cuid())
+model FAD_AdSetDailyReport {
+  pkId String @id @default(dbgenerated("gen_random_uuid()"))
   createdAt DateTime @default(now())
 
   // Thông tin định danh
@@ -413,11 +431,13 @@ model AdSetDailyReport {
   purchaseROAS            Float?
   websitePurchases        Int?
   onFacebookPurchases     Int?
+
+  // @@unique([account_id, date_start, date_stop])
 }
 
 // Ad Daily Report
-model AdDailyReport {
-  pkId String @id @default(cuid())
+model FAD_AdDailyReport {
+  pkId String @id @default(dbgenerated("gen_random_uuid()"))
   createdAt DateTime @default(now())
 
   // 1.Thông tin định danh
@@ -458,11 +478,13 @@ model AdDailyReport {
   purchaseROAS            Float?
   websitePurchases        Int?
   onFacebookPurchases     Int?
+
+  // @@unique([account_id, date_start, date_stop])
 }
 
 // Ad Creative Report
-model AdCreativeReport {
-  pkId String @id @default(cuid())
+model FAD_AdCreativeReport {
+  pkId String @id @default(dbgenerated("gen_random_uuid()"))
   createdAt DateTime @default(now())
 
   // 1.Thông tin định danh
@@ -510,11 +532,13 @@ model AdCreativeReport {
   // 6.Khoảng thời gian lấy dữ liệu
   date_start DateTime?
   date_stop  DateTime?
+
+  // @@unique([account_id, date_start, date_stop])
 }
 
 // BM & Ad Accounts
-model BmAndAdAccounts {
-  pkId String @id @default(cuid())
+model FAD_BmAndAdAccounts {
+  pkId String @id @default(dbgenerated("gen_random_uuid()"))
   createdAt DateTime @default(now())
 
   // 1.Thông tin Business Manager
@@ -535,6 +559,8 @@ model BmAndAdAccounts {
   balance                  Float?
   current_payment_method   String?
   tax_and_fee              Float?
+
+  // @@unique([bm_id, account_id])
 }
 
 // ===============================================
@@ -543,8 +569,8 @@ model BmAndAdAccounts {
 
 // FB Billing Data
 // Dựa trên các trường từ Google Sheet
-model FbBillingData {
-  pkId      String   @id @default(cuid())
+model FBT_FbBillingData {
+  pkId      String   @id @default(dbgenerated("gen_random_uuid()"))
   createdAt DateTime @default(now())
 
   // === Các trường từ Sheet ===
@@ -571,6 +597,8 @@ model FbBillingData {
   // Dùng @db.Text cho các link có thể rất dài
   billingHubLink      String? @db.Text
   downloadInvoiceLink String? @db.Text
+
+  // @@unique([accountId, transactionId])
 }
 
 // ===============================================
@@ -578,8 +606,8 @@ model FbBillingData {
 // ===============================================
 
 // BC Tương tác & Tăng trưởng Cộng đồng
-model BcTuongTacTangTruongCongDong {
-  pkId String @id @default(cuid())
+model MPI_BcTuongTacTangTruongCongDong {
+  pkId String @id @default(dbgenerated("gen_random_uuid()"))
   createdAt DateTime @default(now())
 
   // 1.Tương tác Trang
@@ -594,8 +622,8 @@ model BcTuongTacTangTruongCongDong {
 }
 
 // BC Hiển thị & Tiếp cận Trang
-model BcHienThiTiepCanTrang {
-  pkId String @id @default(cuid())
+model MPI_BcHienThiTiepCanTrang {
+  pkId String @id @default(dbgenerated("gen_random_uuid()"))
   createdAt DateTime @default(now())
 
   // 1.Hiển thị (Impressions)
@@ -608,8 +636,8 @@ model BcHienThiTiepCanTrang {
 }
 
 // BC Hiệu suất Bài viết (Tổng hợp)
-model BcHieuSuatBaiVietTongHop {
-  pkId String @id @default(cuid())
+model MPI_BcHieuSuatBaiVietTongHop {
+  pkId String @id @default(dbgenerated("gen_random_uuid()"))
   createdAt DateTime @default(now())
 
   // 1.Hiệu suất chính
@@ -639,8 +667,8 @@ model BcHieuSuatBaiVietTongHop {
 }
 
 // BC Phân tích Cảm xúc Bài viết
-model BcPhanTichCamXucBaiViet {
-  pkId String @id @default(cuid())
+model MPI_BcPhanTichCamXucBaiViet {
+  pkId String @id @default(dbgenerated("gen_random_uuid()"))
   createdAt DateTime @default(now())
 
   // 1.Các loại Reactions
@@ -653,8 +681,8 @@ model BcPhanTichCamXucBaiViet {
 }
 
 // BC Phân tích: Fan theo Vị trí
-model BcPhanTichFanTheoViTri {
-  pkId String @id @default(cuid())
+model MPI_BcPhanTichFanTheoViTri {
+  pkId String @id @default(dbgenerated("gen_random_uuid()"))
   createdAt DateTime @default(now())
 
   // Metric
@@ -663,8 +691,8 @@ model BcPhanTichFanTheoViTri {
 }
 
 // BC Phân tích: Nguồn Lượt thích Mới
-model BcPhanTichNguonLuotThichMoi {
-  pkId String @id @default(cuid())
+model MPI_BcPhanTichNguonLuotThichMoi {
+  pkId String @id @default(dbgenerated("gen_random_uuid()"))
   createdAt DateTime @default(now())
 
   // Metric
@@ -672,8 +700,8 @@ model BcPhanTichNguonLuotThichMoi {
 }
 
 // BC Hiệu suất Video (Từng video)
-model BcHieuSuatVideoTungVideo {
-  pkId String @id @default(cuid())
+model MPI_BcHieuSuatVideoTungVideo {
+  pkId String @id @default(dbgenerated("gen_random_uuid()"))
   createdAt DateTime @default(now())
 
   // 3. Tiếp cận & Lượt xem Video
@@ -691,8 +719,8 @@ model BcHieuSuatVideoTungVideo {
 }
 
 // BC Hiệu suất Video (Tổng hợp)
-model BcHieuSuatVideoTongHop {
-  pkId String @id @default(cuid())
+model MPI_BcHieuSuatVideoTongHop {
+  pkId String @id @default(dbgenerated("gen_random_uuid()"))
   createdAt DateTime @default(now())
 
   // 1.Lượt xem Video
@@ -710,8 +738,8 @@ model BcHieuSuatVideoTongHop {
 }
 
 // BC Tổng hợp Hiệu suất Trang (Nâng cao)
-model BcTongHopHieuSuatTrangNangCao {
-  pkId String @id @default(cuid())
+model MPI_BcTongHopHieuSuatTrangNangCao {
+  pkId String @id @default(dbgenerated("gen_random_uuid()"))
   createdAt DateTime @default(now())
 
   // 1.Thông tin cơ bản
@@ -749,8 +777,8 @@ model BcTongHopHieuSuatTrangNangCao {
 }
 
 // BC Hiệu suất Bài viết (Lifetime)
-model BcHieuSuatBaiVietLifetime {
-  pkId String @id @default(cuid())
+model MPI_BcHieuSuatBaiVietLifetime {
+  pkId String @id @default(dbgenerated("gen_random_uuid()"))
   createdAt DateTime @default(now())
 
   // Chỉ số Hiệu suất
