@@ -1,7 +1,7 @@
 {
   "name": "opendb-all-modules",
   "version": "1.0.0",
-  "type": "module",  
+  "type": "module",
   "description": "",
   "main": "src/index.js",
   "devDependencies": {
@@ -10,6 +10,7 @@
   "dependencies": {
     "@prisma/client": "^6.18.0",
     "axios": "^1.12.2",
-    "dotenv": "^17.2.3"
+    "dotenv": "^17.2.3",
+    "node-cache": "^5.1.2"
   }
 }

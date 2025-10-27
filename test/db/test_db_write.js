@@ -12,8 +12,8 @@ import prisma from '../../src/db/client.js'; // Import client để đóng kết
  */
 
 // [QUAN TRỌNG] Đảm bảo biến này khớp với templateName đã tạo ra file JSON
-const TEMPLATE_NAME_TO_TEST = 'BM & Ad Accounts';
-const JSON_FILE_PATH = path.join(process.cwd(), 'debug_data.json');
+const TEMPLATE_NAME_TO_TEST = 'Platform Report by Campaign';
+const JSON_FILE_PATH = path.join(process.cwd(), 'debug_tiktok_data.json');
 
 async function runDbTest() {
   console.log(`[DB Write Test] Bắt đầu test ghi dữ liệu cho template: "${TEMPLATE_NAME_TO_TEST}"`);

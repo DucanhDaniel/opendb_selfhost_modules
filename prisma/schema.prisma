@@ -789,3 +789,612 @@ model MPI_BcHieuSuatBaiVietLifetime {
   post_video_views              Int?
   post_video_views_unique       Int?
 }
+
+
+// -------------------------------------
+// NHÓM BCA: Báo cáo BC & Account
+// -------------------------------------
+
+/// @model
+/// Dữ liệu cho template "BCs Info"
+model BCA_BCInfo {
+  pkId      String   @id @default(dbgenerated("gen_random_uuid()"))
+  createdAt DateTime @default(now()) 
+
+  // Metrics
+  bc_id       String?
+  bc_name     String?
+  company     String?
+  currency    String?
+  status      String?
+  type        String?
+  timezone    String?
+  user_role   String?
+  finance_role String?
+
+}
+
+/// @model
+/// Dữ liệu cho template "BC & Accounts Info"
+model BCA_BCAccountInfo {
+  pkId      String   @id @default(dbgenerated("gen_random_uuid()"))
+  createdAt DateTime @default(now()) 
+
+  // Metrics
+  advertiser_id   String?
+  name            String?
+  status          String?
+  currency        String?
+  timezone        String?
+  company         String?
+  industry        String?
+  country         String?
+  address         String?
+  contacter       String?
+  email           String?
+  cellphone_number String?
+  owner_bc_id     String?
+  create_time     DateTime?
+  balance         Float?
+  role            String?
+
+}
+
+/// @model
+/// Dữ liệu cho template "BC Assets Info"
+model BCA_BCAssetInfo {
+  pkId      String   @id @default(dbgenerated("gen_random_uuid()"))
+  createdAt DateTime @default(now()) 
+
+  // Dimensions
+  bc_id       String?
+  asset_type  String?
+
+  // Metrics
+  asset_id        String?
+  asset_name      String?
+  owner_bc_name   String?
+  relation_type   String?
+  advertiser_status String?
+  advertiser_role String?
+  catalog_role    String?
+  store_role      String?
+  relation_status String?
+
+}
+
+// -------------------------------------
+// NHÓM TTA: Báo cáo hiệu suất
+// -------------------------------------
+
+/// @model
+/// Dữ liệu cho template "Campaign Performance" (Ví dụ của bạn)
+model TTA_CampaignPerformance {
+  pkId      String   @id @default(dbgenerated("gen_random_uuid()"))
+  createdAt DateTime @default(now()) 
+
+  // Thông tin Định danh (Dimensions)
+  stat_time_day   DateTime?
+  campaign_id     String?
+  start_date      DateTime?
+  end_date        DateTime?
+  advertiser_id   String?
+  advertiser_name String?
+  campaign_name   String?
+  objective_type  String?
+
+  // Số liệu (Metrics)
+  spend                       Float?
+  impressions                 Int?
+  clicks                      Int?
+  ctr                         Float?
+  cpc                         Float?
+  cpm                         Float?
+  reach                       Int?
+  frequency                   Float?
+  conversion                  Int?
+  cost_per_conversion         Float?
+  conversion_rate             Float?
+  video_play_actions          Int?
+  profile_visits              Int?
+  likes                       Int?
+  comments                    Int?
+  shares                      Int?
+  follows                     Int?
+  live_views                  Int?
+  purchase                    Int?
+  
+  // Số liệu mua sắm On-site
+  total_onsite_shopping_value Float?
+  onsite_shopping             Int?
+  onsite_shopping_roas        Float?
+  cost_per_onsite_shopping    Float?
+
+}
+
+/// @model
+/// Dữ liệu cho template "AdGroup Performance"
+model TTA_AdGroupPerformance {
+  pkId      String   @id @default(dbgenerated("gen_random_uuid()"))
+  createdAt DateTime @default(now()) 
+
+  // Dimensions
+  stat_time_day   DateTime?
+  adgroup_id      String?
+  start_date      DateTime?
+  end_date        DateTime?
+  advertiser_id   String?
+  advertiser_name String?
+
+  // Metrics
+  adgroup_name    String?
+  campaign_name   String?
+  spend           Float?
+  impressions     Int?
+  clicks          Int?
+  ctr             Float?
+  cpc             Float?
+  cpm             Float?
+  reach           Int?
+  frequency       Float?
+  conversion      Int?
+  cost_per_conversion Float?
+  conversion_rate Float?
+  video_play_actions Int?
+  purchase        Int?
+  profile_visits  Int?
+  likes           Int?
+  comments        Int?
+  shares          Int?
+  follows         Int?
+  live_views      Int?
+  
+  // On-site Shopping
+  total_onsite_shopping_value Float?
+  onsite_shopping             Int?
+  onsite_shopping_roas        Float?
+  cost_per_onsite_shopping    Float?
+
+}
+
+/// @model
+/// Dữ liệu cho template "Ad Performance"
+model TTA_AdPerformance {
+  pkId      String   @id @default(dbgenerated("gen_random_uuid()"))
+  createdAt DateTime @default(now()) 
+
+  // Dimensions
+  stat_time_day   DateTime?
+  ad_id           String?
+  start_date      DateTime?
+  end_date        DateTime?
+  advertiser_id   String?
+  advertiser_name String?
+  campaign_name   String?
+  adgroup_name     String?
+
+  // Metrics
+  ad_text         String?
+  ad_name         String?
+  spend           Float?
+  impressions     Int?
+  clicks          Int?
+  ctr             Float?
+  cpc             Float?
+  cpm             Float?
+  reach           Int?
+  frequency       Float?
+  conversion      Int?
+  cost_per_conversion Float?
+  conversion_rate Float?
+  video_play_actions Int?
+  purchase        Int?
+  profile_visits  Int?
+  likes           Int?
+  comments        Int?
+  shares          Int?
+  follows         Int?
+  live_views      Int?
+  
+  // On-site Shopping
+  total_onsite_shopping_value Float?
+  onsite_shopping             Int?
+  onsite_shopping_roas        Float?
+  cost_per_onsite_shopping    Float?
+
+}
+
+/// @model
+/// Dữ liệu cho template "Creative Performance (Video/Image)"
+model TTA_CreativePerformance {
+  pkId      String   @id @default(dbgenerated("gen_random_uuid()"))
+  createdAt DateTime @default(now()) 
+
+  // Dimensions
+  ad_id           String?
+  start_date      DateTime?
+  end_date        DateTime?
+  advertiser_id   String?
+  advertiser_name String?
+
+  // Metrics
+  campaign_id     String?
+  campaign_name   String?
+  adgroup_id      String?
+  adgroup_name    String?
+  ad_name         String?
+  spend           Float?
+  impressions     Int?
+  clicks          Int?
+  ctr             Float?
+  conversion      Int?
+  cost_per_conversion Float?
+
+}
+
+// -------------------------------------
+// NHÓM TTA: Báo cáo đối tượng & vị trí
+// -------------------------------------
+
+/// @model
+/// Dữ liệu cho template "Audience Report: Region by Campaign"
+model TTA_AudienceRegionReport {
+  pkId      String   @id @default(dbgenerated("gen_random_uuid()"))
+  createdAt DateTime @default(now()) 
+  // Dimensions
+  campaign_id     String?
+  province_id     String?
+  province_name   String?
+  start_date      DateTime?
+  end_date        DateTime?
+  advertiser_id   String?
+  advertiser_name String?
+
+  // Metrics
+  campaign_name   String?
+  spend           Float?
+  impressions     Int?
+  clicks          Int?
+  ctr             Float?
+  cpc             Float?
+  cpm             Float?
+  reach           Int?
+  conversion      Int?
+  cost_per_conversion Float?
+  conversion_rate Float?
+  profile_visits  Int?
+  likes           Int?
+  comments        Int?
+  shares          Int?
+  follows         Int?
+  
+  // Video Metrics
+  video_play_actions Int?
+  video_watched_2s   Int?
+  video_watched_6s   Int?
+  video_views_p25    Int?
+  video_views_p50    Int?
+  video_views_p75    Int?
+  video_views_p100   Int?
+  average_video_play Float?
+
+}
+
+/// @model
+/// Dữ liệu cho template "Audience Report: Country by Campaign"
+model TTA_AudienceCountryReport {
+  pkId      String   @id @default(dbgenerated("gen_random_uuid()"))
+  createdAt DateTime @default(now()) 
+
+  // Dimensions
+  stat_time_day   DateTime?
+  campaign_id     String?
+  country_code    String?
+  start_date      DateTime?
+  end_date        DateTime?
+  advertiser_id   String?
+  advertiser_name String?
+
+  // Metrics
+  campaign_name   String?
+  spend           Float?
+  impressions     Int?
+  clicks          Int?
+  ctr             Float?
+  cpc             Float?
+  cpm             Float?
+  reach           Int?
+  conversion      Int?
+  cost_per_conversion Float?
+  conversion_rate Float?
+  video_play_actions Int?
+  likes           Int?
+  comments        Int?
+  shares          Int?
+  follows         Int?
+  profile_visits  Int?
+
+}
+
+/// @model
+/// Dữ liệu cho template "Audience Report: Age by Campaign"
+model TTA_AudienceAgeReport {
+  pkId      String   @id @default(dbgenerated("gen_random_uuid()"))
+  createdAt DateTime @default(now()) 
+
+  // Dimensions
+  stat_time_day   DateTime?
+  campaign_id     String?
+  age             String? // e.g., "18-24"
+  start_date      DateTime?
+  end_date        DateTime?
+  advertiser_id   String?
+  advertiser_name String?
+
+  // Metrics (Tương tự Country Report)
+  campaign_name   String?
+  spend           Float?
+  impressions     Int?
+  clicks          Int?
+  ctr             Float?
+  cpc             Float?
+  cpm             Float?
+  reach           Int?
+  conversion      Int?
+  cost_per_conversion Float?
+  conversion_rate Float?
+  video_play_actions Int?
+  likes           Int?
+  comments        Int?
+  shares          Int?
+  follows         Int?
+  profile_visits  Int?
+
+}
+
+/// @model
+/// Dữ liệu cho template "Audience Report: Gender by Campaign"
+model TTA_AudienceGenderReport {
+  pkId      String   @id @default(dbgenerated("gen_random_uuid()"))
+  createdAt DateTime @default(now()) 
+
+  // Dimensions
+  stat_time_day   DateTime?
+  campaign_id     String?
+  gender          String? // e.g., "GENDER_MALE"
+  start_date      DateTime?
+  end_date        DateTime?
+  advertiser_id   String?
+  advertiser_name String?
+
+  // Metrics (Tương tự Country Report)
+  campaign_name   String?
+  spend           Float?
+  impressions     Int?
+  clicks          Int?
+  ctr             Float?
+  cpc             Float?
+  cpm             Float?
+  reach           Int?
+  conversion      Int?
+  cost_per_conversion Float?
+  conversion_rate Float?
+  video_play_actions Int?
+  likes           Int?
+  comments        Int?
+  shares          Int?
+  follows         Int?
+  profile_visits  Int?
+
+}
+
+/// @model
+/// Dữ liệu cho template "Audience Report: Age & Gender by Campaign"
+model TTA_AudienceAgeGenderReport {
+  pkId      String   @id @default(dbgenerated("gen_random_uuid()"))
+  createdAt DateTime @default(now()) 
+
+  // Dimensions
+  stat_time_day   DateTime?
+  campaign_id     String?
+  age             String?
+  gender          String?
+  start_date      DateTime?
+  end_date        DateTime?
+  advertiser_id   String?
+  advertiser_name String?
+
+  // Metrics (Tương tự Country Report)
+  campaign_name   String?
+  spend           Float?
+  impressions     Int?
+  clicks          Int?
+  ctr             Float?
+  cpc             Float?
+  cpm             Float?
+  reach           Int?
+  conversion      Int?
+  cost_per_conversion Float?
+  conversion_rate Float?
+  video_play_actions Int?
+  likes           Int?
+  comments        Int?
+  shares          Int?
+  follows         Int?
+  profile_visits  Int?
+
+}
+
+/// @model
+/// Dữ liệu cho template "Placement Report by Campaign"
+model TTA_PlacementReport {
+  pkId      String   @id @default(dbgenerated("gen_random_uuid()"))
+  createdAt DateTime @default(now()) 
+
+  // Dimensions
+  campaign_id     String?
+  placement       String? // e.g., "PLACEMENT_TIKTOK"
+  start_date      DateTime?
+  end_date        DateTime?
+  advertiser_id   String?
+  advertiser_name String?
+
+  // Metrics
+  campaign_name   String?
+  spend           Float?
+  impressions     Int?
+  clicks          Int?
+  ctr             Float?
+  conversion      Int?
+  cost_per_conversion Float?
+
+}
+
+/// @model
+/// Dữ liệu cho template "Platform Report by Campaign"
+model TTA_PlatformReport {
+  pkId      String   @id @default(dbgenerated("gen_random_uuid()"))
+  createdAt DateTime @default(now()) 
+
+  // Dimensions
+  campaign_id     String?
+  platform        String? // e.g., "PLATFORM_IOS"
+  start_date      DateTime?
+  end_date        DateTime?
+  advertiser_id   String?
+  advertiser_name String?
+
+  // Metrics
+  campaign_name   String?
+  spend           Float?
+  impressions     Int?
+  clicks          Int?
+  ctr             Float?
+  conversion      Int?
+  cost_per_conversion Float?
+
+}
+
+// -------------------------------------
+// NHÓM GMV: Báo cáo hiệu suất
+// -------------------------------------
+
+/// @model
+/// Dữ liệu cho "GMV All/Product/Live Campaign Performance" (Dùng chung model)
+model GMV_CampaignPerformance {
+  pkId      String   @id @default(dbgenerated("gen_random_uuid()"))
+  createdAt DateTime @default(now()) 
+
+  // Dimensions
+  campaign_id     String?
+  stat_time_day   DateTime?
+  start_date      DateTime?
+  end_date        DateTime?
+  advertiser_id   String?
+  advertiser_name String?
+  store_id        String?
+  store_name      String?
+  
+  // Metrics
+  campaign_name   String?
+  cost            Float?
+  orders          Int?
+  roi             Float?
+  cost_per_order  Float?
+  gross_revenue   Float?
+  net_cost        Float?
+  roas_bid        Float?
+  operation_status String?
+  schedule_type   String?
+  schedule_start_time DateTime?
+  schedule_end_time   DateTime?
+  target_roi_budget   Float?
+  bid_type        String?
+  max_delivery_budget Float?
+
+}
+
+/// Dữ liệu cho template "GMV Campaign / Product Detail"
+model GMV_ProductDetailReport {
+  pkId      String   @id @default(dbgenerated("gen_random_uuid()"))
+  createdAt DateTime @default(now()) 
+
+  // Dimensions
+  stat_time_day   DateTime?
+  campaign_id     String?
+  item_group_id   String?
+  product_img     String? // Mặc dù tên là img, đây có thể là URL
+  start_date      DateTime?
+  end_date        DateTime?
+  advertiser_id   String?
+  advertiser_name String?
+  store_id        String?
+  store_name      String?
+  
+  // Metrics
+  campaign_name     String?
+  operation_status  String?
+  bid_type          String?
+  product_name      String?
+  product_image_url String?
+  orders            Int?
+  gross_revenue     Float?
+  cost              Float?
+  cost_per_order    Float?
+  roi               Float?
+
+}
+
+/// @model
+/// Dữ liệu cho template "GMV Campaign / Creative Detail"
+model GMV_CreativeDetailReport {
+  pkId      String   @id @default(dbgenerated("gen_random_uuid()"))
+  createdAt DateTime @default(now()) @map("created_at")
+
+  // Dimensions
+  campaign_id     String?
+  item_group_id   String?
+  item_id         String? // Creative ID
+  product_img     String?
+  start_date      DateTime?
+  end_date        DateTime?
+  advertiser_id   String?
+  advertiser_name String?
+  store_id        String?
+  store_name      String?
+
+  // Metrics - Thuộc tính
+  campaign_name   String?
+  operation_status String?
+  product_name    String?
+  product_status  String?
+  product_image_url String?
+  creative_delivery_status String?
+  title           String?
+  tt_account_name String?
+  tt_account_profile_image_url String?
+
+  // Metrics - Hiệu suất chính
+  cost            Float?
+  orders          Int?
+  cost_per_order  Float?
+  gross_revenue   Float?
+  roi             Float?
+
+  // Metrics - Chỉ số sản phẩm
+  product_impressions Int?
+  product_clicks      Int?
+  product_click_rate  Float?
+
+  // Metrics - Chỉ số quảng cáo
+  ad_conversion_rate Float?
+
+  // Metrics - Tỷ lệ xem video
+  ad_video_view_rate_2s   Float?
+  ad_video_view_rate_6s   Float?
+  ad_video_view_rate_p25  Float?
+  ad_video_view_rate_p50  Float?
+  ad_video_view_rate_p75  Float?
+  ad_video_view_rate_p100 Float?
+
+}

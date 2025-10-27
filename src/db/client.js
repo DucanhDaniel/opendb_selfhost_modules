@@ -8,7 +8,7 @@ import { PrismaClient } from '@prisma/client';
 const prisma = new PrismaClient({
   // Bật log query để debug.
   // Bạn nên tắt 'query' ở môi trường production để tránh spam log.
-  log: ['query', 'info', 'warn', 'error'],
+  log: ['info', 'warn', 'error'],
 });
 
 export default prisma;

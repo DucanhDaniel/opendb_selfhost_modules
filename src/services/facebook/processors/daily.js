@@ -3,9 +3,10 @@ import { fetchFacebookBatchApi } from '../api.js';
 import { 
   flattenActionMetrics, 
   getFacebookTemplateConfigByName,
-  getRelativeUrl,
-  generateMonthlyDateChunks
+  getRelativeUrl
 } from '../helpers.js';
+
+import { generateMonthlyDateChunks } from '../../../utils/date_utils.js';
 import { CONVERSION_METRICS_MAP, EFFECTIVE_STATUS_FILTERS } from '../constants.js';
 
 // Define execution parameters
