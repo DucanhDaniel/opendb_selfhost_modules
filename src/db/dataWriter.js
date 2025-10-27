@@ -1,6 +1,8 @@
 import prisma from './client.js';
+import { chunkArray } from '../utils/array_utils.js';
 
 // --- TYPE_CONFIG và KEY_MAP ---
+const DB_BATCH_SIZE_ROWS = 900;
 const TYPE_CONFIG = {
   TEXT: new Set([
     "advertiser_id", "campaign_id", "store_id", "item_group_id", "item_id",
@@ -87,7 +89,7 @@ const TEMPLATE_MAP = {
   // --- FAD ---
   "Campaign Overview Report": {
     tableName: "FAD_CampaignOverviewReport",
-    conflictTarget: ["account_id", "date_start", "date_stop"],
+    conflictTarget: ["account_id", "date_start", "date_stop", "id"],
     updateFields: [
       "id", "name", "objective", "account_name", "status", "effective_status",
       "start_time", "stop_time", "created_time", "updated_time", "buying_type", "bid_strategy",
@@ -99,7 +101,7 @@ const TEMPLATE_MAP = {
   },
    "Campaign Performance by Age": {
      tableName: "FAD_CampaignPerformanceByAge",
-     conflictTarget: ["account_id", "date_start", "date_stop"],
+     conflictTarget: ["account_id", "date_start", "date_stop", "campaign_name", "age"],
      updateFields: [
        "campaign_name", "account_id", "account_name", "spend", "newMessagingConnections",
        "costPerNewMessaging", "leads", "costLeads", "purchases", "costPurchases",
@@ -108,7 +110,7 @@ const TEMPLATE_MAP = {
    },
    "Campaign Performance by Gender": {
      tableName: "FAD_CampaignPerformanceByGender",
-     conflictTarget: ["account_id", "date_start", "date_stop"],
+     conflictTarget: ["account_id", "date_start", "date_stop", "campaign_name", "gender"],
      updateFields: [
        "campaign_name", "account_id", "account_name", "spend", "newMessagingConnections",
        "costPerNewMessaging", "leads", "costLeads", "purchases", "costPurchases",
@@ -117,7 +119,7 @@ const TEMPLATE_MAP = {
    },
    "Campaign Performance by Platform": {
      tableName: "FAD_CampaignPerformanceByPlatform",
-     conflictTarget: ["account_id", "date_start", "date_stop"],
+     conflictTarget: ["account_id", "date_start", "date_stop", "campaign_name", "publisher_platform", "platform_position"],
      updateFields: [
        "account_id", "account_name", "campaign_name", "spend", "impressions", "clicks",
        "newMessagingConnections", "costPerNewMessaging", "leads", "costLeads", "purchases",
@@ -126,7 +128,7 @@ const TEMPLATE_MAP = {
    },
     "Campaign Performance by Region": {
       tableName: "FAD_CampaignPerformanceByRegion",
-      conflictTarget: ["account_id", "date_start", "date_stop"],
+      conflictTarget: ["account_id", "date_start", "date_stop", "campaign_name", "region"],
       updateFields: [
           "campaign_name", "account_id", "account_name", "spend", "impressions", "clicks", "ctr",
           "newMessagingConnections", "costPerNewMessaging", "leads", "costLeads", "purchases",
@@ -135,7 +137,7 @@ const TEMPLATE_MAP = {
   },
   "Ad Set Performance Report": {
       tableName: "FAD_AdSetPerformanceReport",
-      conflictTarget: ["account_id", "date_start", "date_stop"],
+      conflictTarget: ["account_id", "date_start", "date_stop", "campaign_id", "id"],
       updateFields: [
           "name", "campaign_id", "campaign_name", "account_id", "account_name", "status",
           "effective_status", "created_time", "daily_budget", "lifetime_budget", "budget_remaining",
@@ -146,7 +148,7 @@ const TEMPLATE_MAP = {
   },
  "Ad Performance Report": {
      tableName: "FAD_AdPerformanceReport",
-     conflictTarget: ["account_id", "date_start", "date_stop"], 
+     conflictTarget: ["account_id", "date_start", "date_stop", "campaign_id", "adset_id", "id"], 
      updateFields: [
          "name", "adset_id", "adset_name", "campaign_id", "campaign_name", "account_id",
          "account_name", "created_time", "updated_time", "status", "effective_status",
@@ -167,7 +169,7 @@ const TEMPLATE_MAP = {
  },
  "Campaign Daily Report": {
      tableName: "FAD_CampaignDailyReport",
-     conflictTarget: ["account_id", "date_start", "date_stop"],
+     conflictTarget: ["account_id", "date_start", "date_stop", "campaign_id"],
      updateFields: [
          "campaign_name", "account_id", "account_name", "spend", "impressions", "reach",
          "clicks", "cpc", "cpm", "ctr", "frequency", "newMessagingConnections",
@@ -177,7 +179,7 @@ const TEMPLATE_MAP = {
  },
  "Ad Set Daily Report": {
      tableName: "FAD_AdSetDailyReport",
-     conflictTarget: ["account_id", "date_start", "date_stop"],
+     conflictTarget: ["account_id", "date_start", "date_stop", "campaign_id", "id"],
      updateFields: [
          "name", "campaign_id", "campaign_name", "account_id", "account_name", "status",
          "effective_status", "daily_budget", "lifetime_budget", "budget_remaining",
@@ -188,7 +190,7 @@ const TEMPLATE_MAP = {
  },
  "Ad Daily Report": {
      tableName: "FAD_AdDailyReport",
-     conflictTarget: ["account_id", "date_start", "date_stop"],
+     conflictTarget: ["account_id", "date_start", "date_stop", "campaign_id", "adset_id", "id"],
      updateFields: [
          "name", "adset_id", "adset_name", "campaign_id", "campaign_name", "account_id",
          "account_name", "status", "effective_status", "created_time", "spend", "impressions",
@@ -199,7 +201,7 @@ const TEMPLATE_MAP = {
  },
  "Ad Creative Report": {
     tableName: "FAD_AdCreativeReport",
-    conflictTarget: ["account_id", "date_start", "date_stop"],
+    conflictTarget: ["account_id", "date_start", "date_stop", "campaign_id", "adset_id", "id"],
     updateFields: [
        "name", "adset_id", "adset_name", "campaign_id", "campaign_name", "account_id",
        "account_name", "status", "effective_status", "creative_id", "actor_id", "page_name",
@@ -356,121 +358,230 @@ export async function writeDataToDatabase(templateName, dataRows) {
       return normalizedRow;
   });
 
-  // 6. [LOGIC MỚI] Xây dựng 2 câu lệnh: DELETE và INSERT
+  // 6.  Xây dựng 2 câu lệnh: DELETE và INSERT
   if (normalizedData.length === 0) {
       return { success: true, count: 0 };
   }
 
-  // === 6.A. Xây dựng lệnh DELETE ===
-  // Dùng logic: DELETE ... WHERE (col1, col2) IN (($1, $2), ($3, $4), ...)
-  const conflictTargetSql = conflictTarget.map(col => `"${col}"`).join(", "); // vd: "account_id", "date_start"
-  let deleteParamIndex = 1;
-  const deleteValues = [];
-  const deletePlaceholders = normalizedData.map(row => {
-      const rowParams = [];
-      for (const col of conflictTarget) {
-          // [SỬA LỖI 42883] Thêm ép kiểu (cast) cho các tham số của DELETE
-          // Giống hệt logic của INSERT
-          let castType = "";
-          if (TYPE_CONFIG.DATE.has(col)) {
-              castType = "::timestamp";
-          } else if (TYPE_CONFIG.JSON.has(col)) { 
-              castType = "::jsonb";
-          } else if (TYPE_CONFIG.DECIMAL.has(col)) {
-              castType = "::decimal";
-          }
-          // Thêm placeholder đã ép kiểu
-          rowParams.push(`$${deleteParamIndex++}${castType}`);
-          // [HẾT SỬA LỖI 42883]
+//   // === 6.A. Xây dựng lệnh DELETE ===
+//   // Dùng logic: DELETE ... WHERE (col1, col2) IN (($1, $2), ($3, $4), ...)
+//   const conflictTargetSql = conflictTarget.map(col => `"${col}"`).join(", "); // vd: "account_id", "date_start"
+//   let deleteParamIndex = 1;
+//   const deleteValues = [];
+//   const deletePlaceholders = normalizedData.map(row => {
+//       const rowParams = [];
+//       for (const col of conflictTarget) {
+//           // [SỬA LỖI 42883] Thêm ép kiểu (cast) cho các tham số của DELETE
+//           // Giống hệt logic của INSERT
+//           let castType = "";
+//           if (TYPE_CONFIG.DATE.has(col)) {
+//               castType = "::timestamp";
+//           } else if (TYPE_CONFIG.JSON.has(col)) { 
+//               castType = "::jsonb";
+//           } else if (TYPE_CONFIG.DECIMAL.has(col)) {
+//               castType = "::decimal";
+//           }
+//           // Thêm placeholder đã ép kiểu
+//           rowParams.push(`$${deleteParamIndex++}${castType}`);
+//           // [HẾT SỬA LỖI 42883]
 
-          const val = row[col]; // Lấy từ row đã chuẩn hóa
-          if (val instanceof Date) {
-              deleteValues.push(val.toISOString());
-          } else {
-              deleteValues.push(val);
-          }
-      }
-      return `(${rowParams.join(", ")})`;
-  }).join(", ");
+//           const val = row[col]; // Lấy từ row đã chuẩn hóa
+//           if (val instanceof Date) {
+//               deleteValues.push(val.toISOString());
+//           } else {
+//               deleteValues.push(val);
+//           }
+//       }
+//       return `(${rowParams.join(", ")})`;
+//   }).join(", ");
 
-  const deleteSql = `DELETE FROM "${tableName}" WHERE (${conflictTargetSql}) IN (${deletePlaceholders});`;
+//   const deleteSql = `DELETE FROM "${tableName}" WHERE (${conflictTargetSql}) IN (${deletePlaceholders});`;
 
-  // === 6.B. Xây dựng lệnh INSERT ===
-  const columnsSql = finalColumns.map(col => `"${col}"`).join(", ");
-  const valuePlaceholders = normalizedData.map((_, rowIndex) =>
-        `(${finalColumns.map((col, colIndex) => {
-            const paramIndex = rowIndex * finalColumns.length + colIndex + 1;
-            let castType = "";
-            if (TYPE_CONFIG.DATE.has(col)) {
-                castType = "::timestamp";
-            } else if (TYPE_CONFIG.JSON.has(col)) {
-                castType = "::jsonb";
-            } else if (TYPE_CONFIG.DECIMAL.has(col)) {
-                castType = "::decimal";
-            }
-            return `$${paramIndex}${castType}`;
-        }).join(", ")})`
-    ).join(", ");
+//   // === 6.B. Xây dựng lệnh INSERT ===
+//   const columnsSql = finalColumns.map(col => `"${col}"`).join(", ");
+//   const valuePlaceholders = normalizedData.map((_, rowIndex) =>
+//         `(${finalColumns.map((col, colIndex) => {
+//             const paramIndex = rowIndex * finalColumns.length + colIndex + 1;
+//             let castType = "";
+//             if (TYPE_CONFIG.DATE.has(col)) {
+//                 castType = "::timestamp";
+//             } else if (TYPE_CONFIG.JSON.has(col)) {
+//                 castType = "::jsonb";
+//             } else if (TYPE_CONFIG.DECIMAL.has(col)) {
+//                 castType = "::decimal";
+//             }
+//             return `$${paramIndex}${castType}`;
+//         }).join(", ")})`
+//     ).join(", ");
 
-  const allInsertValues = normalizedData.flatMap(row => finalColumns.map(col => {
-        const val = row[col];
-        if (val === null || val === undefined) {
-             return null;
-        }
-        if (val instanceof Date) {
-            return val.toISOString();
-        }
-        // [SỬA] Logic stringify JSON chính xác hơn
-        if (TYPE_CONFIG.JSON.has(col) && typeof val === 'object') {
-            return JSON.stringify(val);
-        }
-        if (TYPE_CONFIG.DECIMAL.has(col)) {
-             return String(val);
-        }
-        if (TYPE_CONFIG.INTEGER.has(col) || TYPE_CONFIG.FLOAT.has(col)) {
-            return Number(val);
-        }
-        return String(val);
-    }));
-  
-  const insertSql = `INSERT INTO "${tableName}" (${columnsSql}) VALUES ${valuePlaceholders};`;
+//   const allInsertValues = normalizedData.flatMap(row => finalColumns.map(col => {
+//         const val = row[col];
+//         if (val === null || val === undefined) {
+//              return null;
+//         }
+//         if (val instanceof Date) {
+//             return val.toISOString();
+//         }
+//         // [SỬA] Logic stringify JSON chính xác hơn
+//         if (TYPE_CONFIG.JSON.has(col) && typeof val === 'object') {
+//             return JSON.stringify(val);
+//         }
+//         if (TYPE_CONFIG.DECIMAL.has(col)) {
+//              return String(val);
+//         }
+//         if (TYPE_CONFIG.INTEGER.has(col) || TYPE_CONFIG.FLOAT.has(col)) {
+//             return Number(val);
+//         }
+//         return String(val);
+//     }));
+//   
+//   const insertSql = `INSERT INTO "${tableName}" (${columnsSql}) VALUES ${valuePlaceholders};`;
 
 
-  // 7. [LOGIC MỚI] Thực thi trong Transaction
-  try {
-    
-    // Tạo các lệnh "raw" để đưa vào transaction
-    const deleteCommand = prisma.$executeRawUnsafe(deleteSql, ...deleteValues);
-    const insertCommand = prisma.$executeRawUnsafe(insertSql, ...allInsertValues);
+//   // 7. [LOGIC MỚI] Thực thi trong Transaction
+//   try {
+//     
+//     // Tạo các lệnh "raw" để đưa vào transaction
+//     const deleteCommand = prisma.$executeRawUnsafe(deleteSql, ...deleteValues);
+//     const insertCommand = prisma.$executeRawUnsafe(insertSql, ...allInsertValues);
 
-    console.log(`DB Writer (${templateName}): Starting Transaction for ${normalizedData.length} rows...`);
-    console.log(`   1. Deleting existing rows...`);
-    console.log(`   2. Inserting new rows...`);
+//     console.log(`DB Writer (${templateName}): Starting Transaction for ${normalizedData.length} rows...`);
+//     console.log(`   1. Deleting existing rows...`);
+//     console.log(`   2. Inserting new rows...`);
 
-    // Chạy transaction
-    const [deleteResultCount, insertResultCount] = await prisma.$transaction([
-      deleteCommand,
-      insertCommand
-    ]);
+//     // Chạy transaction
+//     const [deleteResultCount, insertResultCount] = await prisma.$transaction([
+//       deleteCommand,
+//       insertCommand
+//     ]);
 
-    console.log(`DB Writer (${templateName}): Transaction successful.`);
-    console.log(`   - Rows Deleted: ${deleteResultCount}`);
-    console.log(`   - Rows Inserted: ${insertResultCount}`);
-    
-    return { success: true, count: insertResultCount };
+//     console.log(`DB Writer (${templateName}): Transaction successful.`);
+//     console.log(`   - Rows Deleted: ${deleteResultCount}`);
+//     console.log(`   - Rows Inserted: ${insertResultCount}`);
+//     
+//     return { success: true, count: insertResultCount };
 
-  } catch (e) {
-    console.error(`DB Writer (${templateName}): Transaction Error:`, e.message);
-    console.error("   - SQL (DELETE template):", deleteSql.substring(0, 500) + "...");
-    console.error("   - SQL (INSERT template):", insertSql.substring(0, 500) + "...");
-    if (normalizedData.length > 0) {
-      console.error("   - Sample Data (1 row, normalized):", JSON.stringify(normalizedData[0], null, 2));
-    }
-     console.error("   - Delete Value count:", deleteValues.length);
-     console.error("   - Insert Value count:", allInsertValues.length);
-    if (e.message && e.message.includes("is of type")) {
-        console.error("   - Potential type mismatch detected by DB.");
-    }
-    return { success: false, count: 0, error: e.message };
-  }
+//   } catch (e) {
+//     console.error(`DB Writer (${templateName}): Transaction Error:`, e.message);
+//     console.error("   - SQL (DELETE template):", deleteSql.substring(0, 500) + "...");
+//     console.error("   - SQL (INSERT template):", insertSql.substring(0, 500) + "...");
+//     if (normalizedData.length > 0) {
+//       console.error("   - Sample Data (1 row, normalized):", JSON.stringify(normalizedData[0], null, 2));
+//     }
+//      console.error("   - Delete Value count:", deleteValues.length);
+//      console.error("   - Insert Value count:", allInsertValues.length);
+//     if (e.message && e.message.includes("is of type")) {
+//         console.error("   - Potential type mismatch detected by DB.");
+//     }
+//     return { success: false, count: 0, error: e.message };
+//   }
+// }
+// 6. [LOGIC MỚI] Chia dữ liệu thành các đợt (chunks)
+  const dataChunks = chunkArray(normalizedData, DB_BATCH_SIZE_ROWS);
+  let totalInsertedCount = 0;
+
+  // [SỬA LỖI 2] Khai báo biến ở scope ngoài để 'catch' có thể truy cập
+  let deleteValues = [];
+  let allInsertValues = [];
+
+  console.log(`DB Writer (${templateName}): Preparing transaction for ${normalizedData.length} rows, divided into ${dataChunks.length} chunks of ~${DB_BATCH_SIZE_ROWS} rows.`);
+
+  // 7. [LOGIC MỚI] Thực thi trong một Interactive Transaction
+  try {
+    // Bắt đầu một giao dịch lớn
+    await prisma.$transaction(async (tx) => {
+      console.log(`DB Writer (${templateName}): Transaction started...`);
+
+      // Lặp qua từng đợt dữ liệu
+      for (const [index, chunk] of dataChunks.entries()) {
+        if (chunk.length === 0) continue;
+        
+        console.log(`   -> Processing chunk ${index + 1}/${dataChunks.length} (${chunk.length} rows)...`);
+
+        // === 6.A. Xây dựng lệnh DELETE (cho đợt này) ===
+        const conflictTargetSql = conflictTarget.map(col => `"${col}"`).join(", ");
+        let deleteParamIndex = 1;
+        deleteValues = []; // [SỬA LỖI 2] Gán lại, không khai báo 'const'
+        const deletePlaceholders = chunk.map(row => { // <--- Dùng 'chunk'
+            const rowParams = [];
+            for (const col of conflictTarget) {
+                let castType = "";
+                if (TYPE_CONFIG.DATE.has(col)) castType = "::timestamp";
+                else if (TYPE_CONFIG.JSON.has(col)) castType = "::jsonb";
+                else if (TYPE_CONFIG.DECIMAL.has(col)) castType = "::decimal";
+                
+                rowParams.push(`$${deleteParamIndex++}${castType}`);
+                
+                const val = row[col];
+                if (val instanceof Date) deleteValues.push(val.toISOString());
+                else deleteValues.push(val);
+            }
+            return `(${rowParams.join(", ")})`;
+        }).join(", ");
+
+        const deleteSql = `DELETE FROM "${tableName}" WHERE (${conflictTargetSql}) IN (${deletePlaceholders});`;
+
+        // === 6.B. Xây dựng lệnh INSERT (cho đợt này) ===
+        const columnsSql = finalColumns.map(col => `"${col}"`).join(", ");
+        const valuePlaceholders = chunk.map((_, rowIndex) => // <--- Dùng 'chunk'
+            `(${finalColumns.map((col, colIndex) => {
+                const paramIndex = rowIndex * finalColumns.length + colIndex + 1;
+                let castType = "";
+                if (TYPE_CONFIG.DATE.has(col)) castType = "::timestamp";
+                else if (TYPE_CONFIG.JSON.has(col)) castType = "::jsonb";
+                else if (TYPE_CONFIG.DECIMAL.has(col)) castType = "::decimal";
+                return `$${paramIndex}${castType}`;
+            }).join(", ")})`
+        ).join(", ");
+
+        allInsertValues = chunk.flatMap(row => finalColumns.map(col => { // [SỬA LỖI 2] Gán lại
+            const val = row[col];
+            if (val === null || val === undefined) return null;
+            if (val instanceof Date) return val.toISOString();
+            if (TYPE_CONFIG.JSON.has(col) && typeof val === 'object') return JSON.stringify(val);
+            if (TYPE_CONFIG.DECIMAL.has(col)) return String(val);
+            if (TYPE_CONFIG.INTEGER.has(col) || TYPE_CONFIG.FLOAT.has(col)) return Number(val);
+            return String(val);
+        }));
+        
+        const insertSql = `INSERT INTO "${tableName}" (${columnsSql}) VALUES ${valuePlaceholders};`;
+
+        // 7. Thực thi 2 lệnh (DELETE, INSERT) cho đợt này
+        // (Sử dụng 'tx' thay vì 'prisma')
+        const deleteCommand = tx.$executeRawUnsafe(deleteSql, ...deleteValues);
+        const insertCommand = tx.$executeRawUnsafe(insertSql, ...allInsertValues);
+
+        // Chạy song song delete và insert cho đợt này
+        const [deleteResultCount, insertResultCount] = await Promise.all([
+          deleteCommand,
+          insertCommand
+        ]);
+
+        totalInsertedCount += insertResultCount;
+        console.log(`   ... Chunk ${index + 1} done. Deleted: ${deleteResultCount}, Inserted: ${insertResultCount}`);
+      }
+      // Nếu vòng lặp 'for' hoàn thành mà không có lỗi, transaction sẽ tự động commit
+    }, 
+    {
+      timeout: 60000 // [SỬA LỖI 1] Tăng timeout lên 60 giây (mặc định là 5s)
+    });
+
+    // Giao dịch đã thành công
+    console.log(`DB Writer (${templateName}): Transaction successful.`);
+    console.log(`   - Total Rows Inserted: ${totalInsertedCount}`);
+    
+    return { success: true, count: totalInsertedCount };
+
+  } catch (e) {
+    // Nếu bất kỳ đợt nào (chunk) thất bại, toàn bộ giao dịch sẽ bị rollback
+    console.error(`DB Writer (${templateName}): Transaction FAILED and was Rolled Back:`, e.message);
+    // (Giữ nguyên các log lỗi chi tiết của bạn)
+    // [SỬA LỖI 2] Giờ đây các biến này đã truy cập được
+    console.error("   - Delete Value count (last chunk):", deleteValues?.length || "N/A");
+    console.error("   - Insert Value count (last chunk):", allInsertValues?.length || "N/A");
+    if (e.message && e.message.includes("is of type")) {
+        console.error("   - Potential type mismatch detected by DB.");
+    }
+    return { success: false, count: 0, error: e.message };
+  }
 }

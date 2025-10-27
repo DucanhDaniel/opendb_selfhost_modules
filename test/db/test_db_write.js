@@ -12,7 +12,7 @@ import prisma from '../../src/db/client.js'; // Import client để đóng kết
  */
 
 // [QUAN TRỌNG] Đảm bảo biến này khớp với templateName đã tạo ra file JSON
-const TEMPLATE_NAME_TO_TEST = 'BM & Ad Accounts';
+const TEMPLATE_NAME_TO_TEST = 'Campaign Daily Report';
 const JSON_FILE_PATH = path.join(process.cwd(), 'debug_data.json');
 
 async function runDbTest() {

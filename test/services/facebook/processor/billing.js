@@ -27,8 +27,8 @@ const sampleTaskParams = {
   endDate: '2025-10-23',
   startDate: '2025-08-23',
   accountsToProcess: [
-//     { id: 'act_948290596967304', name: 'BM MẠNH SÁO 2' },
-    { id : 'act_650248897235348', name: 'Cara Luna 2'}
+    { id: 'act_948290596967304', name: 'BM MẠNH SÁO 2' },
+    // { id : 'act_650248897235348', name: 'Cara Luna 2'}
   ],
   templateName: 'FB Billing Data',
 
