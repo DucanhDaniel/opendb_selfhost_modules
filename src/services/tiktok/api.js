@@ -17,6 +17,7 @@ const API_DELAY_MS = 1200; // Increased from 1100 for safety
  */
 export async function fetchTiktokApi(url, accessToken, jobId, context) {
   logTiktok(jobId, context, "API Call", `Fetching page: ${url.split('?')[0]}...`);
+  console.log(url)
   try {
     const response = await axios.get(url, {
       headers: { 'Access-Token': accessToken },

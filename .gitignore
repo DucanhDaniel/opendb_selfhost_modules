@@ -5,3 +5,4 @@ node_modules
 /generated/prisma
 
 debug_data.json
+debug_tiktok_data.json

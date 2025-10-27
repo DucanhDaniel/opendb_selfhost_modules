@@ -16,7 +16,6 @@ export async function processBasicReport(params, templateConfig, accessToken, jo
   logTiktok(jobId, functionName, 'Info', `Processing template: ${params.templateName}`);
   const { startDate, endDate, selectedFields, accountsToProcess } = params;
 
-  // Extract primary advertiser info
   const advertiserInfo = accountsToProcess?.[0] || {};
   const advertiserId = advertiserInfo.id;
   const advertiserName = advertiserInfo.name;
@@ -60,7 +59,7 @@ export async function processBasicReport(params, templateConfig, accessToken, jo
       end_date: chunk.end,
       dimensions: JSON.stringify(apiDimensions),
       metrics: JSON.stringify(apiMetrics),
-      page_size: 1000, // Max page size for reports
+      page_size: 1000, 
     };
 
     // Add specific parameters from template config (like data_level, report_type)
