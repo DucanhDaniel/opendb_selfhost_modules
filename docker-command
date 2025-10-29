@@ -1,0 +1,16 @@
+Chạy lệnh dưới để khởi tạo database:
+docker run -d --name opendb-postgres -p 5433:5432 -e POSTGRES_DB=opendb -e POSTGRES_PASSWORD=opendb_123 postgres
+
+Sử dụng pgAdmin4 để monitor database này bằng cách:
+Mở pgAdmin.
+Click chuột phải vào Servers -> Register -> Server...
+Trong cửa sổ mới hiện ra:
+  Tab General:
+    Name: Đặt một tên bất kỳ (ví dụ: Docker Postgres 5433)
+  Tab Connection:
+    Host name/address: localhost
+    Port: 5433 (Đây là cổng bạn đã map -p 5433:5432)
+    Maintenance database: opendb (Database bạn đã tạo -e POSTGRES_DB=opendb)
+    Username: postgres (Đây là user mặc định)
+    Password: mysecretpassword (Mật khẩu bạn đã đặt ở -e POSTGRES_PASSWORD)
+Nhấn Save.
