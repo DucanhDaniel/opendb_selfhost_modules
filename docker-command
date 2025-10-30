@@ -1,5 +1,5 @@
 Chạy lệnh dưới để khởi tạo database:
-docker run -d --name opendb-postgres -p 5433:5432 -e POSTGRES_DB=opendb -e POSTGRES_PASSWORD=opendb_123 postgres
+docker run -d --name opendb-postgres -p 5433:5432 -e POSTGRES_DB=opendb -e POSTGRES_PASSWORD=opendb_123 -v opendb-data:/var/lib/postgresql/data postgres
 
 Sử dụng pgAdmin4 để monitor database này bằng cách:
 Mở pgAdmin.
