@@ -12,5 +12,5 @@ Trong cửa sổ mới hiện ra:
     Port: 5433 (Đây là cổng bạn đã map -p 5433:5432)
     Maintenance database: opendb (Database bạn đã tạo -e POSTGRES_DB=opendb)
     Username: postgres (Đây là user mặc định)
-    Password: mysecretpassword (Mật khẩu bạn đã đặt ở -e POSTGRES_PASSWORD)
+    Password: opendb_123 (Mật khẩu bạn đã đặt ở -e POSTGRES_PASSWORD)
 Nhấn Save.

@@ -27,30 +27,30 @@ router.post(
   handleCreateUser
 );
 
-// GET /api/v1/users/:userId/settings
+// GET /api/v1/users/settings
 router.get(
-  '/:userId/settings',
+  '/settings',
   validate(userParamSchema),
   handleGetAllSettings
 );
 
-// PATCH /api/v1/users/:userId/settings
+// PATCH /api/v1/users/settings
 router.patch(
-  '/:userId/settings',
+  '/settings',
   validate(updateSettingsSchema),
   handleUpdateSettings
 );
 
-// GET /api/v1/users/:userId/settings/:key
+// GET /api/v1/users/settings/:key
 router.get(
-  '/:userId/settings/:key',
+  '/settings/:key',
   validate(singleKeySchema),
   handleGetSingleSetting
 );
 
-// POST /api/v1/users/:userId/settings/:key
+// POST /api/v1/users/settings/:key
 router.post(
-  '/:userId/settings/:key',
+  '/settings/:key',
   validate(singleKeySchema),
   handleSetSingleSetting
 );

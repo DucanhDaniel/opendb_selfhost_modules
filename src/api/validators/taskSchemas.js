@@ -43,3 +43,13 @@ export const dataSchema = z.object({
     options: z.record(z.any()).optional(),
   }),
 }).loose();
+
+// Schema cho body của /tasks/initiate
+export const initiateTaskSchema = z.object({
+  body: z.object({
+    taskType: z.string().min(1, 'taskType là bắt buộc'),
+    params: z.object({}).loose(), 
+    description: z.string().min(1, 'description là bắt buộc'),
+    runType: z.string().optional().default('MANUAL'),
+  }),
+}).loose();

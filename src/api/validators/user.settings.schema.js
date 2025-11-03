@@ -3,14 +3,12 @@ import { z } from 'zod';
 // Schema cho các request chỉ cần userId
 export const userParamSchema = z.object({
   params: z.object({
-    userId: z.string(), 
   }),
 }).loose();
 
 // Schema cho request lấy/set 1 key
 export const singleKeySchema = z.object({
   params: z.object({
-    userId: z.string().cuid('UserID không hợp lệ'),
     key: z.string().min(1, 'Key không được rỗng'),
   }),
   body: z.object({
@@ -21,7 +19,6 @@ export const singleKeySchema = z.object({
 // Schema cho request update (merge) nhiều key
 export const updateSettingsSchema = z.object({
   params: z.object({
-    userId: z.string().cuid('UserID không hợp lệ'),
   }),
   body: z.record(z.any())
 }).loose();

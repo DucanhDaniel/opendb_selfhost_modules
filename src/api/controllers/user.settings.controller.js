@@ -6,7 +6,9 @@ import logger from '../../utils/logger.js';
  */
 export const handleGetAllSettings = async (req, res, next) => {
   try {
-    const { userId } = req.params;
+    const { userId } = req.user;
+
+
     const settings = await userPropertiesService.getAllUserSettings(userId);
     res.status(200).json({ success: true, data: settings });
   } catch (error) {
@@ -20,7 +22,7 @@ export const handleGetAllSettings = async (req, res, next) => {
  */
 export const handleUpdateSettings = async (req, res, next) => {
   try {
-    const { userId } = req.params;
+    const { userId } = req.user;
     const newSettings = req.body; // { "theme": "dark", "last_project": "abc" }
     
     const updatedSettings = await userPropertiesService.updateUserSettings(userId, newSettings);
@@ -36,7 +38,9 @@ export const handleUpdateSettings = async (req, res, next) => {
  */
 export const handleGetSingleSetting = async (req, res, next) => {
   try {
-    const { userId, key } = req.params;
+    const { key } = req.params;
+    const { userId } = req.user;
+
     const value = await userPropertiesService.getUserSetting(userId, key);
     res.status(200).json({ success: true, key: key, value: value });
   } catch (error) {
@@ -50,7 +54,9 @@ export const handleGetSingleSetting = async (req, res, next) => {
  */
 export const handleSetSingleSetting = async (req, res, next) => {
   try {
-    const { userId, key } = req.params;
+    const { key } = req.params;
+    const { userId } = req.user;
+
     const { value } = req.body; 
     
     const updatedSettings = await userPropertiesService.setUserSetting(userId, key, value);

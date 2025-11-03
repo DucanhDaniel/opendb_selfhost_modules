@@ -1,5 +1,6 @@
 import express from 'express';
 import apiRoutes from './routes.js';
+import cookieParser from 'cookie-parser';
 import { errorHandler } from './middleware/errorHandler.js';
 import logger from '../utils/logger.js';
 
@@ -7,8 +8,10 @@ export function createApiServer(port) {
   const app = express();
 
   // Middlewares
-  app.use(express.json({ limit: '50mb' })); // Tăng giới hạn payload
+  app.use(express.json({ limit: '50mb' })); 
   app.use(express.urlencoded({ extended: true, limit: '50mb' }));
+
+  app.use(cookieParser());
 
   // Routes
   app.use('/api/v1', apiRoutes); // Thêm prefix /api/v1
