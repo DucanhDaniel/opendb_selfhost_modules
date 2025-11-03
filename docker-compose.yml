@@ -1,0 +1,16 @@
+version: '3.8'
+
+services:
+  redis:
+    container_name: opendb_redis
+    image: redis:7-alpine  # Dùng image Redis 7 bản gọn nhẹ
+    ports:
+      # Ánh xạ cổng 6379 ra ngoài để bạn có thể monitor (tùy chọn)
+      - "6379:6379"
+    volumes:
+      # Giữ lại dữ liệu Redis ngay cả khi container bị xóa (tùy chọn)
+      - redis_data:/data
+
+# [MỚI] Định nghĩa volume
+volumes:
+  redis_data:

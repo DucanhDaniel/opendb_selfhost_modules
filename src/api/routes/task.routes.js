@@ -8,7 +8,7 @@ import { handleSubmitData } from '../controllers/gmv_data_controller.js';
 import { 
   handleGetTaskHistory, 
   handleDeleteTaskHistory,
-  handleInitiateTask
+  handleInitiateTask, handleExecuteTask
 } from '../controllers/task.controller.js';
 
 const router = Router();
@@ -36,6 +36,11 @@ router.post(
   '/initiate',
   validate(initiateTaskSchema),
   handleInitiateTask
+);
+
+router.post(
+  '/execute', 
+  handleExecuteTask
 );
 
 export default router;

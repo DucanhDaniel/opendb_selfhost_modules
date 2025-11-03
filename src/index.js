@@ -1,7 +1,7 @@
 import 'dotenv/config'; // Đảm bảo config được load đầu tiên
 import logger from './utils/logger.js';
 import { createApiServer } from './api/server.js';
-// import { startWorker } from './core/jobQueue.js'; // (Tên hàm có thể khác)
+import { initializeWorker } from './core/jobQueue.js';
 
 const API_PORT = process.env.PORT || 3000;
 
@@ -11,10 +11,11 @@ async function main() {
   // 1. Khởi động API Server
   createApiServer(API_PORT);
 
+
+
   // 2. Khởi động Worker (BullMQ processor)
   // Đảm bảo bạn gọi hàm khởi động worker của mình ở đây
-  // Ví dụ:
-  // startWorker(); 
+  initializeWorker();
   logger.info('Worker (task processor) đang chạy...');
   
   // (Bạn có thể cần import và chạy logic từ /core/taskProcessor.js ở đây)

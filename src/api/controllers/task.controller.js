@@ -58,3 +58,25 @@ export const handleInitiateTask = async (req, res, next) => {
     next(error);
   }
 };
+
+export const handleExecuteTask = async (req, res, next) => {
+  try {
+    // 1. Lấy userId từ token (do authMiddleware thêm vào)
+    const { userId } = req.user;
+    
+    // 2. Không cần lấy taskId từ params nữa
+    const startedTask = await taskService.executeTask(userId); // <-- Chỉ cần userId
+
+    // 202 Accepted: Yêu cầu đã được chấp nhận và đang được xử lý nền.
+    res.status(202).json({ 
+      success: true, 
+      message: "Task đã được chấp nhận và đang xử lý.",
+      task: startedTask 
+    });
+
+  } catch (error) {
+    logger.error(`Lỗi khi thực thi current task:`, error);
+    // 400 Bad Request: Lỗi do người dùng (ví dụ: gọi execute khi không có task)
+    res.status(400).json({ success: false, message: error.message });
+  }
+};

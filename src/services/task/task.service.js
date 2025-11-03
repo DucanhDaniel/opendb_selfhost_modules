@@ -2,6 +2,8 @@ import prisma from '../../db/client.js';
 import logger from '../../utils/logger.js';
 import { randomUUID } from 'crypto';
 
+import { taskQueue } from '../../core/jobQueue.js';
+
 // Tên key mà chúng ta sẽ dùng để lưu lịch sử trong cột 'settings' (JSONB)
 const CURRENT_TASK_PROPERTY = "TASK_MANAGER_CURRENT_TASK";
 const TASK_HISTORY_PROPERTY = "TASK_MANAGER_HISTORY";
@@ -135,9 +137,74 @@ async function initiateTask(userId, taskData) {
   return newTask;
 }
 
+async function executeTask(userId) {
+  // 1. Lấy settings hiện tại
+  const user = await prisma.user.findUnique({
+    where: { id: userId },
+    select: { settings: true }
+  });
+  const currentSettings = user?.settings || {};
+
+  // 2. Load task từ key cố định
+  const task = currentSettings[CURRENT_TASK_PROPERTY];
+
+  // 3. Validate task
+  if (!task) {
+    throw new Error("Không có task nào đang chờ (CURRENT_TASK is null).");
+  }
+  
+  // Lấy taskId từ chính task object
+  const taskId = task.taskId; 
+
+  if (task.status !== "QUEUED") {
+     throw new Error(`Task ${taskId} đã ở trạng thái ${task.status}, không thể thực thi.`);
+  }
+
+let accessToken;
+  if (task.taskType.startsWith("F")) {
+    accessToken = currentSettings["FACEBOOK_ACCESS_TOKEN"]; // Ví dụ
+  } else if (task.taskType.startsWith("T")) {
+    accessToken = currentSettings["TIKTOK_ACCESS_TOKEN"]; // Ví dụ
+  }
+  
+  if (!accessToken) {
+    throw new Error(`Không tìm thấy Access Token cho ${task.taskType}`);
+  }
+
+  // 5. Cập nhật trạng thái task (vẫn giống như cũ)
+  task.status = "RUNNING";
+  task.progress.message = "Đã gửi đến hàng đợi xử lý...";
+  
+  const updatedSettings = { ...currentSettings, [CURRENT_TASK_PROPERTY]: task };
+  
+  await prisma.user.update({
+    where: { id: userId },
+    data: { settings: updatedSettings }
+  });
+
+  // 6. [QUAN TRỌNG] Thêm task vào hàng đợi (BullMQ)
+  // 'process-job' là tên của job, worker sẽ lắng nghe tên này
+  try {
+    await taskQueue.add('process-job', {
+      task: task, // Toàn bộ object task
+      userId: userId, // ID của user để worker cập nhật lại settings
+      accessToken: accessToken // Token để worker sử dụng
+    });
+    
+    logger.info(`Đã thêm task ${task.taskId} vào hàng đợi.`);
+    return task; // Trả về task (đã cập nhật status)
+
+  } catch (queueError) {
+     logger.error(`Lỗi khi thêm task vào hàng đợi: ${queueError.message}`);
+     // (Bạn có thể implement logic để rollback status task về 'QUEUED' ở đây)
+     throw new Error("Lỗi hệ thống khi xếp hàng tác vụ.");
+  }
+}
+
 // Export service
 export const taskService = {
   getTaskHistory,
   deleteTaskHistory,
-  initiateTask
+  initiateTask,
+  executeTask
 };
