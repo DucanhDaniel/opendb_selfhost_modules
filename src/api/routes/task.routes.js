@@ -1,13 +1,14 @@
 import { Router } from 'express';
 import { validate } from '../middleware/validate.js';
-import { logSchema, dataSchema } from '../validators/taskSchemas.js';
+import { logSchema, dataSchema, initiateTaskSchema } from '../validators/taskSchemas.js';
 import { handleLogProgress } from '../controllers/log_controller.js'; 
 import { handleSubmitData } from '../controllers/gmv_data_controller.js';
 
 // [MỚI] Import controllers
 import { 
   handleGetTaskHistory, 
-  handleDeleteTaskHistory 
+  handleDeleteTaskHistory,
+  handleInitiateTask
 } from '../controllers/task.controller.js';
 
 const router = Router();
@@ -17,18 +18,24 @@ const router = Router();
 // router.post('/data/submit', validate(dataSchema), handleSubmitData);
 
 // --- [MỚI] API Lịch sử Task ---
-// (Các API này đã được bảo vệ bởi authMiddleware trong file routes.js chính)
 
-// GET /api/v1/tasks/history
+// GET /api/v1/task/history
 router.get(
   '/history',
   handleGetTaskHistory
 );
 
-// DELETE /api/v1/tasks/history
+// DELETE /api/v1/task/history
 router.delete(
   '/history',
   handleDeleteTaskHistory
+);
+
+// POST /api/v1/task/initiate
+router.post(
+  '/initiate',
+  validate(initiateTaskSchema),
+  handleInitiateTask
 );
 
 export default router;

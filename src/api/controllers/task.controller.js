@@ -39,3 +39,22 @@ export const handleDeleteTaskHistory = async (req, res, next) => {
     next(error);
   }
 };
+
+export const handleInitiateTask = async (req, res, next) => {
+  try {
+    // Lấy userId từ token (do authMiddleware thêm vào)
+    const { userId } = req.user; 
+    
+    // Lấy data từ body (đã được validatorxác thực)
+    const taskData = req.body; 
+
+    const newTask = await taskService.initiateTask(userId, taskData);
+
+    // 201 Created là status code phù hợp cho việc tạo mới
+    res.status(201).json(newTask); 
+
+  } catch (error) {
+    logger.error('Lỗi khi khởi tạo task:', error);
+    next(error);
+  }
+};
