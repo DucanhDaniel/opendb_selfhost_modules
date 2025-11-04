@@ -1,23 +1,20 @@
 import { Router } from 'express';
 import { validate } from '../middleware/validate.js';
-import { logSchema, dataSchema, initiateTaskSchema } from '../validators/taskSchemas.js';
+import { logSchema, dataSchema, initiateTaskSchema, getTaskParamsSchema } from '../validators/taskSchemas.js';
 import { handleLogProgress } from '../controllers/log_controller.js'; 
 import { handleSubmitData } from '../controllers/gmv_data_controller.js';
 
-// [MỚI] Import controllers
 import { 
   handleGetTaskHistory, 
   handleDeleteTaskHistory,
-  handleInitiateTask, handleExecuteTask
+  handleInitiateTask, handleExecuteTask,
+  handleGetTaskParams, handleGetTaskStatusByQuery
 } from '../controllers/task.controller.js';
 
 const router = Router();
 
-// --- Các route cũ ---
-// router.post('/log/progress', validate(logSchema), handleLogProgress);
-// router.post('/data/submit', validate(dataSchema), handleSubmitData);
 
-// --- [MỚI] API Lịch sử Task ---
+
 
 // GET /api/v1/task/history
 router.get(
@@ -38,9 +35,23 @@ router.post(
   handleInitiateTask
 );
 
+// POST /api/v1/task/execute
 router.post(
   '/execute', 
   handleExecuteTask
 );
 
+// GET /api/v1/task/get/task-param?taskId=...
+router.get(
+  '/get/task-param',
+  validate(getTaskParamsSchema),
+  handleGetTaskParams
+);
+
+// GET /api/v1/tasks/get/status?taskId=...
+router.get(
+  '/get/status',
+  validate(getTaskParamsSchema), 
+  handleGetTaskStatusByQuery
+);
 export default router;

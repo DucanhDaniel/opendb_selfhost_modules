@@ -1,6 +1,5 @@
 import  logger  from '../../utils/logger.js';
 
-// Middleware này sẽ nhận 1 schema và kiểm tra req
 export const validate = (schema) => async (req, res, next) => {
   try {
     await schema.parseAsync({
@@ -18,3 +17,4 @@ export const validate = (schema) => async (req, res, next) => {
     });
   }
 };
+

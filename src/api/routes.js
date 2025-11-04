@@ -1,8 +1,9 @@
 import { Router } from 'express';
 import userRoutes from './routes/user.routes.js';
 import taskRoutes from './routes/task.routes.js';
-import authRoutes from './routes/auth.routes.js'; // <-- 1. Import
-import { authMiddleware } from './middleware/auth.middleware.js'; // <-- 2. Import
+import authRoutes from './routes/auth.routes.js'; 
+import dataRoutes from './routes/data.routes.js';
+import { authMiddleware } from './middleware/auth.middleware.js'; 
 
 const router = Router();
 
@@ -15,4 +16,5 @@ router.use('/auth', authRoutes);
 router.use('/users', authMiddleware, userRoutes);
 router.use('/task', authMiddleware, taskRoutes);
 
+router.use('/data', authMiddleware, dataRoutes);
 export default router;

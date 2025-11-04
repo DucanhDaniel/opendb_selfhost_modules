@@ -1,8 +1,7 @@
-// src/api/validators/taskSchemas.js
 import { z } from 'zod';
 
 /**
- * Validator cho body của request log
+ * Validator cho body của request log -> chưa dùng, chuẩn bị cho gmv
  */
 export const logSchema = z.object({
   body: z.object({
@@ -22,10 +21,7 @@ export const logSchema = z.object({
   }),
 }).loose(); 
 
-
-/**
- * Validator cho body của request data
- */
+// Chưa dùng schema này, sẽ dùng cho callback gmv
 export const dataSchema = z.object({
   body: z.object({
     // Dùng task_id để liên kết dữ liệu
@@ -51,5 +47,11 @@ export const initiateTaskSchema = z.object({
     params: z.object({}).loose(), 
     description: z.string().min(1, 'description là bắt buộc'),
     runType: z.string().optional().default('MANUAL'),
+  }),
+}).loose();
+
+export const getTaskParamsSchema = z.object({
+  query: z.object({
+    taskId: z.string().min(1, 'Query parameter "taskId" là bắt buộc'),
   }),
 }).loose();

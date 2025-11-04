@@ -80,3 +80,44 @@ export const handleExecuteTask = async (req, res, next) => {
     res.status(400).json({ success: false, message: error.message });
   }
 };
+
+export const handleGetTaskParams = async (req, res, next) => {
+  try {
+    const { userId } = req.user;
+    const { taskId } = req.query;
+
+    const params = await taskService.getTaskParams(userId, taskId);
+
+    // Trả về object params
+    res.status(200).json(params);
+
+  } catch (error) {
+    logger.error(`Lỗi khi lấy task params cho ${req.query.taskId}:`, error);
+    // Xử lý lỗi "Không tìm thấy"
+    if (error.message.includes("Không tìm thấy")) {
+      return res.status(404).json({ success: false, message: error.message });
+    }
+    next(error);
+  }
+};
+
+export const handleGetTaskStatusByQuery = async (req, res, next) => {
+  try {
+    // Lấy userId từ token
+    const { userId } = req.user;
+    // Lấy taskId từ query thay vì params
+    const { taskId } = req.query; 
+
+    const taskStatus = await taskService.getTaskStatus(userId, taskId);
+
+    res.status(200).json(taskStatus);
+
+  } catch (error) {
+    logger.error(`Lỗi khi lấy status task ${req.query.taskId}:`, error);
+    // Xử lý lỗi "Không tìm thấy"
+    if (error.message.includes("Không tìm thấy")) {
+      return res.status(404).json({ success: false, message: error.message });
+    }
+    next(error);
+  }
+};

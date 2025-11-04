@@ -4,7 +4,6 @@ import { randomUUID } from 'crypto';
 
 import { taskQueue } from '../../core/jobQueue.js';
 
-// Tên key mà chúng ta sẽ dùng để lưu lịch sử trong cột 'settings' (JSONB)
 const CURRENT_TASK_PROPERTY = "TASK_MANAGER_CURRENT_TASK";
 const TASK_HISTORY_PROPERTY = "TASK_MANAGER_HISTORY";
 const TASK_PARAMS_PREFIX = "TASK_PARAMS_";
@@ -15,7 +14,6 @@ const MAX_HISTORY_ENTRIES = 20;
  * @param {string} userId - ID của user (từ token)
  */
 async function getTaskHistory(userId) {
-  // Lấy chỉ cột 'settings'
   const user = await prisma.user.findUnique({
     where: { id: userId },
     select: { settings: true }
@@ -65,7 +63,7 @@ async function initiateTask(userId, taskData) {
   const { taskType, params, description, runType } = taskData;
   
   // 1. Tạo Task ID và đối tượng Task mới
-  const taskId = randomUUID(); // Thay thế Utilities.getUuid()
+  const taskId = randomUUID(); 
   const createdAt = new Date().toISOString();
 
   const newTask = {
@@ -87,21 +85,18 @@ async function initiateTask(userId, taskData) {
     nextChunkIndex: 0,
   };
 
-  // 2. Lấy settings hiện tại (chúng ta cần cập nhật nhiều key)
   const user = await prisma.user.findUnique({
     where: { id: userId },
     select: { settings: true }
   });
   const currentSettings = user?.settings || {};
 
-  // 3. Logic của _saveTaskParams (GAS)
   const taskParamsToSave = {
     createdAt: createdAt,
     taskType: taskType,
     ...params,
   };
 
-  // 4. Logic của _logTaskHistory (GAS)
   const newHistoryEntry = {
     taskId: taskId,
     timestamp: createdAt,
@@ -120,9 +115,9 @@ async function initiateTask(userId, taskData) {
   // 5. Cập nhật đối tượng settings
   const updatedSettings = {
     ...currentSettings,
-    [CURRENT_TASK_PROPERTY]: newTask, // Logic của _saveCurrentTask
-    [TASK_HISTORY_PROPERTY]: currentHistory, // Logic của _logTaskHistory
-    [TASK_PARAMS_PREFIX + taskId]: taskParamsToSave // Logic của _saveTaskParams
+    [CURRENT_TASK_PROPERTY]: newTask, 
+    [TASK_HISTORY_PROPERTY]: currentHistory, 
+    [TASK_PARAMS_PREFIX + taskId]: taskParamsToSave 
   };
 
   // 6. Lưu lại vào DB
@@ -161,10 +156,10 @@ async function executeTask(userId) {
   }
 
 let accessToken;
-  if (task.taskType.startsWith("F")) {
-    accessToken = currentSettings["FACEBOOK_ACCESS_TOKEN"]; // Ví dụ
-  } else if (task.taskType.startsWith("T")) {
-    accessToken = currentSettings["TIKTOK_ACCESS_TOKEN"]; // Ví dụ
+  if (task.taskType.startsWith("FACEBOOK")) {
+    accessToken = currentSettings["FACEBOOK_ACCESS_TOKEN"]; 
+  } else if (task.taskType.startsWith("TIKTOK")) {
+    accessToken = currentSettings["TIKTOK_ACCESS_TOKEN"]; 
   }
   
   if (!accessToken) {
@@ -201,10 +196,65 @@ let accessToken;
   }
 }
 
+async function getTaskParams(userId, taskId) {
+  // 1. Lấy settings
+  const user = await prisma.user.findUnique({
+    where: { id: userId },
+    select: { settings: true }
+  });
+  const settings = user?.settings || {};
+
+  // 2. Xây dựng key và lấy dữ liệu
+  const key = TASK_PARAMS_PREFIX + taskId;
+  const paramsData = settings[key];
+
+  // 3. Xử lý
+  if (!paramsData) {
+    // Ném lỗi 404 để controller bắt
+    throw new Error(`Không tìm thấy cấu hình cho Task ID: ${taskId}`);
+  }
+  
+  // Dữ liệu đã là JSON, chỉ cần trả về
+  return paramsData;
+}
+
+async function getTaskStatus(userId, taskId) {
+  const user = await prisma.user.findUnique({
+    where: { id: userId },
+    select: { settings: true }
+  });
+  const settings = user?.settings || {};
+
+  // 1. Kiểm tra task đang chạy (CURRENT_TASK)
+  const currentTask = settings[CURRENT_TASK_PROPERTY];
+  if (currentTask && currentTask.taskId === taskId) {
+    // Trả về task đang chạy (với progress, message, v.v.)
+    return currentTask; 
+  }
+
+  // 2. Nếu không, kiểm tra trong lịch sử (HISTORY)
+  const history = settings[TASK_HISTORY_PROPERTY] || [];
+  const historyEntry = history.find(h => h.taskId === taskId);
+  
+  if (historyEntry) {
+    // Trả về một object "giả-task" từ lịch sử
+    return {
+      taskId: taskId,
+      status: historyEntry.status,
+      progress: { message: historyEntry.message },
+    };
+  }
+
+  // 3. Nếu không tìm thấy ở đâu cả
+  throw new Error("Không tìm thấy Task ID.");
+}
+
 // Export service
 export const taskService = {
   getTaskHistory,
   deleteTaskHistory,
   initiateTask,
-  executeTask
+  executeTask,
+  getTaskParams,
+  getTaskStatus
 };

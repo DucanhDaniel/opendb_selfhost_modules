@@ -1,0 +1,14 @@
+# Bỏ qua thư mục node_modules (quan trọng nhất)
+node_modules
+
+# Bỏ qua các file log và debug
+npm-debug.log
+*.log
+
+# Bỏ qua các file .env (sẽ được đưa vào qua 'env_file' trong docker-compose)
+.env
+.env.*
+
+# Bỏ qua các file hệ thống
+.DS_Store
+.git
