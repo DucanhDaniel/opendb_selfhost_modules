@@ -90,62 +90,74 @@ const TEMPLATE_MAP = {
   "Campaign Overview Report": {
     tableName: "FAD_CampaignOverviewReport",
     conflictTarget: ["account_id", "date_start", "date_stop", "id"], // Columns to delete old rows, ensure data is not duplicated
-    filter_spend: true // Specify if this template need to be filtered when spend is null
+    filter_spend: true, // Specify if this template need to be filtered when spend is null
+    insightDateKey: ["date_start", "date_stop"]
   },
    "Campaign Performance by Age": {
      tableName: "FAD_CampaignPerformanceByAge",
      conflictTarget: ["account_id", "date_start", "date_stop", "campaign_name", "age"],
-      filter_spend: true
+      filter_spend: true,
+      insightDateKey: ["date_start", "date_stop"]
    },
    "Campaign Performance by Gender": {
      tableName: "FAD_CampaignPerformanceByGender",
      conflictTarget: ["account_id", "date_start", "date_stop", "campaign_name", "gender"],
-      filter_spend: true
+      filter_spend: true,
+      insightDateKey: ["date_start", "date_stop"]
    },
    "Campaign Performance by Platform": {
      tableName: "FAD_CampaignPerformanceByPlatform",
      conflictTarget: ["account_id", "date_start", "date_stop", "campaign_name", "publisher_platform", "platform_position"],
-      filter_spend: true
+      filter_spend: true,
+      insightDateKey: ["date_start", "date_stop"]
    },
     "Campaign Performance by Region": {
       tableName: "FAD_CampaignPerformanceByRegion",
       conflictTarget: ["account_id", "date_start", "date_stop", "campaign_name", "region"],
-      filter_spend: true
+      filter_spend: true,
+      insightDateKey: ["date_start", "date_stop"]
   },
   "Ad Set Performance Report": {
       tableName: "FAD_AdSetPerformanceReport",
       conflictTarget: ["account_id", "date_start", "date_stop", "campaign_id", "id"],
-      filter_spend: true
+      filter_spend: true,
+      insightDateKey: ["date_start", "date_stop"]
   },
  "Ad Performance Report": {
      tableName: "FAD_AdPerformanceReport",
      conflictTarget: ["account_id", "date_start", "date_stop", "campaign_id", "adset_id", "id"], 
-      filter_spend: true
+      filter_spend: true,
+      insightDateKey: ["date_start", "date_stop"]
  },
  "Account Daily Report": {
      tableName: "FAD_AccountDailyReport",
      conflictTarget: ["account_id", "date_start", "date_stop"],
-      filter_spend: true
+      filter_spend: true,
+      insightDateKey: ["date_start", "date_stop"]
  },
  "Campaign Daily Report": {
      tableName: "FAD_CampaignDailyReport",
      conflictTarget: ["account_id", "date_start", "date_stop", "campaign_id"],
-      filter_spend: true
+      filter_spend: true,
+      insightDateKey: ["date_start", "date_stop"]
  },
  "Ad Set Daily Report": {
      tableName: "FAD_AdSetDailyReport",
      conflictTarget: ["account_id", "date_start", "date_stop", "campaign_id", "id"],
-      filter_spend: true
+      filter_spend: true,
+      insightDateKey: ["date_start", "date_stop"]
  },
  "Ad Daily Report": {
      tableName: "FAD_AdDailyReport",
      conflictTarget: ["account_id", "date_start", "date_stop", "campaign_id", "adset_id", "id"],
-      filter_spend: true
+      filter_spend: true,
+      insightDateKey: ["date_start", "date_stop"]
  },
  "Ad Creative Report": {
     tableName: "FAD_AdCreativeReport",
     conflictTarget: ["account_id", "date_start", "date_stop", "campaign_id", "adset_id", "id"],
-      filter_spend: true
+      filter_spend: true,
+      insightDateKey: ["date_start", "date_stop"]
  },
  "BM & Ad Accounts": {
      tableName: "FAD_BmAndAdAccounts",
@@ -160,57 +172,68 @@ const TEMPLATE_MAP = {
   // TTA
   "Campaign Performance": {
     tableName: "TTA_CampaignPerformance",
-    conflictTarget: ["advertiser_id", "campaign_id", "objective_type", "start_date", "end_date"] 
+    conflictTarget: ["advertiser_id", "campaign_id", "objective_type", "start_date", "end_date"],
+    insightDateKey: ["start_date", "end_date"] 
   }, 
 
   "AdGroup Performance": {
     tableName: "TTA_AdGroupPerformance",
-    conflictTarget: ["advertiser_id", "campaign_id", "adgroup_id", "start_date", "end_date"]
+    conflictTarget: ["advertiser_id", "campaign_id", "adgroup_id", "start_date", "end_date"],
+    insightDateKey: ["start_date", "end_date"] 
   },
 
   "Ad Performance": {
     tableName: "TTA_AdPerformance",
-    conflictTarget: ["advertiser_id", "campaign_name", "adgroup_name", "ad_id", "start_date", "end_date"]
+    conflictTarget: ["advertiser_id", "campaign_name", "adgroup_name", "ad_id", "start_date", "end_date"],
+    insightDateKey: ["start_date", "end_date"] 
   },
 
   "Creative Performance (Video/Image)": {
     tableName: "TTA_CreativePerformance",
-    conflictTarget: ["advertiser_id", "campaign_id", "adgroup_id", "ad_id", "start_date", "end_date"]
+    conflictTarget: ["advertiser_id", "campaign_id", "adgroup_id", "ad_id", "start_date", "end_date"],
+    insightDateKey: ["start_date", "end_date"] 
   },
 
   "Audience Report: Region by Campaign": {
     tableName: "TTA_AudienceRegionReport",
-    conflictTarget: ["advertiser_id", "start_date", "end_date", "campaign_id", "province_id"]
+    conflictTarget: ["advertiser_id", "start_date", "end_date", "campaign_id", "province_id"],
+    insightDateKey: ["start_date", "end_date"] 
   },
 
   "Audience Report: Country by Campaign": {
     tableName: "TTA_AudienceCountryReport",
-    conflictTarget: ["stat_time_day", "advertiser_id", "campaign_id", "start_date", "end_date", "country_code"]
+    conflictTarget: ["stat_time_day", "advertiser_id", "campaign_id", "start_date", "end_date", "country_code"],
+    insightDateKey: ["start_date", "end_date"] 
   },
 
   "Audience Report: Age by Campaign": {
     tableName: "TTA_AudienceAgeReport",
-    conflictTarget: ["stat_time_day", "advertiser_id", "campaign_id", "start_date", "end_date", "age"]
+    conflictTarget: ["stat_time_day", "advertiser_id", "campaign_id", "start_date", "end_date", "age"],
+    insightDateKey: ["start_date", "end_date"] 
   },
 
   "Audience Report: Gender by Campaign": {
     tableName: "TTA_AudienceGenderReport",
-    conflictTarget: ["stat_time_day", "advertiser_id", "campaign_id", "start_date", "end_date", "gender"]
+    conflictTarget: ["stat_time_day", "advertiser_id", "campaign_id", "start_date", "end_date", "gender"],
+    insightDateKey: ["start_date", "end_date"] 
   },
 
   "Audience Report: Age & Gender by Campaign": {
     tableName: "TTA_AudienceAgeGenderReport",
-    conflictTarget: ["stat_time_day", "campaign_id", "gender", "age", "start_date", "end_date", "advertiser_id"]
+    conflictTarget: ["stat_time_day", "campaign_id", "gender", "age", "start_date", "end_date", "advertiser_id"],
+    insightDateKey: ["start_date", "end_date"] 
   },
 
   "Placement Report by Campaign": {
     tableName: "TTA_PlacementReport",
-    conflictTarget: ["advertiser_id", "campaign_id", "start_date", "end_date", "placement"]
+    conflictTarget: ["advertiser_id", "campaign_id", "start_date", "end_date", "placement"],
+    insightDateKey: ["start_date", "end_date"] 
   },
 
   "Platform Report by Campaign": {
     tableName: "TTA_PlatformReport",
-    conflictTarget: ["advertiser_id", "campaign_id", "start_date", "end_date", "platform"]
+    conflictTarget: ["advertiser_id", "campaign_id", "start_date", "end_date", "platform"],
+    insightDateKey: ["start_date", "end_date"] 
   }
 };
 

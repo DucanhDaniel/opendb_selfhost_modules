@@ -1,0 +1,37 @@
+version: '3.8'
+
+services:
+  opendb_all_modules_api:
+    container_name: opendb_all_modules_api
+    build:
+      context: . # Xây dựng từ thư mục hiện tại (nơi có Dockerfile)
+      dockerfile: Dockerfile
+    ports:
+      - "3000:3000" # Ánh xạ cổng 3000 của container ra máy thật
+    env_file:
+      - ./.env # Tải file .env của bạn
+    depends_on:
+      - redis     # Đảm bảo redis khởi động trước
+      - postgres  # Đảm bảo postgres khởi động trước
+  redis:
+    container_name: opendb_redis
+    image: redis:7-alpine 
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis_data:/data
+
+  postgres:
+    container_name: opendb-postgres
+    image: postgres:16-alpine
+    ports:
+      - "5433:5432"
+    environment:
+      - POSTGRES_DB=opendb
+      - POSTGRES_PASSWORD=opendb_123
+    volumes:
+      - opendb-data:/var/lib/postgresql/data
+
+volumes:
+  redis_data:
+  opendb-data: 

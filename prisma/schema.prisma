@@ -1398,3 +1398,25 @@ model GMV_CreativeDetailReport {
   ad_video_view_rate_p100 Float?
 
 }
+
+model User {
+  id        String  @id @default(cuid()) // Đây là 'userid' của bạn
+  username  String  @unique // Thêm: Dùng để đăng nhập
+  email     String? @unique // Thêm: Tùy chọn nhưng vẫn là duy nhất
+  password  String  // Thêm: Lưu mật khẩu đã băm
+  
+  settings  Json?   @default("{}") // Đã có
+
+  refreshTokens RefreshToken[] // Thêm: Liên kết đến refresh tokens
+  
+  // Xóa/sửa các trường cũ nếu cần (ví dụ: 'name'?)
+}
+
+model RefreshToken {
+  id        String   @id @default(cuid())
+  hashedToken String   @unique // Lưu token đã băm
+  userId    String
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade) // Xóa token khi user bị xóa
+  expiresAt DateTime
+  createdAt DateTime @default(now())
+}

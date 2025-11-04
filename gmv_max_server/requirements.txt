@@ -1,0 +1,15 @@
+fastapi
+uvicorn[standard]
+requests
+python-json-logger
+gunicorn
+dotenv
+celery
+redis
+gevent
+gspread 
+google-auth-oauthlib
+pymongo 
+python-dotenv
+fastapi-cors
+gunicorn

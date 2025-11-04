@@ -7,7 +7,6 @@ import { processTiktokJob } from '../../../../src/services/tiktok/index.js';
 dotenv.config();
 
 // --- [BƯỚC 2] ---
-// Lấy Access Token từ biến môi trường
 const tiktokAccessToken = process.env.TIKTOK_ACCESS_TOKEN;
 if (!tiktokAccessToken) {
   console.error("Lỗi: TIKTOK_ACCESS_TOKEN không được tìm thấy trong file .env");
@@ -17,16 +16,9 @@ if (!tiktokAccessToken) {
 }
 
 // --- [BƯỚC 3] ---
-// --- CHỌN 1 TRONG CÁC VÍ DỤ SAU HOẶC TỰ ĐỊNH NGHĨA ---
-
-
-
-// --- Ví dụ 2: BCA - BC Assets Info ---
 const sampleTaskParams_BCA_Assets = {
-  // taskId: 'test-bca-assets-456',
   taskType: 'TIKTOK_BCA',
   params: {
-    // startDate, endDate không cần thiết cho BCA Assets Info
     accountsToProcess: [ // accountsToProcess ở đây là danh sách BC IDs
       { id: 'YOUR_BC_ID_1_HERE', name: 'BC Name 1' }, // Thay BC ID và tên
       // { id: 'YOUR_BC_ID_2_HERE', name: 'BC Name 2' },
@@ -42,7 +34,6 @@ const sampleTaskParams_BCA_Assets = {
         "relation_type",
         "advertiser_status", // Chỉ có giá trị nếu asset_type là ADVERTISER
         "advertiser_role",
-        // Thêm các fields khác
     ]
   }
 };

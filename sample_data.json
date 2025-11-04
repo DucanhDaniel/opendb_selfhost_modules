@@ -1,0 +1,41 @@
+{
+  "task_id": "132123123",
+  "source": "TIKTOK",
+  "report_type": "GMV Creative",
+  "data": [
+    {
+      "id": "120213588302990280",
+      "name": "A1I - VGN10 - Sắp tới là dịp đặc biệt, đau đầu vì không biết TẶNG GÌ CHO BẠN GÁI??? Các anh xem video này là có câu trả lời nha",
+      "created_time": "2024-12-04T15:16:52+0700",
+      "updated_time": "2025-10-21T10:47:58+0700",
+      "status": "PAUSED",
+      "effective_status": "PAUSED",
+      "account_id": "act_650248897235348",
+      "spend": "3450500",
+      "impressions": "127120",
+      "reach": "90029",
+      "clicks": "1577",
+      "ctr": "1.24056",
+      "cpc": "2188.015219",
+      "cpm": "27143.643801",
+      "frequency": "1.411989",
+      "date_start": "2025-10-01",
+      "date_stop": "2025-10-23",
+      "campaign_name": "Dây chuyền - Nam / Dây chuyền VGN10 - 04/12 - NEW Nam / Awareness / KOC Việt Anh chạy tiếp cận mới",
+      "campaign_id": "120213588302770280",
+      "adset_name": "Nam / 18-34 / Loại trừ đã xem + Quà tặng + Trang sức",
+      "adset_id": "120213588302860280",
+      "account_name": "Cara Luna 2",
+      "New Messaging Connections": 225,
+      "Cost per New Messaging": 15335.555556,
+      "Leads": 3,
+      "Cost Leads": 1150166.666667,
+      "Purchases": 5,
+      "Cost Purchases": 690100,
+      "Purchase Value": 4570000,
+      "Purchase ROAS": 1.324446,
+      "Website Purchases": 2,
+      "On-Facebook Purchases": 3
+    }
+  ]
+}
