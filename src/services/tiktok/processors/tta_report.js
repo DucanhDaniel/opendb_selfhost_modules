@@ -12,6 +12,7 @@ import { TIKTOK_PERCENT_METRICS } from '../constants.js';
  * @returns {Promise<object>} - { status, data, newRows, message? }.
  */
 export async function processBasicReport(params, templateConfig, accessToken, jobId) {
+  console.log(params)
   const functionName = 'processBasicReport (TTA)';
   logTiktok(jobId, functionName, 'Info', `Processing template: ${params.templateName}`);
   const { startDate, endDate, selectedFields, accountsToProcess } = params;

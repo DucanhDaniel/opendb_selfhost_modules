@@ -17,6 +17,7 @@ datasource db {
 // Campaign Overview Report
 model FAD_CampaignOverviewReport {
   pkId String @id @default(dbgenerated("gen_random_uuid()"))
+  user_id  String
   createdAt DateTime @default(now())
 
   // 1.Thông tin định danh
@@ -68,6 +69,7 @@ model FAD_CampaignOverviewReport {
 // Campaign Performance by Age
 model FAD_CampaignPerformanceByAge {
   pkId String @id @default(dbgenerated("gen_random_uuid()"))
+  user_id  String
   createdAt DateTime @default(now())
 
   // 1.Thông tin Chiến dịch
@@ -102,6 +104,7 @@ model FAD_CampaignPerformanceByAge {
 // Campaign Performance by Gender
 model FAD_CampaignPerformanceByGender {
   pkId String @id @default(dbgenerated("gen_random_uuid()"))
+  user_id  String
   createdAt DateTime @default(now())
 
   // 1.Thông tin Chiến dịch
@@ -136,6 +139,7 @@ model FAD_CampaignPerformanceByGender {
 // Campaign Performance by Platform
 model FAD_CampaignPerformanceByPlatform {
   pkId String @id @default(dbgenerated("gen_random_uuid()"))
+  user_id  String
   createdAt DateTime @default(now())
 
   // 1.Thông tin Định danh
@@ -175,6 +179,7 @@ model FAD_CampaignPerformanceByPlatform {
 // Campaign Performance by Region
 model FAD_CampaignPerformanceByRegion {
   pkId String @id @default(dbgenerated("gen_random_uuid()"))
+  user_id  String
   createdAt DateTime @default(now())
 
   // 1.Thông tin Chiến dịch
@@ -213,6 +218,7 @@ model FAD_CampaignPerformanceByRegion {
 // Ad Set Performance Report
 model FAD_AdSetPerformanceReport {
   pkId String @id @default(dbgenerated("gen_random_uuid()"))
+  user_id  String
   createdAt DateTime @default(now())
 
   // 1.Thông tin định danh
@@ -264,6 +270,7 @@ model FAD_AdSetPerformanceReport {
 // Ad Performance Report
 model FAD_AdPerformanceReport {
   pkId String @id @default(dbgenerated("gen_random_uuid()"))
+  user_id  String
   createdAt DateTime @default(now())
 
   // 1.Thông tin định danh
@@ -314,6 +321,7 @@ model FAD_AdPerformanceReport {
 // Account Daily Report
 model FAD_AccountDailyReport {
   pkId String @id @default(dbgenerated("gen_random_uuid()"))
+  user_id  String
   createdAt DateTime @default(now())
 
   // 1.Thông tin định danh
@@ -351,6 +359,7 @@ model FAD_AccountDailyReport {
 // Campaign Daily Report
 model FAD_CampaignDailyReport {
   pkId String @id @default(dbgenerated("gen_random_uuid()"))
+  user_id  String
   createdAt DateTime @default(now())
 
   // 1.Thông tin định danh
@@ -389,6 +398,7 @@ model FAD_CampaignDailyReport {
 // Ad Set Daily Report
 model FAD_AdSetDailyReport {
   pkId String @id @default(dbgenerated("gen_random_uuid()"))
+  user_id  String
   createdAt DateTime @default(now())
 
   // Thông tin định danh
@@ -438,6 +448,7 @@ model FAD_AdSetDailyReport {
 // Ad Daily Report
 model FAD_AdDailyReport {
   pkId String @id @default(dbgenerated("gen_random_uuid()"))
+  user_id  String
   createdAt DateTime @default(now())
 
   // 1.Thông tin định danh
@@ -485,6 +496,7 @@ model FAD_AdDailyReport {
 // Ad Creative Report
 model FAD_AdCreativeReport {
   pkId String @id @default(dbgenerated("gen_random_uuid()"))
+  user_id  String
   createdAt DateTime @default(now())
 
   // 1.Thông tin định danh
@@ -539,6 +551,7 @@ model FAD_AdCreativeReport {
 // BM & Ad Accounts
 model FAD_BmAndAdAccounts {
   pkId String @id @default(dbgenerated("gen_random_uuid()"))
+  user_id  String
   createdAt DateTime @default(now())
 
   // 1.Thông tin Business Manager
@@ -571,6 +584,7 @@ model FAD_BmAndAdAccounts {
 // Dựa trên các trường từ Google Sheet
 model FBT_FbBillingData {
   pkId      String   @id @default(dbgenerated("gen_random_uuid()"))
+  user_id  String
   createdAt DateTime @default(now())
 
   // === Các trường từ Sheet ===
@@ -608,6 +622,7 @@ model FBT_FbBillingData {
 // BC Tương tác & Tăng trưởng Cộng đồng
 model MPI_BcTuongTacTangTruongCongDong {
   pkId String @id @default(dbgenerated("gen_random_uuid()"))
+  user_id  String
   createdAt DateTime @default(now())
 
   // 1.Tương tác Trang
@@ -624,6 +639,7 @@ model MPI_BcTuongTacTangTruongCongDong {
 // BC Hiển thị & Tiếp cận Trang
 model MPI_BcHienThiTiepCanTrang {
   pkId String @id @default(dbgenerated("gen_random_uuid()"))
+  user_id  String
   createdAt DateTime @default(now())
 
   // 1.Hiển thị (Impressions)
@@ -638,6 +654,7 @@ model MPI_BcHienThiTiepCanTrang {
 // BC Hiệu suất Bài viết (Tổng hợp)
 model MPI_BcHieuSuatBaiVietTongHop {
   pkId String @id @default(dbgenerated("gen_random_uuid()"))
+  user_id  String
   createdAt DateTime @default(now())
 
   // 1.Hiệu suất chính
@@ -669,6 +686,7 @@ model MPI_BcHieuSuatBaiVietTongHop {
 // BC Phân tích Cảm xúc Bài viết
 model MPI_BcPhanTichCamXucBaiViet {
   pkId String @id @default(dbgenerated("gen_random_uuid()"))
+  user_id  String
   createdAt DateTime @default(now())
 
   // 1.Các loại Reactions
@@ -683,6 +701,7 @@ model MPI_BcPhanTichCamXucBaiViet {
 // BC Phân tích: Fan theo Vị trí
 model MPI_BcPhanTichFanTheoViTri {
   pkId String @id @default(dbgenerated("gen_random_uuid()"))
+  user_id  String
   createdAt DateTime @default(now())
 
   // Metric
@@ -693,6 +712,7 @@ model MPI_BcPhanTichFanTheoViTri {
 // BC Phân tích: Nguồn Lượt thích Mới
 model MPI_BcPhanTichNguonLuotThichMoi {
   pkId String @id @default(dbgenerated("gen_random_uuid()"))
+  user_id  String
   createdAt DateTime @default(now())
 
   // Metric
@@ -702,6 +722,7 @@ model MPI_BcPhanTichNguonLuotThichMoi {
 // BC Hiệu suất Video (Từng video)
 model MPI_BcHieuSuatVideoTungVideo {
   pkId String @id @default(dbgenerated("gen_random_uuid()"))
+  user_id  String
   createdAt DateTime @default(now())
 
   // 3. Tiếp cận & Lượt xem Video
@@ -721,6 +742,7 @@ model MPI_BcHieuSuatVideoTungVideo {
 // BC Hiệu suất Video (Tổng hợp)
 model MPI_BcHieuSuatVideoTongHop {
   pkId String @id @default(dbgenerated("gen_random_uuid()"))
+  user_id  String
   createdAt DateTime @default(now())
 
   // 1.Lượt xem Video
@@ -740,6 +762,7 @@ model MPI_BcHieuSuatVideoTongHop {
 // BC Tổng hợp Hiệu suất Trang (Nâng cao)
 model MPI_BcTongHopHieuSuatTrangNangCao {
   pkId String @id @default(dbgenerated("gen_random_uuid()"))
+  user_id  String
   createdAt DateTime @default(now())
 
   // 1.Thông tin cơ bản
@@ -779,6 +802,7 @@ model MPI_BcTongHopHieuSuatTrangNangCao {
 // BC Hiệu suất Bài viết (Lifetime)
 model MPI_BcHieuSuatBaiVietLifetime {
   pkId String @id @default(dbgenerated("gen_random_uuid()"))
+  user_id  String
   createdAt DateTime @default(now())
 
   // Chỉ số Hiệu suất
@@ -799,6 +823,7 @@ model MPI_BcHieuSuatBaiVietLifetime {
 /// Dữ liệu cho template "BCs Info"
 model BCA_BCInfo {
   pkId      String   @id @default(dbgenerated("gen_random_uuid()"))
+  user_id  String
   createdAt DateTime @default(now()) 
 
   // Metrics
@@ -818,6 +843,7 @@ model BCA_BCInfo {
 /// Dữ liệu cho template "BC & Accounts Info"
 model BCA_BCAccountInfo {
   pkId      String   @id @default(dbgenerated("gen_random_uuid()"))
+  user_id  String
   createdAt DateTime @default(now()) 
 
   // Metrics
@@ -844,6 +870,7 @@ model BCA_BCAccountInfo {
 /// Dữ liệu cho template "BC Assets Info"
 model BCA_BCAssetInfo {
   pkId      String   @id @default(dbgenerated("gen_random_uuid()"))
+  user_id  String
   createdAt DateTime @default(now()) 
 
   // Dimensions
@@ -871,6 +898,7 @@ model BCA_BCAssetInfo {
 /// Dữ liệu cho template "Campaign Performance" (Ví dụ của bạn)
 model TTA_CampaignPerformance {
   pkId      String   @id @default(dbgenerated("gen_random_uuid()"))
+  user_id  String
   createdAt DateTime @default(now()) 
 
   // Thông tin Định danh (Dimensions)
@@ -916,6 +944,7 @@ model TTA_CampaignPerformance {
 /// Dữ liệu cho template "AdGroup Performance"
 model TTA_AdGroupPerformance {
   pkId      String   @id @default(dbgenerated("gen_random_uuid()"))
+  user_id  String
   createdAt DateTime @default(now()) 
 
   // Dimensions
@@ -961,6 +990,7 @@ model TTA_AdGroupPerformance {
 /// Dữ liệu cho template "Ad Performance"
 model TTA_AdPerformance {
   pkId      String   @id @default(dbgenerated("gen_random_uuid()"))
+  user_id  String
   createdAt DateTime @default(now()) 
 
   // Dimensions
@@ -1008,6 +1038,7 @@ model TTA_AdPerformance {
 /// Dữ liệu cho template "Creative Performance (Video/Image)"
 model TTA_CreativePerformance {
   pkId      String   @id @default(dbgenerated("gen_random_uuid()"))
+  user_id  String
   createdAt DateTime @default(now()) 
 
   // Dimensions
@@ -1040,6 +1071,7 @@ model TTA_CreativePerformance {
 /// Dữ liệu cho template "Audience Report: Region by Campaign"
 model TTA_AudienceRegionReport {
   pkId      String   @id @default(dbgenerated("gen_random_uuid()"))
+  user_id  String
   createdAt DateTime @default(now()) 
   // Dimensions
   campaign_id     String?
@@ -1084,6 +1116,7 @@ model TTA_AudienceRegionReport {
 /// Dữ liệu cho template "Audience Report: Country by Campaign"
 model TTA_AudienceCountryReport {
   pkId      String   @id @default(dbgenerated("gen_random_uuid()"))
+  user_id  String
   createdAt DateTime @default(now()) 
 
   // Dimensions
@@ -1120,6 +1153,7 @@ model TTA_AudienceCountryReport {
 /// Dữ liệu cho template "Audience Report: Age by Campaign"
 model TTA_AudienceAgeReport {
   pkId      String   @id @default(dbgenerated("gen_random_uuid()"))
+  user_id  String
   createdAt DateTime @default(now()) 
 
   // Dimensions
@@ -1156,6 +1190,7 @@ model TTA_AudienceAgeReport {
 /// Dữ liệu cho template "Audience Report: Gender by Campaign"
 model TTA_AudienceGenderReport {
   pkId      String   @id @default(dbgenerated("gen_random_uuid()"))
+  user_id  String
   createdAt DateTime @default(now()) 
 
   // Dimensions
@@ -1192,6 +1227,7 @@ model TTA_AudienceGenderReport {
 /// Dữ liệu cho template "Audience Report: Age & Gender by Campaign"
 model TTA_AudienceAgeGenderReport {
   pkId      String   @id @default(dbgenerated("gen_random_uuid()"))
+  user_id  String
   createdAt DateTime @default(now()) 
 
   // Dimensions
@@ -1229,6 +1265,7 @@ model TTA_AudienceAgeGenderReport {
 /// Dữ liệu cho template "Placement Report by Campaign"
 model TTA_PlacementReport {
   pkId      String   @id @default(dbgenerated("gen_random_uuid()"))
+  user_id  String
   createdAt DateTime @default(now()) 
 
   // Dimensions
@@ -1254,6 +1291,7 @@ model TTA_PlacementReport {
 /// Dữ liệu cho template "Platform Report by Campaign"
 model TTA_PlatformReport {
   pkId      String   @id @default(dbgenerated("gen_random_uuid()"))
+  user_id  String
   createdAt DateTime @default(now()) 
 
   // Dimensions
@@ -1283,6 +1321,7 @@ model TTA_PlatformReport {
 /// Dữ liệu cho "GMV All/Product/Live Campaign Performance" (Dùng chung model)
 model GMV_CampaignPerformance {
   pkId      String   @id @default(dbgenerated("gen_random_uuid()"))
+  user_id  String
   createdAt DateTime @default(now()) 
 
   // Dimensions
@@ -1317,6 +1356,7 @@ model GMV_CampaignPerformance {
 /// Dữ liệu cho template "GMV Campaign / Product Detail"
 model GMV_ProductDetailReport {
   pkId      String   @id @default(dbgenerated("gen_random_uuid()"))
+  user_id  String
   createdAt DateTime @default(now()) 
 
   // Dimensions
@@ -1349,6 +1389,7 @@ model GMV_ProductDetailReport {
 /// Dữ liệu cho template "GMV Campaign / Creative Detail"
 model GMV_CreativeDetailReport {
   pkId      String   @id @default(dbgenerated("gen_random_uuid()"))
+  user_id  String
   createdAt DateTime @default(now()) @map("created_at")
 
   // Dimensions

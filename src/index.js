@@ -11,8 +11,7 @@ async function main() {
   createApiServer(API_PORT);
 
   initializeWorker();
-  logger.info('Worker (task processor) đang chạy...');
-  
+  logger.info('Worker đang chạy...');
 
 }
 

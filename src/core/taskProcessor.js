@@ -25,14 +25,13 @@ export const processJobWorker = async (job) => {
     // 1. [QUAN TRỌNG] Điều phối (Dispatch) tác vụ
     // (Đây là logic switch-case bạn đã có trong GAS)
     if (task.taskType.startsWith("FACEBOOK_")) {
-      result = await processFacebookJob(task.params, accessToken);
+      result = await processFacebookJob(task.params, accessToken, userId);
     
     } else if (task.taskType.startsWith("TIKTOK_")) {
-      // result = await processTiktokJob(task.params, accessToken);
-      throw new Error("TikTok processor chưa được implement");
+      result = await processTiktokJob(task, accessToken, userId);
       
     } else if (task.taskType.startsWith("GOOGLE_")) {
-      // result = await processGoogleJob(task.params, accessToken);
+      // result = await processGoogleJob(task.params, accessToken, userId);
       throw new Error("Google processor chưa được implement");
       
     } else {

@@ -15,7 +15,7 @@ const TYPE_CONFIG = {
     "bm_verification_status", "bm_profile_picture_uri", "account_type",
     "account_status_text", "currency", "timezone_name", "current_payment_method",
     "eventType", "dateTimeInTimezone", "transactionId", "action", "type",
-    "billingHubLink", "downloadInvoiceLink", "platform"
+    "billingHubLink", "downloadInvoiceLink", "platform", "user_id"
   ]),
   FLOAT: new Set([
     "purchaseROAS", "frequency", "ctr", "spend", "cpc", "cpm", "average_video_play",
@@ -173,67 +173,78 @@ const TEMPLATE_MAP = {
   "Campaign Performance": {
     tableName: "TTA_CampaignPerformance",
     conflictTarget: ["advertiser_id", "campaign_id", "objective_type", "start_date", "end_date"],
-    insightDateKey: ["start_date", "end_date"] 
+    insightDateKey: ["start_date", "end_date"],
+    filter_spend: true 
   }, 
 
   "AdGroup Performance": {
     tableName: "TTA_AdGroupPerformance",
     conflictTarget: ["advertiser_id", "campaign_id", "adgroup_id", "start_date", "end_date"],
-    insightDateKey: ["start_date", "end_date"] 
+    insightDateKey: ["start_date", "end_date"],
+    filter_spend: true 
   },
 
   "Ad Performance": {
     tableName: "TTA_AdPerformance",
     conflictTarget: ["advertiser_id", "campaign_name", "adgroup_name", "ad_id", "start_date", "end_date"],
-    insightDateKey: ["start_date", "end_date"] 
+    insightDateKey: ["start_date", "end_date"],
+    filter_spend: true 
   },
 
   "Creative Performance (Video/Image)": {
     tableName: "TTA_CreativePerformance",
     conflictTarget: ["advertiser_id", "campaign_id", "adgroup_id", "ad_id", "start_date", "end_date"],
-    insightDateKey: ["start_date", "end_date"] 
+    insightDateKey: ["start_date", "end_date"],
+    filter_spend: true 
   },
 
   "Audience Report: Region by Campaign": {
     tableName: "TTA_AudienceRegionReport",
     conflictTarget: ["advertiser_id", "start_date", "end_date", "campaign_id", "province_id"],
-    insightDateKey: ["start_date", "end_date"] 
+    insightDateKey: ["start_date", "end_date"],
+    filter_spend: true 
   },
 
   "Audience Report: Country by Campaign": {
     tableName: "TTA_AudienceCountryReport",
     conflictTarget: ["stat_time_day", "advertiser_id", "campaign_id", "start_date", "end_date", "country_code"],
-    insightDateKey: ["start_date", "end_date"] 
+    insightDateKey: ["start_date", "end_date"],
+    filter_spend: true 
   },
 
   "Audience Report: Age by Campaign": {
     tableName: "TTA_AudienceAgeReport",
     conflictTarget: ["stat_time_day", "advertiser_id", "campaign_id", "start_date", "end_date", "age"],
-    insightDateKey: ["start_date", "end_date"] 
+    insightDateKey: ["start_date", "end_date"],
+    filter_spend: true 
   },
 
   "Audience Report: Gender by Campaign": {
     tableName: "TTA_AudienceGenderReport",
     conflictTarget: ["stat_time_day", "advertiser_id", "campaign_id", "start_date", "end_date", "gender"],
-    insightDateKey: ["start_date", "end_date"] 
+    insightDateKey: ["start_date", "end_date"],
+    filter_spend: true
   },
 
   "Audience Report: Age & Gender by Campaign": {
     tableName: "TTA_AudienceAgeGenderReport",
     conflictTarget: ["stat_time_day", "campaign_id", "gender", "age", "start_date", "end_date", "advertiser_id"],
-    insightDateKey: ["start_date", "end_date"] 
+    insightDateKey: ["start_date", "end_date"],
+    filter_spend: true
   },
 
   "Placement Report by Campaign": {
     tableName: "TTA_PlacementReport",
     conflictTarget: ["advertiser_id", "campaign_id", "start_date", "end_date", "placement"],
-    insightDateKey: ["start_date", "end_date"] 
+    insightDateKey: ["start_date", "end_date"],
+    filter_spend: true
   },
 
   "Platform Report by Campaign": {
     tableName: "TTA_PlatformReport",
     conflictTarget: ["advertiser_id", "campaign_id", "start_date", "end_date", "platform"],
-    insightDateKey: ["start_date", "end_date"] 
+    insightDateKey: ["start_date", "end_date"],
+    filter_spend: true
   }
 };
 
@@ -241,8 +252,8 @@ const TEMPLATE_MAP = {
  * Hàm nội bộ: Chuyển đổi key và chuẩn hóa kiểu dữ liệu cho một dòng.
  * [SỬA] Đã sửa lỗi check type dùng friendlyKey thay vì newKey.
  */
-function _transformAndSanitizeRow(rawRow, index) {
-  const sanitizedRow = {};
+function _transformAndSanitizeRow(rawRow, index, userId) {
+  const sanitizedRow = {user_id: userId};
   for (const friendlyKey in rawRow) {
     if (Object.prototype.hasOwnProperty.call(rawRow, friendlyKey)) {
       let originalValue = rawRow[friendlyKey];
@@ -252,9 +263,10 @@ function _transformAndSanitizeRow(rawRow, index) {
       if (value === null || value === undefined) {
          if (TYPE_CONFIG.FLOAT.has(newKey) || TYPE_CONFIG.INTEGER.has(newKey) || TYPE_CONFIG.DECIMAL.has(newKey)) {
             value = 0;
-         } else {
-            value = null;
+         } else if (TYPE_CONFIG.TEXT.has(newKey)) {
+            value = "";
          }
+        else value = null;
         sanitizedRow[newKey] = value;
         continue;
       }
@@ -291,7 +303,7 @@ function _transformAndSanitizeRow(rawRow, index) {
   return sanitizedRow;
 }
 
-export async function writeDataToDatabase(templateName, dataRows) {
+export async function writeDataToDatabase(templateName, dataRows, userId) {
   // 1. Kiểm tra đầu vào
   if (!dataRows || dataRows.length === 0) {
     console.log(`DB Writer: No data to write/upsert for "${templateName}".`);
@@ -304,10 +316,13 @@ export async function writeDataToDatabase(templateName, dataRows) {
     console.warn(`DB Writer: Incomplete config for template: "${templateName}"`);
     return { success: false, count: 0, error: `Incomplete config for template: ${templateName}` };
   }
-  const { tableName, conflictTarget } = config; 
+
+  // Thêm user id vào conflictTarget
+  const { tableName } = config;
+  const conflictTarget = [...config.conflictTarget, "user_id"];
 
   // 3. Chuẩn hóa dữ liệu
-  const sanitizedData = dataRows.map((row, index) => _transformAndSanitizeRow(row, index + 1));
+  const sanitizedData = dataRows.map((row, index) => _transformAndSanitizeRow(row, index + 1, userId));
 
   // 4. Lọc spend (optional, bypassed)
   let filteredData = sanitizedData
