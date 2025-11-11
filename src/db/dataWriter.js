@@ -446,17 +446,22 @@ export async function writeDataToDatabase(templateName, dataRows, userId) {
         const insertSql = `INSERT INTO "${tableName}" (${columnsSql}) VALUES ${valuePlaceholders};`;
 
         // 7. Thực thi 2 lệnh (DELETE, INSERT) cho đợt này
-        const deleteCommand = tx.$executeRawUnsafe(deleteSql, ...deleteValues);
+        // const deleteCommand = tx.$executeRawUnsafe(deleteSql, ...deleteValues);
         const insertCommand = tx.$executeRawUnsafe(insertSql, ...allInsertValues);
 
         // Chạy song song delete và insert cho đợt này
-        const [deleteResultCount, insertResultCount] = await Promise.all([
-          deleteCommand,
+        // const [deleteResultCount, insertResultCount] = await Promise.all([
+        //   deleteCommand,
+        //   insertCommand
+        // ]);
+
+        const [insertResultCount] = await Promise.all([
           insertCommand
         ]);
 
         totalInsertedCount += insertResultCount;
-        console.log(`   ... Chunk ${index + 1} done. Deleted: ${deleteResultCount}, Inserted: ${insertResultCount}`);
+        // console.log(`   ... Chunk ${index + 1} done. Deleted: ${deleteResultCount}, Inserted: ${insertResultCount}`);
+        console.log(`   ... Chunk ${index + 1} done. Deleted: ${0}, Inserted: ${insertResultCount}`);
       }
       // Nếu vòng lặp 'for' hoàn thành mà không có lỗi, transaction sẽ tự động commit
     }, 
