@@ -21,11 +21,11 @@ const TYPE_CONFIG = {
     "purchaseROAS", "frequency", "ctr", "spend", "cpc", "cpm", "average_video_play",
     "cost_per_conversion", "total_onsite_shopping_value", "cost",
     "cost_per_order", "gross_revenue", "net_cost", "roas_bid",
-    "target_roi_budget", "max_delivery_budget", "daily_budget",
-    "budget_remaining", "lifetime_budget", "roi", "tax_and_fee",
-    "post_video_avg_time_watched", "post_video_view_time", "page_video_view_time",
+    "target_roi_budget", "max_delivery_budget", "daily_budget", "ad_video_view_rate_2s", "ad_video_view_rate_6s", "ad_video_view_rate_p100",
+    "budget_remaining", "lifetime_budget", "roi", "tax_and_fee", "ad_video_view_rate_p25", "ad_video_view_rate_p50", "ad_video_view_rate_p75",
+    "post_video_avg_time_watched", "post_video_view_time", "page_video_view_time", "product_click_rate",
     "engagement_rate", "conversion_rate", "onsite_shopping_roas", "cost_per_onsite_shopping",
-    "taxAndFeePercent", "costPerNewMessaging", "costLeads", "purchaseValue", "costPurchases", "amount_spent", "balance"
+    "taxAndFeePercent", "costPerNewMessaging", "costLeads", "purchaseValue", "costPurchases", "amount_spent", "balance", "ad_conversion_rate"
   ]),
   DECIMAL: new Set(["value", "totalValue", "tax"]),
   INTEGER: new Set([
@@ -245,12 +245,25 @@ const TEMPLATE_MAP = {
     conflictTarget: ["advertiser_id", "campaign_id", "start_date", "end_date", "platform"],
     insightDateKey: ["start_date", "end_date"],
     filter_spend: true
+  },
+
+  "GMV Campaign / Product Detail": {
+    tableName: "GMV_ProductDetailReport",
+    conflictTarget: ["advertiser_id", "store_id", "campaign_id", "start_date", "end_date"],
+    insightDateKey: ["start_date", "end_date"],
+    filter_spend: false // Trong logic của GMV detail đã có sẵn lọc cost để tối ưu xử lý
+  },
+
+  "GMV Campaign / Creative Detail": {
+    tableName: "GMV_CreativeDetailReport",
+    conflictTarget: ["advertiser_id", "store_id", "campaign_id", "start_date", "end_date", "item_group_id"],
+    insightDateKey: ["start_date", "end_date"],
+    filter_spend: false // Trong logic của GMV detail đã có sẵn lọc cost để tối ưu xử lý
   }
 };
 
 /**
  * Hàm nội bộ: Chuyển đổi key và chuẩn hóa kiểu dữ liệu cho một dòng.
- * [SỬA] Đã sửa lỗi check type dùng friendlyKey thay vì newKey.
  */
 function _transformAndSanitizeRow(rawRow, index, userId) {
   const sanitizedRow = {user_id: userId};

@@ -209,7 +209,7 @@ export class GMVCampaignProductDetailReporter extends GMVReporter {
     // BƯỚC 3: Gộp dữ liệu
     this._reportProgress("Bắt đầu gộp dữ liệu...", 80);
     const final_data = this._enrichCampaignData(all_campaign_results, product_map);
-    return final_data;
+    return flattenProductReport(final_data, this);
   }
 } // Kết thúc class
 

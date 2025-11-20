@@ -3,8 +3,8 @@ import path from 'path';
 import { writeDataToDatabase } from '../../src/db/dataWriter.js'; // Import hàm ghi DB
 import prisma from '../../src/db/client.js'; // Import client để đóng kết nối
 
-const TEMPLATE_NAME_TO_TEST = 'Platform Report by Campaign';
-const JSON_FILE_PATH = path.join(process.cwd(), 'debug_tiktok_data.json');
+const TEMPLATE_NAME_TO_TEST = 'GMV Campaign / Creative Detail';
+const JSON_FILE_PATH = path.join(process.cwd(), 'GMV_Campaign_creative_detail.json');
 
 async function runDbTest() {
   console.log(`[DB Write Test] Bắt đầu test ghi dữ liệu cho template: "${TEMPLATE_NAME_TO_TEST}"`);

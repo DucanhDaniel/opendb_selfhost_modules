@@ -6,6 +6,7 @@ import { writeDataToDatabase } from '../../db/dataWriter.js';
 // import { startGmvAsyncJob } from './asyncHandler.js';
 import { processBcaBcInfo, processBcaAccountInfo, processBcaAssetInfo } from './processors/bca_report.js';
 import logger from '../../utils/logger.js'; 
+import { processGmvReport } from './processors/gmv_report.js';
 
 /**
  * Main dispatcher for TikTok tasks.
@@ -44,11 +45,10 @@ export async function processTiktokJob(task, accessToken, userId, writeData=true
       processorResult = await processBcaAssetInfo(params, templateConfig, accessToken, taskId);
       break;
 
-    // Keep ASYNC types separate
-    // case "ASYNC_GMV_CREATIVE":
-    //    return await startGmvAsyncJob(task, 'creative', accessToken);
-    // case "ASYNC_GMV_PRODUCT":
-    //    return await startGmvAsyncJob(task, 'product', accessToken);
+    case "MULTI_STEP_GMV_PRODUCT":
+    case "MULTI_STEP_GMV_CREATIVE":
+       processorResult = await processGmvReport(params, templateConfig, accessToken, taskId);
+       break;
 
     // Remove GMV_ACCOUNT_DAILY as it's handled by BASIC now
 

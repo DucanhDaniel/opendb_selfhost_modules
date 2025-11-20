@@ -333,7 +333,7 @@ export class GMVCampaignCreativeDetailReporter extends GMVReporter {
     final_data = GMVCampaignCreativeDetailReporter._filterEmptyCreatives(final_data);
     final_data = await this._enrichWithCreativeMetadata(final_data);
     
-    return final_data;
+    return flattenCreativeReport(final_data, this);
   }
 } // Kết thúc class
 

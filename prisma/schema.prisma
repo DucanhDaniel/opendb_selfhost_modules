@@ -1382,7 +1382,8 @@ model GMV_ProductDetailReport {
   cost              Float?
   cost_per_order    Float?
   roi               Float?
-
+  currency          String?
+  product_status    String?
 }
 
 /// @model
@@ -1421,6 +1422,7 @@ model GMV_CreativeDetailReport {
   cost_per_order  Float?
   gross_revenue   Float?
   roi             Float?
+  currency        String?
 
   // Metrics - Chỉ số sản phẩm
   product_impressions Int?
