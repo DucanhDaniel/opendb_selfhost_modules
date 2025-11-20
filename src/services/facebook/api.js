@@ -3,26 +3,6 @@ import axios from 'axios';
 import { BATCH_SERVER_URL, FACEBOOK_API_VERSION } from './constants.js';
 
 /**
- * Loads the Facebook Access Token from environment variables.
- * In a real app, this might come from a secure vault or config file.
- * @returns {string} The Facebook Access Token.
- */
-function getFacebookToken() {
-  // Assumes FB_AUTH_CONFIG is stored in .env as a JSON string:
-  // FB_AUTH_CONFIG='{"token":"YOUR_ACCESS_TOKEN_HERE"}'
-  try {
-    const authConfig = JSON.parse(process.env.FB_AUTH_CONFIG);
-    if (!authConfig || !authConfig.token) {
-      throw new Error('FB_AUTH_CONFIG is missing or malformed in .env');
-    }
-    return authConfig.token;
-  } catch (e) {
-    console.error("Failed to parse FB_AUTH_CONFIG from .env", e);
-    throw new Error('Invalid FB_AUTH_CONFIG in .env file.');
-  }
-}
-
-/**
  * Fetches data from a single Facebook API endpoint.
  * This is a replacement for _fetchFacebookApi in GAS.
  * @param {string} url - The full URL to fetch.
@@ -169,8 +149,7 @@ export async function fetchAllPagesWithCursor(initialUrl, initialParams, context
  * Replaces _getAccessiblePageMap.
  * @returns {Promise<Map<string, string>>} A Map of PageID -> PageName.
  */
-export async function getAccessiblePageMap() {
-  const token = getFacebookToken();
+export async function getAccessiblePageMap(token) {
   const url = `https://graph.facebook.com/${FACEBOOK_API_VERSION}/me/accounts?fields=id,name&limit=500&access_token=${token}`;
   try {
     const response = await fetchFacebookApi(url, "Fetch Accessible Pages");

@@ -579,7 +579,151 @@ export const TIKTOK_REPORT_TEMPLATES_STRUCTURE = [
       },
     ],
   },
-  // Bỏ qua nhóm GMV
+  {
+    groupName: "GMV: Báo cáo chi tiết",
+    templates: [
+      {
+        name: "GMV Campaign / Product Detail",
+        config: {
+          type: "MULTI_STEP_GMV_PRODUCT",
+          mandatory_keys: ["campaign_id", "item_group_id", "stat_time_day"],
+          selectable_dimensions: {
+            "Thông tin định danh": [
+              "start_date",
+              "end_date",
+              "advertiser_id",
+              "advertiser_name",
+              "store_id",
+              "store_name",
+            ],
+            "Trường (Dimensions)": [
+              "stat_time_day",
+              "campaign_id",
+              "item_group_id",
+              "product_img",
+            ],
+          },
+          selectable_metrics: {
+            "Thuộc tính": [
+              "campaign_name",
+              "operation_status",
+              "bid_type",
+              "product_name",
+              "product_image_url",
+            ],
+            "Hiệu suất": [
+              "orders",
+              "gross_revenue",
+              "cost",
+              "cost_per_order",
+              "roi",
+            ],
+          },
+          field_to_api_map: {
+            step1_get_campaigns: [
+              "campaign_name",
+              "operation_status",
+              "bid_type",
+            ],
+            step2_get_performance: [
+              "orders",
+              "gross_revenue",
+              "cost",
+              "cost_per_order",
+              "roi",
+            ],
+            step3_get_product_details: ["product_name", "product_image_url"],
+          },
+        },
+      },
+      {
+        name: "GMV Campaign / Creative Detail",
+        config: {
+          type: "MULTI_STEP_GMV_CREATIVE",
+          mandatory_keys: ["campaign_id", "item_group_id", "item_id"],
+          selectable_dimensions: {
+            "Thông tin định danh": [
+              "start_date",
+              "end_date",
+              "advertiser_id",
+              "advertiser_name",
+              "store_id",
+              "store_name",
+              "campaign_id",
+              "item_group_id",
+              "item_id",
+              "product_img",
+            ],
+          },
+          selectable_metrics: {
+            "Thuộc tính": [
+              "campaign_name",
+              "operation_status",
+              "product_name",
+              "product_status",
+              "product_image_url",
+              "creative_delivery_status",
+              "title",
+              "tt_account_name",
+              "tt_account_profile_image_url",
+            ],
+            "Hiệu suất chính": [
+              "cost",
+              "orders",
+              "cost_per_order",
+              "gross_revenue",
+              "roi",
+            ],
+            "Chỉ số sản phẩm": [
+              "product_impressions",
+              "product_clicks",
+              "product_click_rate",
+            ],
+            "Chỉ số quảng cáo": ["ad_conversion_rate"],
+            "Tỷ lệ xem video": [
+              "ad_video_view_rate_2s",
+              "ad_video_view_rate_6s",
+              "ad_video_view_rate_p25",
+              "ad_video_view_rate_p50",
+              "ad_video_view_rate_p75",
+              "ad_video_view_rate_p100",
+            ],
+          },
+          field_to_api_map: {
+            step1_get_campaigns: ["campaign_name", "operation_status"],
+            step2b_get_product_attributes: [
+              "product_name",
+              "product_image_url",
+              "product_status",
+            ],
+            step3a_get_creative_performance: [
+              "creative_delivery_status",
+              "cost",
+              "orders",
+              "cost_per_order",
+              "gross_revenue",
+              "roi",
+              "product_impressions",
+              "product_clicks",
+              "product_click_rate",
+              "ad_conversion_rate",
+              "ad_video_view_rate_2s",
+              "ad_video_view_rate_6s",
+              "ad_video_view_rate_p25",
+              "ad_video_view_rate_p50",
+              "ad_video_view_rate_p75",
+              "ad_video_view_rate_p100",
+            ],
+            step3b_get_creative_attributes: [
+              "title",
+              "tt_account_name",
+              "tt_account_profile_image_url",
+            ],
+          },
+        },
+      },
+    ],
+  }
 ];
 
 // --- Gist URL for Province Map ---

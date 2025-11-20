@@ -1,10 +1,12 @@
 import { getTiktokTemplateConfigByName } from './helpers.js';
 import { processBasicReport } from './processors/tta_report.js';
+import { writeDataToDatabase } from '../../db/dataWriter.js';
 // Removed GMV Account Daily import as it's handled by 'BASIC' now based on endpoint
 // import { processGmvAccountDailyReport } from './processors/gmvAccountDaily.js';
 // import { startGmvAsyncJob } from './asyncHandler.js';
 import { processBcaBcInfo, processBcaAccountInfo, processBcaAssetInfo } from './processors/bca_report.js';
 import logger from '../../utils/logger.js'; 
+import { processGmvReport } from './processors/gmv_report.js';
 
 /**
  * Main dispatcher for TikTok tasks.
@@ -12,10 +14,11 @@ import logger from '../../utils/logger.js';
  * @param {string} accessToken - TikTok Access Token.
  * @returns {Promise<object>} - { status, data?, newRows, message? } or { status: 'PENDING', ... } for async jobs.
  */
-export async function processTiktokJob(task, accessToken) {
+export async function processTiktokJob(task, accessToken, userId, writeData=true) {
   const { taskId, params } = task;
-  const { templateName } = params;
-
+  console.log(task);
+  const templateName = params.templateName;
+  console.log(templateName);
   const templateConfig = getTiktokTemplateConfigByName(templateName);
   if (!templateConfig) {
     logger.error(`[TikTok Dispatcher] Task ${taskId}: Template not found "${templateName}"`);
@@ -24,24 +27,28 @@ export async function processTiktokJob(task, accessToken) {
 
   logger.info(`[TikTok Dispatcher] Task ${taskId}: Processing template "${templateName}" (Type: ${templateConfig.type})`);
 
-  // Route based on template type
+  let processorResult;
   switch (templateConfig.type) {
-    case "BASIC": // Includes TTA Basic/Audience and GMV Basic reports now
-      // Also handles "Ad Account GMV Ads Daily" since it uses TIKTOK_GMV_REPORT_URL (type: BASIC in structure)
-      return await processBasicReport(params, templateConfig, accessToken, taskId);
+    case "BASIC": 
+      processorResult = await processBasicReport(params, templateConfig, accessToken, taskId);
+      break;
 
     case "BCA_BC_INFO":
-      return await processBcaBcInfo(params, templateConfig, accessToken, taskId);
-    case "BCA_ACCOUNT_INFO":
-      return await processBcaAccountInfo(params, templateConfig, accessToken, taskId);
-    case "BCA_ASSET_INFO":
-      return await processBcaAssetInfo(params, templateConfig, accessToken, taskId);
+      processorResult = await processBcaBcInfo(params, templateConfig, accessToken, taskId);
+      break;
 
-    // Keep ASYNC types separate
-    // case "ASYNC_GMV_CREATIVE":
-    //    return await startGmvAsyncJob(task, 'creative', accessToken);
-    // case "ASYNC_GMV_PRODUCT":
-    //    return await startGmvAsyncJob(task, 'product', accessToken);
+    case "BCA_ACCOUNT_INFO":
+      processorResult = await processBcaAccountInfo(params, templateConfig, accessToken, taskId);
+      break;
+
+    case "BCA_ASSET_INFO":
+      processorResult = await processBcaAssetInfo(params, templateConfig, accessToken, taskId);
+      break;
+
+    case "MULTI_STEP_GMV_PRODUCT":
+    case "MULTI_STEP_GMV_CREATIVE":
+       processorResult = await processGmvReport(params, templateConfig, accessToken, taskId);
+       break;
 
     // Remove GMV_ACCOUNT_DAILY as it's handled by BASIC now
 
@@ -50,9 +57,36 @@ export async function processTiktokJob(task, accessToken) {
     //    logger.warn(`MULTI_STEP_GMV_PRODUCT not fully implemented yet.`);
     //    return { status: "FAILED", message: "Not implemented", data: [], newRows: 0 };
 
-
     default:
-       logger.error(`[TikTok Dispatcher] Task ${taskId}: Unsupported template type "${templateConfig.type}"`);
       throw new Error(`Unsupported TikTok template type: ${templateConfig.type}`);
   }
+
+  if (writeData && processorResult) {
+    console.log(processorResult.status);
+    // 5. Kiểm tra kết quả Processor
+    if (processorResult.status !== "SUCCESS") {
+      throw new Error(processorResult.message || `[${taskId}] Processor thất bại`);
+    }
+
+    // 6. [LOGIC GHI DỮ LIỆU CỦA BẠN]
+    if (processorResult.data && processorResult.data.length > 0) {
+      logger.info(`[${taskId}] Đã nhận ${processorResult.data.length} dòng. Bắt đầu ghi vào DB...`);
+      
+      const dbResult = await writeDataToDatabase(
+        templateName, 
+        processorResult.data,
+        userId
+      );
+
+      processorResult.newRows = dbResult.count;
+
+      if (!dbResult.success) {
+        throw new Error(dbResult.error || `[${taskId}] Lỗi không xác định khi ghi DB`);
+      }
+    } else {
+      logger.info(`[${taskId}] Không có dữ liệu mới để ghi vào database.`);
+    }
+  }
+  
+  return processorResult;
 }

@@ -20,7 +20,7 @@ import { processBillingReport } from './processors/billing.js';
  * @param {bool} writeData - True if task need to be written in database and json for debugging
  * @returns {Promise<object>} - A promise that resolves to { status, data, newRows }.
  */
-export async function processFacebookJob(options, accessToken, writeData = true) {
+export async function processFacebookJob(options, accessToken, userId, writeData = true) {
   const { taskId, templateName } = options;
   const templateConfig = getFacebookTemplateConfigByName(templateName);
 
@@ -77,30 +77,32 @@ export async function processFacebookJob(options, accessToken, writeData = true)
       throw new Error(`Loại template Facebook không được hỗ trợ: "${templateConfig.type}"`);
   }
 
-    if (writeData && processorResult) {
-      console.log(processorResult.status);
-      // 5. Kiểm tra kết quả Processor
-      if (processorResult.status !== "SUCCESS") {
-        throw new Error(processorResult.message || `[${taskId}] Processor thất bại`);
+  if (writeData && processorResult) {
+    console.log(processorResult.status);
+    // 5. Kiểm tra kết quả Processor
+    if (processorResult.status !== "SUCCESS") {
+      throw new Error(processorResult.message || `[${taskId}] Processor thất bại`);
+    }
+
+    // 6. [LOGIC GHI DỮ LIỆU CỦA BẠN]
+    if (processorResult.data && processorResult.data.length > 0) {
+      logger.info(`[${taskId}] Đã nhận ${processorResult.data.length} dòng. Bắt đầu ghi vào DB...`);
+      
+      const dbResult = await writeDataToDatabase(
+        templateName, 
+        processorResult.data,
+        userId
+      );
+
+      processorResult.newRows = dbResult.count;
+
+      if (!dbResult.success) {
+        throw new Error(dbResult.error || `[${taskId}] Lỗi không xác định khi ghi DB`);
       }
-
-      // 6. [LOGIC GHI DỮ LIỆU CỦA BẠN]
-      if (processorResult.data && processorResult.data.length > 0) {
-        logger.info(`[${taskId}] Đã nhận ${processorResult.data.length} dòng. Bắt đầu ghi vào DB...`);
-        
-        const dbResult = await writeDataToDatabase(
-          templateName, 
-          processorResult.data,
-        );
-
-        processorResult.newRows = dbResult.count;
-
-        if (!dbResult.success) {
-          throw new Error(dbResult.error || `[${taskId}] Lỗi không xác định khi ghi DB`);
-        }
-      } else {
-        logger.info(`[${taskId}] Không có dữ liệu mới để ghi vào database.`);
-      }
+    } else {
+      logger.info(`[${taskId}] Không có dữ liệu mới để ghi vào database.`);
+    }
   }
+  
   return processorResult;
 }

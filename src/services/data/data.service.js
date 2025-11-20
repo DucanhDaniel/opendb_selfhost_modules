@@ -23,11 +23,8 @@ async function queryData(userId, { sheetName, limit, page }) {
     }
 
     // 3. Xây dựng Where Clause
-    // (Bỏ 'userId' nếu model của bạn không có, 
-    // thay bằng 'account_id' nếu cần. Hiện tại, tôi bỏ qua để test)
     const whereClause = {
-      // userId: userId, // <-- Tạm thời bỏ qua nếu model không có
-      // Thêm logic lọc khác nếu cần
+      user_id: userId,
     };
 
     // 4. Lấy dữ liệu và đếm
@@ -36,7 +33,7 @@ async function queryData(userId, { sheetName, limit, page }) {
       take: take,
       skip: skip,
       orderBy: {
-        createdAt: 'desc', // Giả sử mọi bảng đều có 'createdAt'
+        createdAt: 'desc', 
       },
     });
 
