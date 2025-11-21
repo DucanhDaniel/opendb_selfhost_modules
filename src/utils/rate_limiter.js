@@ -14,7 +14,8 @@ class RedisRateLimiter {
       throw new Error("Phải có ít nhất một quy tắc giới hạn.");
     }
     this.redis = redisClient;
-    this.rules = rules.sort((a, b) => a[1] - b[1]);
+    // this.rules = rules.sort((a, b) => a[1] - b[1]);
+    this.rules = [...rules].sort((a, b) => a[1] - b[1]);
   }
 
   /**
@@ -22,34 +23,37 @@ class RedisRateLimiter {
    * @param {string} baseKey - Key cơ sở (ví dụ: 'tiktok_api')
    * @returns {Promise<boolean>} - True nếu được phép, False nếu bị giới hạn.
    */
-  async acquire(baseKey) {
+async acquire(baseKey) {
     for (const [limit, period] of this.rules) {
-      // Tạo một key duy nhất trong Redis cho mỗi quy tắc
       const key = `${baseKey}:${period}s`;
 
-      const multi = this.redis.multi();
+      // 1. Lấy giá trị hiện tại và TTL
+      // Dùng pipeline để lấy dữ liệu nhanh
+      const pipe = this.redis.pipeline();
+      pipe.get(key);
+      pipe.ttl(key);
+      const results = await pipe.exec();
+      
+      let currentCount = parseInt(results[0][1]) || 0;
+      let ttl = results[1][1];
 
-      multi.incr(key); // Tăng bộ đếm
-      multi.expire(key, period); // Đặt lại thời gian hết hạn (sliding window)
-
-      // Thực thi transaction
-      let results;
-      try {
-        results = await multi.exec();
-      } catch (error) {
-        console.error(`Lỗi Redis transaction: ${error.message}`);
+      // 2. Nếu đã quá giới hạn -> TRẢ VỀ FALSE NGAY (Không tăng count, không reset TTL)
+      if (currentCount >= limit) {
         return false; 
       }
 
-      const currentCount = results[0][1];
-
-      // Nếu vi phạm bất kỳ quy tắc nào, từ chối ngay lập tức
-      if (currentCount > limit) {
-        return false;
+      // 3. Nếu chưa quá giới hạn -> Tăng count
+      const multi = this.redis.multi();
+      multi.incr(key);
+      
+      // Chỉ đặt expire nếu key chưa tồn tại hoặc chưa có TTL
+      if (currentCount === 0 || ttl === -1) {
+         multi.expire(key, period);
       }
+      
+      await multi.exec();
     }
 
-    // Nếu vượt qua tất cả các quy tắc, cho phép request
     return true;
   }
 }

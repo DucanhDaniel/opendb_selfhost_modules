@@ -2,13 +2,10 @@ import axios from 'axios';
 import logger from '../../../utils/logger.js';
 import { sleep } from '../../../utils/sleep.js';
 import bluebird from 'bluebird';
+import RedisRateLimiter from '../../../utils/rate_limiter.js';
+import { format } from 'date-fns';
 const { Promise: BluebirdPromise } = bluebird;
 
-/**
- * [ĐÃ DỊCH SANG JS]
- * Lớp cơ sở cho tất cả các loại TikTok GMV Reporter.
- * Đã loại bỏ logic Redis (rate limiter, cancel) theo yêu cầu.
- */
 export class GMVReporter {
   
   PERFORMANCE_API_URL = "https://business-api.tiktok.com/open_api/v1.3/gmv_max/report/get/";
@@ -16,14 +13,14 @@ export class GMVReporter {
   BC_API_URL = "https://business-api.tiktok.com/open_api/v1.3/bc/get/";
 
   /**
-   * @param {object} config - Đối tượng cấu hình
+   * @param {object} config
    * @param {string} config.access_token
    * @param {string} config.advertiser_id
    * @param {string} config.store_id
-   * @param {function} [config.progress_callback] - Hàm callback (jobId, status, message, progress)
+   * @param {function} [config.progress_callback] 
    * @param {string} [config.job_id]
    */
-  constructor({ access_token, advertiser_id, store_id, progress_callback = null, job_id = null }) {
+  constructor({ access_token, advertiser_id, store_id, progress_callback = null, job_id = null, redis_client = null }) {
     if (!access_token || !advertiser_id || !store_id) {
       throw new Error("access_token, advertiser_id, và store_id không được để trống.");
     }
@@ -32,15 +29,12 @@ export class GMVReporter {
     this.advertiser_id = advertiser_id;
     this.store_id = store_id;
     
-    // [JS] Dùng axios.create() thay cho requests.Session()
     this.session = axios.create({
       headers: {
         "Access-Token": this.access_token,
         "Content-Type": "application/json",
       },
-      timeout: 60000, // 60 giây timeout
-      // [JS] Quan trọng: Tái tạo logic của Python (không ném lỗi 4xx/5xx)
-      // để chúng ta có thể đọc 'data.code' và 'data.message'
+      timeout: 60000, 
       validateStatus: () => true, 
     });
 
@@ -49,13 +43,75 @@ export class GMVReporter {
 
     this.progress_callback = progress_callback;
     this.job_id = job_id;
+
+    this.redis_client = redis_client;
+    this.cancel_key = this.job_id ? `job:${this.job_id}:cancel_requested` : null;
+
+    if (this.redis_client) {
+      // Quy tắc GMV: 2 req/1s, 45 req/60s
+      const gmv_rules = [[2, 1], [45, 60]];
+      this.gmv_limiter = new RedisRateLimiter(this.redis_client, gmv_rules);
+      
+      // Quy tắc Basic: 8 req/1s, 550 req/60s
+      const basic_rules = [[8, 1], [550, 60]];
+      this.basic_limiter = new RedisRateLimiter(this.redis_client, basic_rules);
+    }
   }
 
-  // --- Các phương thức điều khiển tác vụ ---
+  async checkLimiter(limiter, key) {
+    if (!limiter) return;
+
+    // acquire trả về true nếu ĐƯỢC PHÉP, false nếu BỊ CHẶN
+    while (!(await limiter.acquire(key))) {
+      logger.info(`  [RATE LIMITER - CLIENT] Đã đạt giới hạn cho ${key}, chờ 1s...`);
+      await sleep(1000); 
+    }
+  }
+
+  async checkRateLimit(url) {
+    const base_key = `ratelimit:${this.advertiser_id}:${url}`;
+    
+    if (url === this.PERFORMANCE_API_URL) {
+      await this.checkLimiter(this.gmv_limiter, `${base_key}:gmv`);
+    }
+    
+    await this.checkLimiter(this.basic_limiter, `${base_key}:basic`);
+  }
+
+  async _checkForCancellation() {
+    if (this.redis_client && this.cancel_key) {
+      const exists = await this.redis_client.exists(this.cancel_key);
+      if (exists) {
+        await this.redis_client.del(this.cancel_key);
+        logger.warn(`[${this.job_id}] Phát hiện lệnh hủy từ Redis.`);
+        throw new Error("TASK_CANCELLED");
+      }
+    }
+  }
+
+  async logApiCounter(url) {
+    if (!this.redis_client) return;
+
+    try {
+      const api_call_total_key = `api_calls_total:${url}`;
+      
+      // Format: YYYY-MM-DD-HH (Ví dụ: 2025-11-21-14)
+      const current_hour = format(new Date(), 'yyyy-MM-dd-HH');
+      const api_call_hourly_key = `api_calls:${url}:${current_hour}`;
+      
+      const pipe = this.redis_client.multi();
+      pipe.incr(api_call_total_key); // Tăng tổng
+      pipe.incr(api_call_hourly_key); // Tăng theo giờ
+      pipe.expire(api_call_hourly_key, 3600 * 24); // Giữ log giờ trong 24h
+      await pipe.exec();
+    } catch (e) {
+      logger.warn(`WARNING: Không thể ghi log API call: ${e.message}`);
+    }
+  }
+
 
   _reportProgress(message, progress = 0) {
     if (this.progress_callback && this.job_id) {
-      // [JS] Giả sử callback của bạn có dạng fn(jobId, status, message, progress)
       this.progress_callback(this.job_id, "RUNNING", message, progress);
     }
   }
@@ -66,8 +122,8 @@ export class GMVReporter {
     }
   }
     
-  async _makeApiRequestWithBackoff(url, params, max_retries = 6, base_delay = 3) {
-    // (Đã xóa _check_for_cancellation)
+async _makeApiRequestWithBackoff(url, params, max_retries = 6, base_delay = 3) {
+    await this._checkForCancellation();
     
     if (this.throttling_delay > 0) {
       logger.warn(`  [THROTTLING] Áp dụng delay hãm tốc ${this.throttling_delay.toFixed(2)} giây.`);
@@ -76,23 +132,24 @@ export class GMVReporter {
 
     for (let attempt = 0; attempt < max_retries; attempt++) {
       try {
-        // (Đã xóa check_rate_limit)
+        // [3] Kiểm tra Rate Limit trước khi gọi
+        if (this.redis_client) {
+            await this.checkRateLimit(url);
+        }
         
         const response = await this.session.get(url, { params });
         const data = response.data;
 
-        // Kiểm tra thành công (HTTP 2xx và business code 0)
         if (response.status >= 200 && response.status < 300 && data.code === 0) {
           this.throttling_delay *= this.recovery_factor;
           if (this.throttling_delay < 0.1) this.throttling_delay = 0;
           return data;
         }
 
-        // Xử lý lỗi API (code != 0 hoặc HTTP 4xx/5xx)
         const error_message = data.message || `Lỗi HTTP ${response.status}`;
         
         if (error_message.includes("Too many requests") || error_message.includes("Request too frequent")) {
-          logger.warn(`  [RATE LIMIT] Gặp lỗi (lần ${attempt + 1}/${max_retries})...`);
+          logger.warn(`  [RATE LIMIT API] Gặp lỗi (lần ${attempt + 1}/${max_retries})...`);
         } else if (error_message.includes("Internal time out")) {
           logger.warn(`  [TIME OUT] Gặp lỗi (lần ${attempt + 1}/${max_retries})...`);
         } else {
@@ -103,15 +160,17 @@ export class GMVReporter {
           return null; 
         }
         
-      } catch (error) { // Chỉ bắt lỗi mạng (ví dụ: ECONNREFUSED, DNS)
+      } catch (error) { 
+        if (error.message === "TASK_CANCELLED") throw error;
         logger.warn(`  [LỖI MẠNG] (lần ${attempt + 1}/${max_retries}): ${error.message}`);
+      } finally {
+        // [4] Ghi log counter
+        await this.logApiCounter(url);
       }
       
-      // (Đã xóa log_api_counter)
-        
       if (attempt < max_retries - 1) {
         const delay = (Math.pow(base_delay, attempt + 1)) + Math.random();
-        this.throttling_delay = delay; // Kích hoạt throttling
+        this.throttling_delay = delay; 
         logger.warn(`  Thử lại sau ${delay.toFixed(2)} giây.`);
         await sleep(delay * 1000);
       }
@@ -121,8 +180,6 @@ export class GMVReporter {
     throw new Error("Hết số lần thử, vui lòng kiểm tra kết nối hoặc trạng thái API.");
   }
   
-  // (Đã xóa log_api_counter)
-
   async _fetchAllTiktokProducts(bc_id) {
     logger.info(`--- Bắt đầu lấy dữ liệu sản phẩm cho BC ID: ${bc_id} ---`);
     const params = {
@@ -146,7 +203,6 @@ export class GMVReporter {
     return all_products;
   }
   
-  // [JS] Dịch hàm fetch all pages (dùng Bluebird Promise.map)
   async _fetchAllPages(url, params, max_threads = 1, throttling_delay = null) {
     const all_results = [];
 
@@ -179,7 +235,7 @@ export class GMVReporter {
 
     // Hàm con để lấy 1 trang
     const fetch_page = async (page_num) => {
-      // (Đã xóa _check_for_cancellation)
+      await this._checkForCancellation()
       const page_params = { ...params, page: page_num };
       if (throttling_delay) this.throttling_delay = throttling_delay;
       
@@ -195,15 +251,13 @@ export class GMVReporter {
       return [];
     };
 
-    // [JS] Dùng Promise.map (từ Bluebird) để chạy song song
-    // với 'concurrency' (giống hệt ThreadPoolExecutor(max_workers))
     const results_from_promises = await BluebirdPromise.map(
       pages_to_fetch, 
       fetch_page,
       { concurrency: max_threads }
     );
     
-    all_results.push(...results_from_promises.flat()); // Dùng .flat() để gộp các mảng con
+    all_results.push(...results_from_promises.flat()); 
     return all_results;
   }
   
@@ -216,7 +270,7 @@ export class GMVReporter {
       const bc_list = data.data?.list || [];
       const bc_ids = bc_list
         .map(bc => bc.bc_info?.bc_id)
-        .filter(Boolean); // Lọc ra các giá trị null/undefined
+        .filter(Boolean); 
         
       logger.info(`Đã lấy thành công ${bc_ids.length} BC ID.`);
       return bc_ids;
@@ -225,6 +279,4 @@ export class GMVReporter {
     logger.error("Không thể lấy danh sách BC ID.");
     throw new Error("Không thể lấy danh sách BC ID.");
   }
-  
-  // (Đã xóa check_rate_limit và check_limiter)
 }

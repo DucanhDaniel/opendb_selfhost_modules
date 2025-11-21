@@ -3,7 +3,7 @@ import { logTiktok } from '../helpers.js';
 import { GMVCampaignProductDetailReporter } from '../../gmv/processor/product.js';
 import { GMVCampaignCreativeDetailReporter } from '../../gmv/processor/creative.js'; 
 import { splitDateRangeIntoMonths } from '../helpers.js';
-
+import Redis from 'ioredis';
 /**
  * Processor chuyên biệt cho báo cáo GMV (Product & Creative).
  * Sử dụng các lớp Reporter được chuyển từ Python.
@@ -25,6 +25,12 @@ export async function processGmvReport(params, templateConfig, accessToken, jobI
   // Store ID có thể nằm trong params hoặc templateConfig tùy cách bạn truyền
   const storeId = params.store_id; 
 
+  const redis_client = new Redis({
+    host: 'localhost', 
+    port: 6379,
+    // password: '...', // Thêm nếu redis của bạn có pass
+  });
+
   if (!advertiserId) {
     throw new Error("Missing Advertiser ID for GMV report.");
   }
@@ -40,6 +46,7 @@ export async function processGmvReport(params, templateConfig, accessToken, jobI
     store_name: params.store_name,
     store_id: storeId,
     job_id: jobId,
+    redis_client: redis_client,
     // Callback để Reporter (base class) gọi ngược lại logTiktok
     // progress_callback: (jid, status, message, progress) => {
     //    // Chuyển đổi format log của Reporter sang logTiktok
