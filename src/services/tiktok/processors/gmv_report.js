@@ -26,9 +26,14 @@ export async function processGmvReport(params, templateConfig, accessToken, jobI
   const storeId = params.store_id; 
 
   const redis_client = new Redis({
-    host: 'localhost', 
-    port: 6379,
-    // password: '...', // Thêm nếu redis của bạn có pass
+    host: process.env.REDIS_HOST || 'localhost',
+    port: parseInt(process.env.REDIS_PORT || '6379'),
+    password: process.env.REDIS_PASSWORD, // Tự động bỏ qua nếu không có password
+    // Thêm retry strategy để tránh crash nếu Redis chập chờn
+    retryStrategy(times) {
+      const delay = Math.min(times * 50, 2000);
+      return delay;
+    },
   });
 
   if (!advertiserId) {
