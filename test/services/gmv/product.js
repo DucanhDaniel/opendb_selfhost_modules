@@ -6,7 +6,6 @@ import logger from '../../../src/utils/logger.js';
 // 2. Import LỚP CON (processor) mà bạn muốn test
 import { GMVCampaignProductDetailReporter } from '../../../src/services/gmv/processor/product.js';
 
-// --- 3. Cấu hình (Giống hệt file Python) ---
 // const ACCESS_TOKEN = "414ebc8a65511360f1b1166f9c9ebe1f8292ea16"; 
 // const ADVERTISER_ID = "7137968211592495105";
 // const STORE_ID = "7494588040522401840";
@@ -39,6 +38,8 @@ async function runTest() {
       access_token: ACCESS_TOKEN,
       advertiser_id: ADVERTISER_ID,
       store_id: STORE_ID,
+      advertiser_name: "ten advertiser",
+      store_name: "ten store",
       progress_callback: (jobId, status, message, progress) => {
         logger.info(`[PROGRESS] ${message} (${progress}%)`);
       },
