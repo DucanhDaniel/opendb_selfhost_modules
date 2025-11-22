@@ -1,12 +1,10 @@
 import { getTiktokTemplateConfigByName } from './helpers.js';
 import { processBasicReport } from './processors/tta_report.js';
 import { writeDataToDatabase } from '../../db/dataWriter.js';
-// Removed GMV Account Daily import as it's handled by 'BASIC' now based on endpoint
-// import { processGmvAccountDailyReport } from './processors/gmvAccountDaily.js';
-// import { startGmvAsyncJob } from './asyncHandler.js';
 import { processBcaBcInfo, processBcaAccountInfo, processBcaAssetInfo } from './processors/bca_report.js';
+import { processGmvBasicReport } from './processors/gmv_basic_report.js';
 import logger from '../../utils/logger.js'; 
-import { processGmvReport } from './processors/gmv_report.js';
+import { processGmvReport } from './processors/gmv_detail_report.js';
 
 /**
  * Main dispatcher for TikTok tasks.
@@ -50,12 +48,9 @@ export async function processTiktokJob(task, accessToken, userId, writeData=true
        processorResult = await processGmvReport(params, templateConfig, accessToken, taskId);
        break;
 
-    // Remove GMV_ACCOUNT_DAILY as it's handled by BASIC now
-
-    // MULTI_STEP_GMV_PRODUCT might become ASYNC or need its own processor
-    // case "MULTI_STEP_GMV_PRODUCT":
-    //    logger.warn(`MULTI_STEP_GMV_PRODUCT not fully implemented yet.`);
-    //    return { status: "FAILED", message: "Not implemented", data: [], newRows: 0 };
+    case "GMV_BASIC":
+      processorResult = await processGmvBasicReport(params, templateConfig, accessToken, taskId);
+      break;
 
     default:
       throw new Error(`Unsupported TikTok template type: ${templateConfig.type}`);
@@ -68,7 +63,6 @@ export async function processTiktokJob(task, accessToken, userId, writeData=true
       throw new Error(processorResult.message || `[${taskId}] Processor thất bại`);
     }
 
-    // 6. [LOGIC GHI DỮ LIỆU CỦA BẠN]
     if (processorResult.data && processorResult.data.length > 0) {
       logger.info(`[${taskId}] Đã nhận ${processorResult.data.length} dòng. Bắt đầu ghi vào DB...`);
       

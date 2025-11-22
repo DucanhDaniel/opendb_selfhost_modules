@@ -48,7 +48,7 @@ const TYPE_CONFIG = {
     "newMessagingConnections", "leads", "websitePurchases", "onFacebookPurchases", "purchases", "purchase", "onsite_shopping"
   ]),
   DATE: new Set([
-    "start_time", "stop_time", "created_time", "updated_time", "date_start",
+    "start_time", "stop_time", "created_time", "updated_time", "date_start", "schedule_start_time", "schedule_end_time",
     "date_stop", "bm_created_time", "fetchTimestamp", "date", "stat_time_day", "start_date", "end_date"
   ]),
   JSON: new Set([
@@ -259,7 +259,28 @@ const TEMPLATE_MAP = {
     conflictTarget: ["advertiser_id", "store_id", "campaign_id", "start_date", "end_date", "item_group_id"],
     insightDateKey: ["start_date", "end_date"],
     filter_spend: false // Trong logic của GMV detail đã có sẵn lọc cost để tối ưu xử lý
-  }
+  },
+
+  "GMV Product Campaign Performance": {
+    tableName: "GMV_ProductCampaignPerformance",
+    conflictTarget: ["advertiser_id", "store_id", "campaign_id", "start_date", "end_date", "start_time_day"],
+    insightDateKey: ["start_date", "end_date"],
+    filter_spend: false
+  },
+
+  "GMV All Campaign Performance": {
+    tableName: "GMV_AllCampaignPerformance",
+    conflictTarget: ["advertiser_id", "store_id", "campaign_id", "start_date", "end_date", "start_time_day"],
+    insightDateKey: ["start_date", "end_date"],
+    filter_spend: false
+  },
+
+  "GMV Live Campaign Performance": {
+    tableName: "GMV_LiveCampaignPerformance",
+    conflictTarget: ["advertiser_id", "store_id", "campaign_id", "start_date", "end_date", "start_time_day"],
+    insightDateKey: ["start_date", "end_date"],
+    filter_spend: false
+  },
 };
 
 /**

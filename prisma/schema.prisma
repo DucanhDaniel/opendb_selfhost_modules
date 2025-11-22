@@ -1318,8 +1318,7 @@ model TTA_PlatformReport {
 // -------------------------------------
 
 /// @model
-/// Dữ liệu cho "GMV All/Product/Live Campaign Performance" (Dùng chung model)
-model GMV_CampaignPerformance {
+model GMV_AllCampaignPerformance {
   pkId      String   @id @default(dbgenerated("gen_random_uuid()"))
   user_id  String
   createdAt DateTime @default(now()) 
@@ -1350,7 +1349,72 @@ model GMV_CampaignPerformance {
   target_roi_budget   Float?
   bid_type        String?
   max_delivery_budget Float?
+}
 
+model GMV_LiveCampaignPerformance {
+  pkId      String   @id @default(dbgenerated("gen_random_uuid()"))
+  user_id  String
+  createdAt DateTime @default(now()) 
+
+  // Dimensions
+  campaign_id     String?
+  stat_time_day   DateTime?
+  start_date      DateTime?
+  end_date        DateTime?
+  advertiser_id   String?
+  advertiser_name String?
+  store_id        String?
+  store_name      String?
+  
+  // Metrics
+  campaign_name   String?
+  cost            Float?
+  orders          Int?
+  roi             Float?
+  cost_per_order  Float?
+  gross_revenue   Float?
+  net_cost        Float?
+  roas_bid        Float?
+  operation_status String?
+  schedule_type   String?
+  schedule_start_time DateTime?
+  schedule_end_time   DateTime?
+  target_roi_budget   Float?
+  bid_type        String?
+  max_delivery_budget Float?
+}
+
+model GMV_ProductCampaignPerformance {
+  pkId      String   @id @default(dbgenerated("gen_random_uuid()"))
+  user_id  String
+  createdAt DateTime @default(now()) 
+
+  // Dimensions
+  campaign_id     String?
+  stat_time_day   DateTime?
+  start_date      DateTime?
+  end_date        DateTime?
+  advertiser_id   String?
+  advertiser_name String?
+  store_id        String?
+  store_name      String?
+  
+  // Metrics
+  campaign_name   String?
+  cost            Float?
+  orders          Int?
+  roi             Float?
+  cost_per_order  Float?
+  gross_revenue   Float?
+  net_cost        Float?
+  roas_bid        Float?
+  operation_status String?
+  schedule_type   String?
+  schedule_start_time DateTime?
+  schedule_end_time   DateTime?
+  target_roi_budget   Float?
+  bid_type        String?
+  max_delivery_budget Float?
 }
 
 /// Dữ liệu cho template "GMV Campaign / Product Detail"

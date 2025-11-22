@@ -5,8 +5,8 @@ export const TIKTOK_API_BASE_URL =
 export const TIKTOK_TOKEN_URL = `${TIKTOK_API_BASE_URL}/oauth2/access_token/`;
 export const TIKTOK_ADVERTISER_URL = `${TIKTOK_API_BASE_URL}/oauth2/advertiser/get/`;
 export const TIKTOK_REPORT_URL = `${TIKTOK_API_BASE_URL}/report/integrated/get/`;
-// export const TIKTOK_GMV_STORE_LIST_URL = `${TIKTOK_API_BASE_URL}/gmv_max/store/list/`; // Bỏ qua GMV
-// export const TIKTOK_GMV_REPORT_URL = `${TIKTOK_API_BASE_URL}/gmv_max/report/get/`; // Bỏ qua GMV
+export const TIKTOK_GMV_STORE_LIST_URL = `${TIKTOK_API_BASE_URL}/gmv_max/store/list/`; 
+export const TIKTOK_GMV_REPORT_URL = `${TIKTOK_API_BASE_URL}/gmv_max/report/get/`; 
 export const TIKTOK_BC_INFO_URL = `${TIKTOK_API_BASE_URL}/bc/get/`;
 export const TIKTOK_BC_AD_ACCOUNT_INFO_URL = `${TIKTOK_API_BASE_URL}/advertiser/info/`;
 export const TIKTOK_BC_ASSET_INFO_URL = `${TIKTOK_API_BASE_URL}/bc/asset/admin/get/`;
@@ -723,7 +723,136 @@ export const TIKTOK_REPORT_TEMPLATES_STRUCTURE = [
         },
       },
     ],
-  }
+  },
+  {
+    groupName: "GMV: Báo cáo hiệu suất",
+    templates: [
+      {
+        name: "GMV All Campaign Performance",
+        config: {
+          type: "GMV_BASIC",
+          api_endpoint: TIKTOK_GMV_REPORT_URL,
+          api_params: {
+            filtering: { gmv_max_promotion_types: ["PRODUCT", "LIVE"] },
+          },
+          selectable_dimensions: {
+            "Thông tin định danh": [
+              "start_date",
+              "end_date",
+              "advertiser_id",
+              "advertiser_name",
+              "store_id",
+              "store_name",
+            ],
+            "Trường (Dimensions)": ["campaign_id", "stat_time_day"],
+          },
+          selectable_metrics: {
+            "Số liệu (Metrics)": [
+              "campaign_name",
+              "cost",
+              "orders",
+              "roi",
+              "cost_per_order",
+              "gross_revenue",
+              "net_cost",
+              "roas_bid",
+              "operation_status",
+              "schedule_type",
+              "schedule_start_time",
+              "schedule_end_time",
+              "target_roi_budget",
+              "bid_type",
+              "max_delivery_budget",
+            ],
+          },
+        },
+      },
+      {
+        name: "GMV Product Campaign Performance",
+        config: {
+          type: "GMV_BASIC",
+          api_endpoint: TIKTOK_GMV_REPORT_URL,
+          api_params: { filtering: { gmv_max_promotion_types: ["PRODUCT"] } },
+          selectable_dimensions: {
+            "Thông tin định danh": [
+              "start_date",
+              "end_date",
+              "advertiser_id",
+              "advertiser_name",
+              "store_id",
+              "store_name",
+            ],
+            "Trường (Dimensions)": ["campaign_id", "stat_time_day"],
+          },
+          selectable_metrics: {
+            "Số liệu (Metrics)": [
+              "campaign_name",
+              "cost",
+              "orders",
+              "roi",
+              "cost_per_order",
+              "gross_revenue",
+              "net_cost",
+              "roas_bid",
+              "operation_status",
+              "schedule_type",
+              "schedule_start_time",
+              "schedule_end_time",
+              "target_roi_budget",
+              "bid_type",
+              "max_delivery_budget",
+            ],
+          },
+        },
+      },
+      {
+        name: "GMV Live Campaign Performance",
+        config: {
+          type: "GMV_BASIC",
+          api_endpoint: TIKTOK_GMV_REPORT_URL,
+          api_params: { filtering: { gmv_max_promotion_types: ["LIVE"] } },
+          selectable_dimensions: {
+            "Thông tin định danh": [
+              "start_date",
+              "end_date",
+              "advertiser_id",
+              "advertiser_name",
+              "store_id",
+              "store_name",
+            ],
+            "Trường (Dimensions)": ["campaign_id", "stat_time_day"],
+          },
+          selectable_metrics: {
+            "Số liệu (Metrics)": [
+              "campaign_name",
+              "cost",
+              "orders",
+              "roi",
+              "cost_per_order",
+              "gross_revenue",
+              "net_cost",
+              "roas_bid",
+              "operation_status",
+              "schedule_type",
+              "schedule_start_time",
+              "schedule_end_time",
+              "target_roi_budget",
+              "bid_type",
+              "max_delivery_budget",
+            ],
+          },
+        },
+      },
+      {
+          name: "Ad Account GMV Ads Daily", // Tên template mới
+          config: {
+              type: "GMV_ACCOUNT_DAILY", // Type mới để định danh
+              api_endpoint: TIKTOK_GMV_REPORT_URL,
+              // Không cần selectable_fields vì các trường là cố định
+          }
+      },
+    ],
+  },
 ];
 
 // --- Gist URL for Province Map ---
