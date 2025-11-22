@@ -20,7 +20,7 @@ export class GMVReporter {
    * @param {function} [config.progress_callback] 
    * @param {string} [config.job_id]
    */
-  constructor({ access_token, advertiser_id, store_id, progress_callback = null, job_id = null, redis_client = null }) {
+  constructor({ access_token, advertiser_id, store_id, advertiser_name, store_name, progress_callback = null, job_id = null, redis_client = null }) {
     if (!access_token || !advertiser_id || !store_id) {
       throw new Error("access_token, advertiser_id, và store_id không được để trống.");
     }
@@ -28,7 +28,10 @@ export class GMVReporter {
     this.access_token = access_token;
     this.advertiser_id = advertiser_id;
     this.store_id = store_id;
-    
+
+    this.advertiser_name = advertiser_name
+    this.store_name = store_name
+
     this.session = axios.create({
       headers: {
         "Access-Token": this.access_token,
