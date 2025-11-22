@@ -1,5 +1,5 @@
 import logger from '../../../utils/logger.js';
-import { GMVReporter } from './base.js'; // 1. Import lớp cha (đã dịch)
+import { GMVReporter } from './base.js'; 
 import bluebird from 'bluebird';
 const { Promise: BluebirdPromise } = bluebird;
 /**

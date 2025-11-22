@@ -1,4 +1,3 @@
-// test-gmv.js
 import 'dotenv/config'; // 1. Tải file .env
 import { promises as fs } from 'fs'; // 7. Thư viện Ghi file
 import logger from '../../../src/utils/logger.js';
