@@ -2,6 +2,7 @@ import prisma from '../db/client.js';
 import logger from '../utils/logger.js';
 
 import { TaskLogger } from '../utils/task_logger.js';
+import { authService } from '../services/auth/auth.service.js';
 
 import { processFacebookJob } from '../services/facebook/index.js';
 import { processTiktokJob } from '../services/tiktok/index.js'; 
@@ -23,6 +24,12 @@ export const processJobWorker = async (job) => {
   task_logger.info(`Khởi tạo task logger thành công!`);
 
   try {
+
+    const isLicenseValid = await authService.checkUserLicensePermission(userId, task.taskType);
+    if (isLicenseValid) {
+      task_logger.info("License hợp lệ!");
+    }
+
     let result; // { status, data, newRows }
     
     // 1. [QUAN TRỌNG] Điều phối (Dispatch) tác vụ

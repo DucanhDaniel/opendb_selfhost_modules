@@ -85,52 +85,6 @@ async function initiateTask(userId, taskData) {
     nextChunkIndex: 0,
   };
 
-  // const user = await prisma.user.findUnique({
-  //   where: { id: userId },
-  //   select: { settings: true }
-  // });
-  // const currentSettings = user?.settings || {};
-
-  // const taskParamsToSave = {
-  //   createdAt: createdAt,
-  //   taskType: taskType,
-  //   ...params,
-  // };
-
-  // const newHistoryEntry = {
-  //   taskId: taskId,
-  //   timestamp: createdAt,
-  //   description: description,
-  //   runType: runType,
-  //   status: "QUEUED",
-  //   message: "Đang chờ xử lý...",
-  // };
-  
-  // const currentHistory = currentSettings[TASK_HISTORY_PROPERTY] || [];
-  // currentHistory.unshift(newHistoryEntry); // Thêm vào đầu mảng
-  // if (currentHistory.length > MAX_HISTORY_ENTRIES) {
-  //   currentHistory.pop(); // Xóa entry cũ nhất
-  // }
-
-  // // 5. Cập nhật đối tượng settings
-  // const updatedSettings = {
-  //   ...currentSettings,
-  //   [CURRENT_TASK_PROPERTY]: newTask, 
-  //   [TASK_HISTORY_PROPERTY]: currentHistory, 
-  //   [TASK_PARAMS_PREFIX + taskId]: taskParamsToSave 
-  // };
-
-  // // 6. Lưu lại vào DB
-  // await prisma.user.update({
-  //   where: { id: userId },
-  //   data: { settings: updatedSettings }
-  // });
-
-  // logger.info(`Đã khởi tạo task ${taskId} cho user ${userId}`);
-  
-  // // 7. Trả về task mới cho controller
-  // return newTask;
-
   const user = await prisma.user.findUnique({
     where: { id: userId },
     select: { settings: true }
