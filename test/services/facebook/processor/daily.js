@@ -40,10 +40,8 @@ const sampleTaskParams = {
  'date_stop',
  'status',
  'effective_status',
-    'daily_budget',
-
+'daily_budget',
 'lifetime_budget',
-
 'budget_remaining',
  'created_time',
  'spend',

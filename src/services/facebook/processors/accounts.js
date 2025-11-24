@@ -12,8 +12,8 @@ import { FACEBOOK_API_VERSION } from '../constants.js';
  * @param {string} accessToken - The Facebook Access Token.
  * @returns {Promise<object>} - An object { status, data, newRows }.
  */
-export async function processBmAndAccountsReport(options, accessToken) {
-  console.log("Starting BM & Ad Accounts Report...");
+export async function processBmAndAccountsReport(options, accessToken, task_logger) {
+  task_logger.info("Starting BM & Ad Accounts Report...");
 
   // 1. Get all Business Managers
   const bmFields = "id,name,created_time,verification_status,profile_picture_uri";
@@ -98,16 +98,16 @@ export async function processBmAndAccountsReport(options, accessToken) {
       pushAccounts(ownedAccounts, "Owned");
       pushAccounts(clientAccounts, "Client");
       
-      console.log(`Processed BM: ${bm.name} (${bm.id})`);
+      task_logger.info(`Processed BM: ${bm.name} (${bm.id})`);
       // Sleep slightly between BMs
       await new Promise(resolve => setTimeout(resolve, 300));
 
     } catch (err) {
-      console.error(`Failed to process BM ${bm.id} (${bm.name}): ${err.message}`);
+      task_logger.error(`Failed to process BM ${bm.id} (${bm.name}): ${err.message}`);
     }
   }
 
-  console.log(`BM & Ad Accounts finished. Total unique accounts: ${allRows.length}`);
+  task_logger.info(`BM & Ad Accounts finished. Total unique accounts: ${allRows.length}`);
   return { 
     status: "SUCCESS", 
     data: allRows, 

@@ -1,7 +1,6 @@
 import { getFacebookTemplateConfigByName } from './helpers.js';
 
 import { writeDataToDatabase } from '../../db/dataWriter.js';
-import logger from '../../utils/logger.js';
 
 import { processGenericPerformanceReport } from './processors/performance.js';
 import { processGenericDailyReport } from './processors/daily.js';
@@ -20,7 +19,7 @@ import { processBillingReport } from './processors/billing.js';
  * @param {bool} writeData - True if task need to be written in database and json for debugging
  * @returns {Promise<object>} - A promise that resolves to { status, data, newRows }.
  */
-export async function processFacebookJob(options, accessToken, userId, writeData = true) {
+export async function processFacebookJob(options, accessToken, userId, task_logger, writeData = true) {
   const { taskId, templateName } = options;
   const templateConfig = getFacebookTemplateConfigByName(templateName);
 
@@ -28,7 +27,7 @@ export async function processFacebookJob(options, accessToken, userId, writeData
     throw new Error(`Template Facebook không được hỗ trợ: "${templateName}"`);
   }
 
-  console.log(`Dispatching Facebook job for type: ${templateConfig.type}`);
+  task_logger.info(`Dispatching Facebook job for type: ${templateConfig.type}`);
 
   // Use a switch on the config type to route to the correct processor
   let processorResult;
@@ -39,29 +38,29 @@ export async function processFacebookJob(options, accessToken, userId, writeData
     case "FAD_PERFORMANCE_ADSET":
     case "FAD_PERFORMANCE_AD":
     case "FAD_AD_CREATIVE":
-      processorResult = await processGenericPerformanceReport(options, accessToken);
+      processorResult = await processGenericPerformanceReport(options, accessToken, task_logger);
       break;
     // --- FAD: Daily Reports ---
     case "FAD_ACCOUNT_DAILY":
     case "FAD_CAMPAIGN_DAILY":
     case "FAD_ADSET_DAILY":
     case "FAD_AD_DAILY":
-      processorResult = await processGenericDailyReport(options, accessToken);
+      processorResult = await processGenericDailyReport(options, accessToken, task_logger);
       break;
     // --- FAD: Breakdown Reports ---
     case "FAD_CAMPAIGN_BY_AGE":
     case "FAD_CAMPAIGN_BY_GENDER":
     case "FAD_CAMPAIGN_PLATFORM":
     case "FAD_CAMPAIGN_BY_REGION":
-      processorResult = await processGenericBreakdownReport(options, accessToken);
+      processorResult = await processGenericBreakdownReport(options, accessToken, task_logger);
       break;
     // --- FAD: Account Management ---
     case "FAD_BM_ACCOUNTS":
-      processorResult = await processBmAndAccountsReport(options, accessToken);
+      processorResult = await processBmAndAccountsReport(options, accessToken, task_logger);
       break;
     // --- FBT: Billing ---
     case "FBT_BILLING":
-      processorResult = await processBillingReport(options, accessToken);
+      processorResult = await processBillingReport(options, accessToken, task_logger);
       break;
     // --- MPI: Meta Page Insights (Future) ---
     // case "MPI_PERFORMANCE":
@@ -86,7 +85,7 @@ export async function processFacebookJob(options, accessToken, userId, writeData
 
     // 6. [LOGIC GHI DỮ LIỆU CỦA BẠN]
     if (processorResult.data && processorResult.data.length > 0) {
-      logger.info(`[${taskId}] Đã nhận ${processorResult.data.length} dòng. Bắt đầu ghi vào DB...`);
+      task_logger.info(`Đã nhận ${processorResult.data.length} dòng. Bắt đầu ghi vào DB...`);
       
       const dbResult = await writeDataToDatabase(
         templateName, 
@@ -100,7 +99,7 @@ export async function processFacebookJob(options, accessToken, userId, writeData
         throw new Error(dbResult.error || `[${taskId}] Lỗi không xác định khi ghi DB`);
       }
     } else {
-      logger.info(`[${taskId}] Không có dữ liệu mới để ghi vào database.`);
+      task_logger.info(`Không có dữ liệu mới để ghi vào database.`);
     }
   }
   

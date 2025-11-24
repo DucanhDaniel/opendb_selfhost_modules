@@ -3,14 +3,11 @@ import { GMVReporter } from './base.js';
 import bluebird from 'bluebird';
 const { Promise: BluebirdPromise } = bluebird;
 /**
- * [ĐÃ DỊCH SANG JS]
  * Lấy và kết hợp dữ liệu hiệu suất chiến dịch với thông tin chi tiết sản phẩm.
- * Kế thừa từ GMVReporter.
  */
 export class GMVCampaignProductDetailReporter extends GMVReporter {
   
   constructor(config) {
-    // 2. Gọi hàm constructor của lớp cha
     super(config); 
   }
 
@@ -19,14 +16,13 @@ export class GMVCampaignProductDetailReporter extends GMVReporter {
    */
   async _getProductMap() {
     logger.info("\n--- BƯỚC 1: LẤY VÀ CHUẨN BỊ DỮ LIỆU SẢN PHẨM ---");
-    const bc_ids = await this._getBcIds(); // (Hàm của lớp cha)
+    const bc_ids = await this._getBcIds(); 
     if (!bc_ids || bc_ids.length === 0) {
       return null;
     }
 
     let all_products = [];
     for (const bc_id of bc_ids) {
-      // (Hàm của lớp cha)
       const products_list = await this._fetchAllTiktokProducts(bc_id); 
       if (products_list && products_list.length > 0) {
         logger.info(`   => THÀNH CÔNG! Tìm thấy BC ID hợp lệ: ${bc_id}. Đã lấy ${products_list.length} sản phẩm.`);
@@ -40,7 +36,6 @@ export class GMVCampaignProductDetailReporter extends GMVReporter {
     }
 
     logger.info("\n>> Bước 1C: Tạo bản đồ sản phẩm để tra cứu nhanh...");
-    // [JS] Dùng new Map()
     const product_map = new Map(all_products.map(p => [p.item_group_id, p]));
     
     logger.info(`   -> Đã tạo bản đồ cho ${product_map.size} sản phẩm độc nhất.`);
@@ -60,10 +55,8 @@ export class GMVCampaignProductDetailReporter extends GMVReporter {
       "filtering": JSON.stringify({"gmv_max_promotion_types": ["PRODUCT"]}),
       "page_size": 1000,
     };
-    // (Hàm của lớp cha)
     const items = await this._fetchAllPages(this.PERFORMANCE_API_URL, params, 1);
     
-    // [JS] Dùng reduce để tạo Map (giống dict comprehension)
     return items.reduce((acc, item) => {
       acc.set(item.dimensions.campaign_id, item.metrics);
       return acc;
@@ -84,7 +77,6 @@ export class GMVCampaignProductDetailReporter extends GMVReporter {
       "filtering": JSON.stringify({"campaign_ids": batch_ids}),
       "page_size": 1000,
     };
-    // (Hàm của lớp cha)
     const perf_list = await this._fetchAllPages(this.PERFORMANCE_API_URL, params, 5); // 5 luồng
     
     const results = new Map();
@@ -142,7 +134,6 @@ export class GMVCampaignProductDetailReporter extends GMVReporter {
           product_info = product_map.get(item_group_id) || { title: `Không tìm thấy thông tin cho ID ${item_group_id}` };
         }
 
-        // [JS] Dùng toán tử spread '...' (giống ** của Python)
         const final_record = {
           ...campaign_info,
           stat_time_day: perf_record.dimensions?.stat_time_day,
@@ -163,7 +154,7 @@ export class GMVCampaignProductDetailReporter extends GMVReporter {
    */
   async getData(date_chunks) {
     // BƯỚC 1: Lấy dữ liệu sản phẩm
-    this._reportProgress("Đang lấy dữ liệu sản phẩm", 5);
+    this._reportProgress("Đang lấy dữ liệu sản phẩm");
     const product_map = await this._getProductMap();
     if (!product_map) {
       logger.error("Không thể lấy dữ liệu sản phẩm. Dừng thực thi.");
@@ -172,34 +163,32 @@ export class GMVCampaignProductDetailReporter extends GMVReporter {
 
     // BƯỚC 2: Lấy dữ liệu campaign
     logger.info("\n--- BƯỚC 2: LẤY DỮ LIỆU CAMPAIGN ---");
-    this._reportProgress("Bắt đầu lấy dữ liệu campaign", 15);
+    this._reportProgress("Bắt đầu lấy dữ liệu campaign");
     
     let all_campaign_results = [];
 
     for (const chunk of date_chunks) {
       logger.info(`\n>> Xử lý chunk: ${chunk.start} to ${chunk.end}`);
-      this._reportProgress(`Xử lý chunk: ${chunk.start} to ${chunk.end}`, 20);
+      this._reportProgress(`Xử lý chunk: ${chunk.start} to ${chunk.end}`);
       
-      const campaigns = await this._getAllCampaigns(chunk.start, chunk.end); // Trả về Map
+      const campaigns = await this._getAllCampaigns(chunk.start, chunk.end); 
       if (campaigns.size === 0) {
         logger.info("   -> Không có campaign nào trong khoảng thời gian này.");
         continue;
       }
       
       logger.info(`   -> Tìm thấy ${campaigns.size} campaigns. Chia thành lô để xử lý...`);
-      // [JS] Dùng _chunkList (static)
-      const campaignItems = Array.from(campaigns.entries()); // [ [id, metrics], ... ]
-      const batches = Array.from(GMVReporter._chunkList(campaignItems, 20)); // [ [ [id, metrics], ... ], ... ]
+      const campaignItems = Array.from(campaigns.entries()); 
+      const batches = Array.from(GMVReporter._chunkList(campaignItems, 20)); 
 
       // Hàm con để chạy 1 batch
       const fetchBatch = async (batch) => {
-        const campaignBatchMap = new Map(batch); // Chuyển [ [id, metrics] ] về Map
+        const campaignBatchMap = new Map(batch); 
         return this._fetchDataForBatch(campaignBatchMap, chunk.start, chunk.end);
       }
 
-      // [JS] Dùng Bluebird.map để chạy song song (thay ThreadPoolExecutor)
       const batchResults = await BluebirdPromise.map(batches, fetchBatch, { 
-        concurrency: 1 // Giống max_workers=1
+        concurrency: 1 
       });
       
       // Gộp kết quả
@@ -207,14 +196,13 @@ export class GMVCampaignProductDetailReporter extends GMVReporter {
     }
 
     // BƯỚC 3: Gộp dữ liệu
-    this._reportProgress("Bắt đầu gộp dữ liệu...", 80);
+    this._reportProgress("Bắt đầu gộp dữ liệu...");
     const final_data = this._enrichCampaignData(all_campaign_results, product_map);
     return flattenProductReport(final_data, this);
   }
-} // Kết thúc class
+} 
 
 /**
- * [ĐÃ DỊCH SANG JS]
  * Làm phẳng dữ liệu thô
  */
 export function flattenProductReport(campaign_data_list, context) {
@@ -244,7 +232,6 @@ export function flattenProductReport(campaign_data_list, context) {
       "product_img": campaign.product_info?.product_image_url,
     };
     
-    // [JS] Dùng Object.assign (giống .update() của Python)
     Object.assign(row, campaign.metrics || {});
     flattened_data.push(row);
   }

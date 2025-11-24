@@ -37,25 +37,22 @@ export class GMVCampaignCreativeDetailReporter extends GMVReporter {
       "page_size": 1000,
     };
     
-    // (Hàm của lớp cha)
-    return this._fetchAllPages(this.PERFORMANCE_API_URL, params, 1, 0.3); // throttling_delay=0.3
+    return this._fetchAllPages(this.PERFORMANCE_API_URL, params, 1, 0.3); 
   }
 
   /**
    * Lấy danh mục sản phẩm từ BC ID hợp lệ đầu tiên.
    */
   async _getProductCatalog() {
-    const bc_ids_list = await this._getBcIds(); // (Hàm của lớp cha)
+    const bc_ids_list = await this._getBcIds(); 
     if (!bc_ids_list || bc_ids_list.length === 0) {
       return [];
     }
     
     let products = [];
     for (const bc_id of bc_ids_list) {
-      const bc_products = await this._fetchAllTiktokProducts(bc_id); // (Hàm của lớp cha)
+      const bc_products = await this._fetchAllTiktokProducts(bc_id); 
       if (bc_products && bc_products.length > 0) {
-        logger.info(`\n=> Tìm thấy BC ID hợp lệ: ${bc_id}. Đã lấy ${bc_products.length} sản phẩm.`);
-        this._reportProgress(`Đã lấy ${bc_products.length} sản phẩm.`, 80);
         products.push(...bc_products);
       }
     }
@@ -69,7 +66,7 @@ export class GMVCampaignCreativeDetailReporter extends GMVReporter {
     // [JS] Chuyển đổi từ Array sang Map và ngược lại
     const batch_ids = campaign_batch.map(c => c[0]);
     const batch_names = campaign_batch.map(c => c[1]);
-    logger.info(`  [BẮT ĐẦU BATCH] Xử lý ${batch_ids.length} campaigns: ${batch_names.join(', ')}`);
+     this._reportProgress(`  [BẮT ĐẦU BATCH] Xử lý ${batch_ids.length} campaigns: ${batch_names.join(', ')}`);
     
     const batch_results = new Map(
       campaign_batch.map(([cid, cname]) => [
@@ -101,7 +98,7 @@ export class GMVCampaignCreativeDetailReporter extends GMVReporter {
     const product_id_chunks = Array.from(GMVReporter._chunkList(product_ids, 20)); 
     let all_creative_results = [];
     
-    logger.info(`  Tìm thấy ${product_ids.length} sản phẩm duy nhất, chia thành ${product_id_chunks.length} lô để lấy creative.`);
+     this._reportProgress(`  Tìm thấy ${product_ids.length} sản phẩm duy nhất, chia thành ${product_id_chunks.length} lô để lấy creative.`);
     
     for (const p_chunk of product_id_chunks) {
       const params_creative = {
@@ -128,12 +125,12 @@ export class GMVCampaignCreativeDetailReporter extends GMVReporter {
       }
     }
 
-    logger.info(`  [HOÀN THÀNH BATCH] Đã xử lý xong lô: ${batch_names.join(', ')}`);
+     this._reportProgress(`  [HOÀN THÀNH BATCH] Đã xử lý xong lô: ${batch_names.join(', ')}`);
     return Array.from(batch_results.values());
   }
 
   // --- CÁC HÀM LÀM GIÀU DỮ LIỆU (STATIC) ---
-  static _createProductInfoMap(product_list) {
+  _createProductInfoMap(product_list) {
     const product_map = new Map();
     for (const product of product_list) {
       const product_id = product.item_group_id;
@@ -148,8 +145,8 @@ export class GMVCampaignCreativeDetailReporter extends GMVReporter {
     return product_map;
   }
 
-  static _enrichWithProductDetails(performance_results, product_info_map) {
-    logger.info("Bắt đầu làm giàu dữ liệu với thông tin chi tiết sản phẩm...");
+  _enrichWithProductDetails(performance_results, product_info_map) {
+    this._reportProgress("Bắt đầu làm giàu dữ liệu với thông tin chi tiết sản phẩm...");
     for (const campaign of performance_results) {
       for (const product_perf of campaign.performance_data || []) {
         const item_group_id = product_perf.dimensions?.item_group_id;
@@ -194,7 +191,6 @@ export class GMVCampaignCreativeDetailReporter extends GMVReporter {
   }
 
   async _enrichWithCreativeMetadata(performance_results) {
-    logger.info("Bắt đầu làm giàu dữ liệu với metadata của creative (tuần tự)...");
     this._reportProgress("Làm giàu dữ liệu với metadata của creative");
     
     const tasks = [];
@@ -213,10 +209,10 @@ export class GMVCampaignCreativeDetailReporter extends GMVReporter {
     // Xử lý tuần tự
     for (let i = 0; i < tasks.length; i++) {
       const [product_perf, cid, igid, s_date, e_date] = tasks[i];
-      logger.info(`   Đang lấy metadata cho cặp (${cid}, ${igid}) - ${i + 1}/${tasks.length}...`);
+      // this._reportProgress(`   Đang lấy metadata cho cặp (${cid}, ${igid}) - ${i + 1}/${tasks.length}...`);
       
       if ((i + 1) % 10 === 0) {
-        this._reportProgress(`Lấy metadata: ${i + 1}/${tasks.length}`, 80);
+        this._reportProgress(`Lấy metadata: ${i + 1}/${tasks.length}`);
       }
       
       const metadata_list = await this._fetchCreativeMetadata(cid, igid, s_date, e_date);
@@ -237,12 +233,12 @@ export class GMVCampaignCreativeDetailReporter extends GMVReporter {
         }
       }
     }
-    logger.info(`\nHoàn thành làm giàu metadata cho ${tasks.length} cặp sản phẩm.`);
+    this._reportProgress(`Hoàn thành làm giàu metadata cho ${tasks.length} cặp sản phẩm.`);
     return performance_results;
   }
 
-  static _filterEmptyCreatives(enriched_campaign_data) {
-    logger.info("Bắt đầu lọc các creative không có hiệu suất...");
+  _filterEmptyCreatives(enriched_campaign_data) {
+    this._reportProgress("Bắt đầu lọc các creative không có hiệu suất...");
     const ZERO_METRICS = new Set(["cost", "orders"]);
     
     for (const campaign of enriched_campaign_data) {
@@ -262,14 +258,12 @@ export class GMVCampaignCreativeDetailReporter extends GMVReporter {
   // --- HÀM CÔNG KHAI (PUBLIC) ---
   async getData(date_chunks) {
     // === GIAI ĐOẠN 1: LẤY DỮ LIỆU HIỆU SUẤT ===
-    logger.info("--- GIAI ĐOẠN 1: BẮT ĐẦU LẤY DỮ LIỆU HIỆU SUẤT ---");
-    this._reportProgress("Bắt đầu lấy dữ liệu hiệu suất GMV...", 5);
+    this._reportProgress("GIAI ĐOẠN 1: Bắt đầu lấy dữ liệu hiệu suất GMV...");
 
     let all_performance_results = [];
     
     for (const chunk of date_chunks) {
       const { start: chunk_start, end: chunk_end } = chunk;
-      logger.info(`\n--- XỬ LÝ CHUNK: ${chunk_start} to ${chunk_end} ---`);
       this._reportProgress(`Xử lý chunk: ${chunk_start} to ${chunk_end}`);
       
       const params = {
@@ -312,11 +306,8 @@ export class GMVCampaignCreativeDetailReporter extends GMVReporter {
       all_performance_results.push(...valid_results);
     }
 
-    logger.info("\n--- HOÀN TẤT GIAI ĐOẠN 1: ĐÃ LẤY XONG DỮ LIỆU HIỆU SUẤT ---");
-    
     // === GIAI ĐOẠN 2: LẤY DANH MỤC SẢN PHẨM ===
-    logger.info("\n--- GIAI ĐOẠN 2: BẮT ĐẦU LẤY DANH MỤC SẢN PHẨM ---");
-    this._reportProgress("Bắt đầu lấy dữ liệu sản phẩm...", 50);
+    this._reportProgress("GIAI ĐOẠN 2: Bắt đầu lấy dữ liệu sản phẩm...");
 
     const product_catalog = await this._getProductCatalog();
     if (!product_catalog || product_catalog.length === 0) {
@@ -324,13 +315,12 @@ export class GMVCampaignCreativeDetailReporter extends GMVReporter {
     }
 
     // === GIAI ĐOẠN 3: LÀM GIÀU DỮ LIỆU VÀ HOÀN TẤT ===
-    logger.info("\n--- GIAI ĐOẠN 3: BẮT ĐẦU LÀM GIÀU DỮ LIỆU ---");
-    this._reportProgress("Bắt đầu làm giàu dữ liệu...", 90);
+    this._reportProgress("GIAI ĐOẠN 3: Bắt đầu làm giàu dữ liệu...");
 
     // (Hàm static của class này)
-    const product_info_map = GMVCampaignCreativeDetailReporter._createProductInfoMap(product_catalog);
-    let final_data = GMVCampaignCreativeDetailReporter._enrichWithProductDetails(all_performance_results, product_info_map);
-    final_data = GMVCampaignCreativeDetailReporter._filterEmptyCreatives(final_data);
+    const product_info_map = this._createProductInfoMap(product_catalog);
+    let final_data = this._enrichWithProductDetails(all_performance_results, product_info_map);
+    final_data = this._filterEmptyCreatives(final_data);
     final_data = await this._enrichWithCreativeMetadata(final_data);
     
     return flattenCreativeReport(final_data, this);

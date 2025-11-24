@@ -20,7 +20,7 @@ export class GMVReporter {
    * @param {function} [config.progress_callback] 
    * @param {string} [config.job_id]
    */
-  constructor({ access_token, advertiser_id, store_id, advertiser_name, store_name, progress_callback = null, job_id = null, redis_client = null }) {
+  constructor({ access_token, advertiser_id, store_id, advertiser_name, store_name, progress_callback = null, job_id = null, redis_client = null, task_logger=null }) {
     if (!access_token || !advertiser_id || !store_id) {
       throw new Error("access_token, advertiser_id, và store_id không được để trống.");
     }
@@ -45,6 +45,7 @@ export class GMVReporter {
     this.recovery_factor = 0.8;
 
     this.progress_callback = progress_callback;
+    this.task_logger = task_logger
     this.job_id = job_id;
 
     this.redis_client = redis_client;
@@ -113,9 +114,9 @@ export class GMVReporter {
   }
 
 
-  _reportProgress(message, progress = 0) {
+  _reportProgress(message) {
     if (this.progress_callback && this.job_id) {
-      this.progress_callback(this.job_id, "RUNNING", message, progress);
+      this.progress_callback(message);
     }
   }
     
@@ -201,8 +202,7 @@ async _makeApiRequestWithBackoff(url, params, max_retries = 6, base_delay = 3) {
       all_products = [];
     }
     
-    logger.info(`--- Hoàn tất lấy sản phẩm cho BC ID: ${bc_id}. Tổng cộng: ${all_products.length} sản phẩm. ---`);
-    this._reportProgress(`Đã lấy tổng cộng: ${all_products.length} sản phẩm.`);
+    this._reportProgress(`Hoàn tất lấy sản phẩm cho BC ID: ${bc_id}. Tổng cộng: ${all_products.length} sản phẩm.`);
     return all_products;
   }
   

@@ -1,7 +1,6 @@
-// /src/services/facebook/processors/billing.js
 import { fetchAllPagesWithCursor } from '../api.js';
 import { FACEBOOK_API_VERSION, CURRENCY_OFFSETS } from '../constants.js';
-import prisma from '../../../db/client.js'; // Import Prisma client to get account info
+import prisma from '../../../db/client.js'; 
 
 /**
  * Fetches billing activities for a single account.
@@ -17,7 +16,7 @@ async function fetchBillingForAccount(account, startDate, endDate, accessToken) 
     fields: "event_type,extra_data,date_time_in_timezone",
     since: fetchSince,
     until: fetchUntil,
-    limit: 750, // Reduced limit for safety
+    limit: 750, 
   };
 
   const activities = await fetchAllPagesWithCursor(
@@ -35,16 +34,14 @@ async function fetchBillingForAccount(account, startDate, endDate, accessToken) 
     let parsedExtraData = {};
     try {
       parsedExtraData = JSON.parse(activity.extra_data);
-      // Process currency value
       if (parsedExtraData.new_value !== undefined) {
         const currency = parsedExtraData.currency || "";
         let value = parseFloat(parsedExtraData.new_value);
         if (
           typeof value === "number" &&
           currency &&
-          !CURRENCY_OFFSETS[currency.toUpperCase()] === 1 // Check if offset is NOT 1
+          !CURRENCY_OFFSETS[currency.toUpperCase()] === 1 
         ) {
-          // Default to 100 offset if not 1 (simplifies original logic)
           value /= 100;
         }
         parsedExtraData.new_value = value;
@@ -55,7 +52,6 @@ async function fetchBillingForAccount(account, startDate, endDate, accessToken) 
       account_id: account.id,
       account_name: account.name,
       event_type: activity.event_type,
-      // Keep raw string, sanitizing is dataWriter's job
       date_time_in_timezone: activity.date_time_in_timezone, 
       fetch_timestamp: new Date(),
       extra_data_parsed: parsedExtraData,
@@ -63,7 +59,6 @@ async function fetchBillingForAccount(account, startDate, endDate, accessToken) 
   }
   return allRowsToAdd;
 }
-
 
 /**
  * Processes the FB Billing Data report.
@@ -74,9 +69,9 @@ async function fetchBillingForAccount(account, startDate, endDate, accessToken) 
  * @param {string} accessToken - The Facebook Access Token.
  * @returns {Promise<object>} - An object { status, data, newRows }.
  */
-export async function processBillingReport(options, accessToken) {
+export async function processBillingReport(options, accessToken, task_logger) {
   const { accountsToProcess, startDate, endDate } = options;
-  console.log("Starting FB Billing Report...");
+  task_logger.info("Starting FB Billing Report...");
 
   // --- 1. Get Account Info (BM ID, Tax) from Database ---
   const accountInfoMap = new Map();
@@ -85,7 +80,7 @@ export async function processBillingReport(options, accessToken) {
       select: {
         account_id: true,
         bm_id: true,
-        tax_and_fee: true, // Assumes this is a Float in your schema
+        tax_and_fee: true, 
       }
     });
     
@@ -95,10 +90,9 @@ export async function processBillingReport(options, accessToken) {
         taxFee: acc.tax_and_fee || 0,
       });
     });
-    console.log(`Loaded info for ${accountInfoMap.size} accounts from DB.`);
+    task_logger.info(`Loaded info for ${accountInfoMap.size} accounts from DB.`);
   } catch (e) {
-    console.error("Failed to load account info from DB for Billing report.", e.message);
-    // Continue without BM IDs and Tax info
+    task_logger.error("Failed to load account info from DB for Billing report.", e.message);
   }
 
   // --- 2. Fetch Billing Data for all accounts ---
@@ -106,7 +100,7 @@ export async function processBillingReport(options, accessToken) {
   for (const account of accountsToProcess) {
     const accountRows = await fetchBillingForAccount(account, startDate, endDate, accessToken);
     allRawRows = allRawRows.concat(accountRows);
-    await new Promise(resolve => setTimeout(resolve, 300)); // Sleep
+    await new Promise(resolve => setTimeout(resolve, 300)); 
   }
 
   if (allRawRows.length === 0) {
@@ -136,8 +130,6 @@ export async function processBillingReport(options, accessToken) {
       ? `https://business.facebook.com/ads/manage/billing_transaction/?act=${cleanAccountId}&pdf=true&source=billing_summary&tx_type=3&txid=${transactionId}`
       : "";
 
-    // Return flat object with "Friendly Names"
-    // This matches the KEY_MAP in dataWriter.js
     return {
       "Account ID": row.account_id,
       "Account Name": row.account_name,
@@ -149,14 +141,14 @@ export async function processBillingReport(options, accessToken) {
       "Transaction ID": transactionId,
       "Action": parsedData.action || "",
       "Type": parsedData.type || "",
-      "Tax & Fee %": taxFeePercent, // dataWriter will handle this
+      "Tax & Fee %": taxFeePercent, 
       "Total Value": totalValue,
       "Billing Hub Link": billingHubLink,
       "Download Invoice Link": downloadInvoiceLink,
     };
   });
 
-  console.log(`Billing Report finished. Total rows: ${processedData.length}`);
+  task_logger.info(`Billing Report finished. Total rows: ${processedData.length}`);
   return { 
     status: "SUCCESS", 
     data: processedData, 

@@ -1,12 +1,12 @@
 import prisma from '../db/client.js';
 import logger from '../utils/logger.js';
 
-// [MỚI] Import các hàm "dispatcher" nghiệp vụ của bạn
+import { TaskLogger } from '../utils/task_logger.js';
+
 import { processFacebookJob } from '../services/facebook/index.js';
 import { processTiktokJob } from '../services/tiktok/index.js'; 
-// import { processGoogleJob } from '../services/google/index.js'; // (Giả sử bạn có)
+// import { processGoogleJob } from '../services/google/index.js'; 
 
-// Hằng số (copy từ service qua)
 const CURRENT_TASK_PROPERTY = "TASK_MANAGER_CURRENT_TASK";
 const TASK_HISTORY_PROPERTY = "TASK_MANAGER_HISTORY";
 
@@ -19,16 +19,19 @@ export const processJobWorker = async (job) => {
   const taskId = task.taskId;
   logger.info(`Worker bắt đầu xử lý task ${taskId} cho user ${userId}...`);
 
+  const task_logger = new TaskLogger(userId, taskId);
+  task_logger.info(`Khởi tạo task logger thành công!`);
+
   try {
     let result; // { status, data, newRows }
     
     // 1. [QUAN TRỌNG] Điều phối (Dispatch) tác vụ
     // (Đây là logic switch-case bạn đã có trong GAS)
     if (task.taskType.startsWith("FACEBOOK_")) {
-      result = await processFacebookJob(task.params, accessToken, userId);
+      result = await processFacebookJob(task.params, accessToken, userId, task_logger);
     
     } else if (task.taskType.startsWith("TIKTOK_")) {
-      result = await processTiktokJob(task, accessToken, userId);
+      result = await processTiktokJob(task, accessToken, userId, task_logger);
       
     } else if (task.taskType.startsWith("GOOGLE_")) {
       // result = await processGoogleJob(task.params, accessToken, userId);
@@ -39,7 +42,7 @@ export const processJobWorker = async (job) => {
     }
 
     // 2. Xử lý kết quả THÀNH CÔNG
-    logger.info(`Task ${taskId} hoàn thành. Status: ${result.status}. New rows: ${result.newRows}`);
+    task_logger.info(`Task hoàn thành. Status: ${result.status}. New rows: ${result.newRows}`)
     
     // Cập nhật trạng thái
     const finalMessage = `Hoàn tất! (Tổng cộng ${result.newRows || 0} dòng mới)`;
@@ -47,7 +50,7 @@ export const processJobWorker = async (job) => {
 
   } catch (error) {
     // 3. Xử lý lỗi (FAILED)
-    logger.error(`Task ${taskId} thất bại: ${error.message}`);
+    task_logger.error(`Task thất bại: ${error.message}`);
     await updateTaskStatus(userId, taskId, "FAILED", `Lỗi: ${error.message}`);
   }
 };

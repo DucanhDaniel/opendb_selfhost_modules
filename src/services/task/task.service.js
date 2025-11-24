@@ -85,18 +85,60 @@ async function initiateTask(userId, taskData) {
     nextChunkIndex: 0,
   };
 
+  // const user = await prisma.user.findUnique({
+  //   where: { id: userId },
+  //   select: { settings: true }
+  // });
+  // const currentSettings = user?.settings || {};
+
+  // const taskParamsToSave = {
+  //   createdAt: createdAt,
+  //   taskType: taskType,
+  //   ...params,
+  // };
+
+  // const newHistoryEntry = {
+  //   taskId: taskId,
+  //   timestamp: createdAt,
+  //   description: description,
+  //   runType: runType,
+  //   status: "QUEUED",
+  //   message: "Đang chờ xử lý...",
+  // };
+  
+  // const currentHistory = currentSettings[TASK_HISTORY_PROPERTY] || [];
+  // currentHistory.unshift(newHistoryEntry); // Thêm vào đầu mảng
+  // if (currentHistory.length > MAX_HISTORY_ENTRIES) {
+  //   currentHistory.pop(); // Xóa entry cũ nhất
+  // }
+
+  // // 5. Cập nhật đối tượng settings
+  // const updatedSettings = {
+  //   ...currentSettings,
+  //   [CURRENT_TASK_PROPERTY]: newTask, 
+  //   [TASK_HISTORY_PROPERTY]: currentHistory, 
+  //   [TASK_PARAMS_PREFIX + taskId]: taskParamsToSave 
+  // };
+
+  // // 6. Lưu lại vào DB
+  // await prisma.user.update({
+  //   where: { id: userId },
+  //   data: { settings: updatedSettings }
+  // });
+
+  // logger.info(`Đã khởi tạo task ${taskId} cho user ${userId}`);
+  
+  // // 7. Trả về task mới cho controller
+  // return newTask;
+
   const user = await prisma.user.findUnique({
     where: { id: userId },
     select: { settings: true }
   });
   const currentSettings = user?.settings || {};
 
-  const taskParamsToSave = {
-    createdAt: createdAt,
-    taskType: taskType,
-    ...params,
-  };
-
+  // 1. Cập nhật History (Giữ nguyên)
+  const currentHistory = currentSettings[TASK_HISTORY_PROPERTY] || [];
   const newHistoryEntry = {
     taskId: taskId,
     timestamp: createdAt,
@@ -106,29 +148,53 @@ async function initiateTask(userId, taskData) {
     message: "Đang chờ xử lý...",
   };
   
-  const currentHistory = currentSettings[TASK_HISTORY_PROPERTY] || [];
-  currentHistory.unshift(newHistoryEntry); // Thêm vào đầu mảng
+  currentHistory.unshift(newHistoryEntry);
+  
+  // Nếu history quá dài, cắt bớt
   if (currentHistory.length > MAX_HISTORY_ENTRIES) {
-    currentHistory.pop(); // Xóa entry cũ nhất
+    currentHistory.pop(); 
   }
 
-  // 5. Cập nhật đối tượng settings
-  const updatedSettings = {
-    ...currentSettings,
-    [CURRENT_TASK_PROPERTY]: newTask, 
-    [TASK_HISTORY_PROPERTY]: currentHistory, 
-    [TASK_PARAMS_PREFIX + taskId]: taskParamsToSave 
-  };
+  // 2. [LOGIC MỚI] Dọn dẹp các key TASK_PARAMS cũ
+  // Lấy danh sách tất cả taskId đang có trong history (bao gồm cả cái mới)
+  const validTaskIds = new Set(currentHistory.map(h => h.taskId));
+  
+  // Tạo một object settings mới để cập nhật
+  const nextSettings = { ...currentSettings };
 
-  // 6. Lưu lại vào DB
+  // Duyệt qua tất cả key trong settings hiện tại
+  Object.keys(nextSettings).forEach(key => {
+    // Nếu key là một TASK_PARAM (bắt đầu bằng prefix)
+    if (key.startsWith(TASK_PARAMS_PREFIX)) {
+      // Trích xuất taskId từ key (ví dụ: TASK_PARAMS_123abc -> 123abc)
+      const existingTaskId = key.replace(TASK_PARAMS_PREFIX, '');
+      
+      // Nếu taskId này KHÔNG còn nằm trong danh sách lịch sử hợp lệ
+      if (!validTaskIds.has(existingTaskId)) {
+        delete nextSettings[key]; // Xóa nó đi
+        logger.info(`Đã dọn dẹp params cũ cho task ${existingTaskId}`);
+      }
+    }
+  });
+
+  // 3. Thêm các giá trị mới vào nextSettings
+  nextSettings[CURRENT_TASK_PROPERTY] = newTask;
+  nextSettings[TASK_HISTORY_PROPERTY] = currentHistory;
+  
+  const taskParamsToSave = {
+    createdAt: createdAt,
+    taskType: taskType,
+    ...params,
+  };
+  nextSettings[TASK_PARAMS_PREFIX + taskId] = taskParamsToSave;
+
+  // 4. Lưu lại vào DB
   await prisma.user.update({
     where: { id: userId },
-    data: { settings: updatedSettings }
+    data: { settings: nextSettings }
   });
 
   logger.info(`Đã khởi tạo task ${taskId} cho user ${userId}`);
-  
-  // 7. Trả về task mới cho controller
   return newTask;
 }
 

@@ -1,5 +1,3 @@
-import { logTiktok } from '../helpers.js';
-// Import các Reporter Class đã chuyển đổi (Đảm bảo đường dẫn đúng)
 import { GMVCampaignProductDetailReporter } from '../../gmv/processor/product.js';
 import { GMVCampaignCreativeDetailReporter } from '../../gmv/processor/creative.js'; 
 import { splitDateRangeIntoMonths } from '../helpers.js';
@@ -14,9 +12,8 @@ import Redis from 'ioredis';
  * @param {string} jobId - Job ID để log.
  * @returns {Promise<object>} - { status, data, newRows, message? }.
  */
-export async function processGmvReport(params, templateConfig, accessToken, jobId) {
-//   const functionName = 'processGmvReport (GMV)';
-//   logTiktok(jobId, functionName, 'Info', `Processing GMV template: ${params.templateName}`);
+export async function processGmvReport(params, templateConfig, accessToken, jobId, task_logger) {
+  task_logger.info(`Processing GMV template: ${params.templateName}`);
 
   // 1. Lấy thông tin Account và Store
   // Giả sử 'accountsToProcess' chứa thông tin Advertiser
@@ -28,8 +25,7 @@ export async function processGmvReport(params, templateConfig, accessToken, jobI
   const redis_client = new Redis({
     host: process.env.REDIS_HOST || 'localhost',
     port: parseInt(process.env.REDIS_PORT || '6379'),
-    password: process.env.REDIS_PASSWORD, // Tự động bỏ qua nếu không có password
-    // Thêm retry strategy để tránh crash nếu Redis chập chờn
+    password: process.env.REDIS_PASSWORD,
     retryStrategy(times) {
       const delay = Math.min(times * 50, 2000);
       return delay;
@@ -52,14 +48,10 @@ export async function processGmvReport(params, templateConfig, accessToken, jobI
     store_id: storeId,
     job_id: jobId,
     redis_client: redis_client,
-    // Callback để Reporter (base class) gọi ngược lại logTiktok
-    // progress_callback: (jid, status, message, progress) => {
-    //    // Chuyển đổi format log của Reporter sang logTiktok
-    //    logTiktok(jid, functionName, 'Info', `[Reporter ${progress}%] ${message}`);
-    // }
-    progress_callback: (jobId, status, message, progress) => {
-        console.log(`[PROGRESS] ${message} (${progress}%)`);
+    progress_callback: (message) => {
+      task_logger.info(`[PROGRESS] ${message}`);
     },
+    task_logger:task_logger
   };
 
   // 3. Chọn Reporter Class dựa trên tên Template
@@ -81,19 +73,17 @@ export async function processGmvReport(params, templateConfig, accessToken, jobI
     const enriched_results = await reporter.getData(date_chunks);
 
     if (!enriched_results || enriched_results.length === 0) {
-    //   logTiktok(jobId, functionName, 'Info', 'No GMV data returned.');
-        console.log("[INFO]: No GMV data returned!");
+      task_logger.info("[INFO]: No GMV data returned!");
       return { status: "SUCCESS", data: [], newRows: 0, message: "No data found." };
     }
     
     const dataToWrite = enriched_results;
 
-    // logTiktok(jobId, functionName, 'Success', `GMV Processed ${dataToWrite.length} rows.`);
-    console.log(`[INFO]: Success', GMV Processed ${dataToWrite.length} rows.`);
+    task_logger.info(`[INFO]: Success', GMV Processed ${dataToWrite.length} rows.`);
     return { status: "SUCCESS", data: dataToWrite, newRows: dataToWrite.length };
 
   } catch (error) {
-    // logTiktok(jobId, functionName, 'Error', `GMV Reporter failed: ${error.message}`);
-    throw error; // Ném lỗi để TaskProcessor xử lý
+    task_logger.info(`GMV Reporter failed: ${error.message}`);
+    throw error; 
   }
 }
