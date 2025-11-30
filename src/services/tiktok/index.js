@@ -12,44 +12,42 @@ import { processGmvReport } from './processors/gmv_detail_report.js';
  * @param {string} accessToken - TikTok Access Token.
  * @returns {Promise<object>} - { status, data?, newRows, message? } or { status: 'PENDING', ... } for async jobs.
  */
-export async function processTiktokJob(task, accessToken, userId, writeData=true) {
+export async function processTiktokJob(task, accessToken, userId, task_logger, writeData=true) {
   const { taskId, params } = task;
-  console.log(task);
   const templateName = params.templateName;
-  console.log(templateName);
   const templateConfig = getTiktokTemplateConfigByName(templateName);
   if (!templateConfig) {
-    logger.error(`[TikTok Dispatcher] Task ${taskId}: Template not found "${templateName}"`);
+    task_logger.error(`[TikTok Dispatcher] Task ${taskId}: Template not found "${templateName}"`);
     throw new Error(`TikTok template not found: ${templateName}`);
   }
 
-  logger.info(`[TikTok Dispatcher] Task ${taskId}: Processing template "${templateName}" (Type: ${templateConfig.type})`);
+  task_logger.info(`Processing template "${templateName}" (Type: ${templateConfig.type})`);
 
   let processorResult;
   switch (templateConfig.type) {
     case "BASIC": 
-      processorResult = await processBasicReport(params, templateConfig, accessToken, taskId);
+      processorResult = await processBasicReport(params, templateConfig, accessToken, taskId, task_logger);
       break;
 
     case "BCA_BC_INFO":
-      processorResult = await processBcaBcInfo(params, templateConfig, accessToken, taskId);
+      processorResult = await processBcaBcInfo(params, templateConfig, accessToken, taskId, task_logger);
       break;
 
     case "BCA_ACCOUNT_INFO":
-      processorResult = await processBcaAccountInfo(params, templateConfig, accessToken, taskId);
+      processorResult = await processBcaAccountInfo(params, templateConfig, accessToken, taskId, task_logger);
       break;
 
     case "BCA_ASSET_INFO":
-      processorResult = await processBcaAssetInfo(params, templateConfig, accessToken, taskId);
+      processorResult = await processBcaAssetInfo(params, templateConfig, accessToken, taskId, task_logger);
       break;
 
     case "MULTI_STEP_GMV_PRODUCT":
     case "MULTI_STEP_GMV_CREATIVE":
-       processorResult = await processGmvReport(params, templateConfig, accessToken, taskId);
+       processorResult = await processGmvReport(params, templateConfig, accessToken, taskId, task_logger);
        break;
 
     case "GMV_BASIC":
-      processorResult = await processGmvBasicReport(params, templateConfig, accessToken, taskId);
+      processorResult = await processGmvBasicReport(params, templateConfig, accessToken, taskId, task_logger);
       break;
 
     default:

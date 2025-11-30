@@ -3,8 +3,8 @@ import path from 'path';
 import { writeDataToDatabase } from '../../src/db/dataWriter.js'; 
 import prisma from '../../src/db/client.js'; 
 
-const TEMPLATE_NAME_TO_TEST = 'GMV Product Campaign Performance';
-const JSON_FILE_PATH = path.join(process.cwd(), 'GMV_Product_Campaign_Performance.json');
+const TEMPLATE_NAME_TO_TEST = 'Báo cáo đơn hàng chi tiết (Full Data)';
+const JSON_FILE_PATH = path.join(process.cwd(), 'output/pancake_data.json');
 
 async function runDbTest() {
   console.log(`[DB Write Test] Bắt đầu test ghi dữ liệu cho template: "${TEMPLATE_NAME_TO_TEST}"`);

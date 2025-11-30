@@ -1,5 +1,4 @@
 import { fetchAllTiktokPages, fetchTiktokApi } from '../api.js';
-import { logTiktok } from '../helpers.js';
 
 // Helper to format timestamp (e.g., for create_time)
 function formatTimestamp(unixTimestamp) {
@@ -21,9 +20,9 @@ function formatTimestamp(unixTimestamp) {
  * @param {string} jobId - Job ID for logging.
  * @returns {Promise<object>} - { status, data, newRows, message? }.
  */
-export async function processBcaBcInfo(params, templateConfig, accessToken, jobId) {
+export async function processBcaBcInfo(params, templateConfig, accessToken, jobId, task_logger) {
     const functionName = 'processBcaBcInfo';
-    logTiktok(jobId, functionName, 'Info', 'Starting BC Info report...');
+    task_logger.info('Starting BC Info report...');
     const { selectedFields } = params;
 
     // Determine metrics to fetch (use defaults if none selected, focusing on essentials)
@@ -31,7 +30,7 @@ export async function processBcaBcInfo(params, templateConfig, accessToken, jobI
     let apiMetrics = selectedFields.filter(field => allAvailableMetrics.includes(field));
     if (apiMetrics.length === 0) {
         apiMetrics = ["bc_id", "bc_name"]; // Sensible defaults
-        logTiktok(jobId, functionName, 'Warn', 'No metrics selected, using defaults: bc_id, bc_name.');
+        task_logger.warn('No metrics selected, using defaults: bc_id, bc_name.');
     }
 
     const apiParams = { page_size: 50 }; // API uses page/page_size
@@ -47,7 +46,7 @@ export async function processBcaBcInfo(params, templateConfig, accessToken, jobI
 
         if (dataFromApi.length === 0 || dataFromApi[0]?._errorType) {
             const message = dataFromApi[0]?._errorType ? dataFromApi[0].message : "No BC data found.";
-            logTiktok(jobId, functionName, 'Info', message);
+            task_logger.info(message);
             return { status: "SUCCESS", data: [], newRows: 0, message };
         }
 
@@ -77,11 +76,11 @@ export async function processBcaBcInfo(params, templateConfig, accessToken, jobI
             return finalRow;
         });
 
-        logTiktok(jobId, functionName, 'Success', `Processed ${dataToWrite.length} BCs.`);
+        task_logger.info(`Processed ${dataToWrite.length} BCs.`);
         return { status: "SUCCESS", data: dataToWrite, newRows: dataToWrite.length };
 
     } catch (e) {
-        logTiktok(jobId, functionName, 'Error', `Failed: ${e.message}`);
+        task_logger.error(`Failed: ${e.message}`);
         throw e;
     }
 }
@@ -89,14 +88,14 @@ export async function processBcaBcInfo(params, templateConfig, accessToken, jobI
 /**
  * Processes the "BC & Accounts Info" report. Fetches info for each account.
  */
-export async function processBcaAccountInfo(params, templateConfig, accessToken, jobId) {
+export async function processBcaAccountInfo(params, templateConfig, accessToken, jobId, task_logger) {
     const functionName = 'processBcaAccountInfo';
-    logTiktok(jobId, functionName, 'Info', 'Starting BC & Accounts Info report...');
+    task_logger.info('Starting BC & Accounts Info report...');
     const { selectedFields, accountsToProcess } = params; // accountsToProcess contains { id, name }
 
     const idsToProcess = accountsToProcess?.map(a => a.id);
     if (!idsToProcess || idsToProcess.length === 0) {
-        logTiktok(jobId, functionName, 'Info', 'No Ad Accounts selected.');
+        task_logger.info('No Ad Accounts selected.');
         return { status: "SUCCESS", data: [], newRows: 0, message: "No Ad Accounts selected." };
     }
 
@@ -105,7 +104,7 @@ export async function processBcaAccountInfo(params, templateConfig, accessToken,
     let apiFields = selectedFields.filter(field => allAvailableFields.includes(field));
      if (apiFields.length === 0) {
         apiFields = ["advertiser_id", "name"]; // Sensible defaults
-        logTiktok(jobId, functionName, 'Warn', 'No fields selected, using defaults: advertiser_id, name.');
+        task_logger.warn('No fields selected, using defaults: advertiser_id, name.');
     }
      // Always include advertiser_id for mapping results back
     if (!apiFields.includes('advertiser_id')) {
@@ -118,7 +117,7 @@ export async function processBcaAccountInfo(params, templateConfig, accessToken,
 
     for (let i = 0; i < totalAccounts; i++) {
         const currentAdvId = idsToProcess[i];
-        logTiktok(jobId, functionName, 'Progress', `Fetching info for account ${i+1}/${totalAccounts} (${currentAdvId})...`);
+        task_logger.info(`Fetching info for account ${i+1}/${totalAccounts} (${currentAdvId})...`);
 
         const apiParams = {
             advertiser_ids: JSON.stringify([currentAdvId]),
@@ -146,14 +145,14 @@ export async function processBcaAccountInfo(params, templateConfig, accessToken,
                 dataToWrite.push(finalRow);
 
             } else {
-                 logTiktok(jobId, functionName, 'Warn', `No data returned for account ${currentAdvId}`);
+                 task_logger.warn(`No data returned for account ${currentAdvId}`);
                  // Add a row indicating no data, or skip? Add placeholder for now.
                  const placeholderRow = { advertiser_id: currentAdvId, name: 'No data returned' };
                  selectedFields.forEach(f => { if (!placeholderRow.hasOwnProperty(f)) placeholderRow[f] = null; });
                  dataToWrite.push(placeholderRow);
             }
         } catch (e) {
-             logTiktok(jobId, functionName, 'Error', `Failed account ${currentAdvId}: ${e.message}`);
+             task_logger.error(`Failed account ${currentAdvId}: ${e.message}`);
              // Add a row indicating the error
              const errorRow = { advertiser_id: currentAdvId, name: `Error: ${e.message}` };
              selectedFields.forEach(f => { if (!errorRow.hasOwnProperty(f)) errorRow[f] = null; });
@@ -162,7 +161,7 @@ export async function processBcaAccountInfo(params, templateConfig, accessToken,
         await new Promise(resolve => setTimeout(resolve, 500)); // Delay
     }
 
-    logTiktok(jobId, functionName, 'Success', `Processed ${dataToWrite.length} accounts.`);
+    task_logger.info(`Processed ${dataToWrite.length} accounts.`);
     return { status: "SUCCESS", data: dataToWrite, newRows: dataToWrite.length };
 }
 
@@ -170,9 +169,9 @@ export async function processBcaAccountInfo(params, templateConfig, accessToken,
 /**
  * Processes the "BC Assets Info" report.
  */
-export async function processBcaAssetInfo(params, templateConfig, accessToken, jobId) {
+export async function processBcaAssetInfo(params, templateConfig, accessToken, jobId, task_logger) {
     const functionName = 'processBcaAssetInfo';
-    logTiktok(jobId, functionName, 'Info', 'Starting BC Assets Info report...');
+    task_logger.info('Starting BC Assets Info report...');
     const { selectedFields, accountsToProcess, assetTypes } = params; // accountsToProcess are BCs
 
     const bcIdsToProcess = accountsToProcess?.map(a => a.id);
@@ -190,7 +189,7 @@ export async function processBcaAssetInfo(params, templateConfig, accessToken, j
     for (const bcId of bcIdsToProcess) {
         for (const assetType of assetTypes) {
             callCounter++;
-            logTiktok(jobId, functionName, 'Progress', `Call ${callCounter}/${totalCalls}: BC ${bcId}, Asset ${assetType}...`);
+            task_logger.info(`Call ${callCounter}/${totalCalls}: BC ${bcId}, Asset ${assetType}...`);
 
             const apiParams = { bc_id: bcId, asset_type: assetType, page_size: 50 };
 
@@ -205,7 +204,7 @@ export async function processBcaAssetInfo(params, templateConfig, accessToken, j
 
                  if (dataFromApi.length === 0 || dataFromApi[0]?._errorType) {
                     const message = dataFromApi[0]?._errorType ? dataFromApi[0].message : `No ${assetType} assets found for BC ${bcId}.`;
-                    logTiktok(jobId, functionName, 'Info', message);
+                    task_logger.info(message);
                     continue; // Skip
                  }
 
@@ -223,7 +222,7 @@ export async function processBcaAssetInfo(params, templateConfig, accessToken, j
                 allData.push(...processedData);
 
             } catch (e) {
-                logTiktok(jobId, functionName, 'Error', `Failed BC ${bcId}, Asset ${assetType}: ${e.message}`);
+                task_logger.error(`Failed BC ${bcId}, Asset ${assetType}: ${e.message}`);
                  // Add error placeholder row if needed
                  // const errorRow = { bc_id: bcId, asset_type: assetType, asset_name: `Error: ${e.message}` };
                  // selectedFields.forEach(f => { if (!errorRow.hasOwnProperty(f)) errorRow[f] = null; });
@@ -233,6 +232,6 @@ export async function processBcaAssetInfo(params, templateConfig, accessToken, j
         }
     }
 
-    logTiktok(jobId, functionName, 'Success', `Processed ${allData.length} assets.`);
+    task_logger.info(`Processed ${allData.length} assets.`);
     return { status: "SUCCESS", data: allData, newRows: allData.length };
 }

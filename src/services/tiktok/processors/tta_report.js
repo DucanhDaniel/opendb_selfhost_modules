@@ -1,6 +1,6 @@
 import { fetchAllTiktokPages } from '../api.js';
 import { getProvinceNameMap } from '../utils.js';
-import { splitDateRangeIntoMonths, logTiktok } from '../helpers.js';
+import { splitDateRangeIntoMonths } from '../helpers.js';
 import { TIKTOK_PERCENT_METRICS } from '../constants.js';
 
 /**
@@ -11,10 +11,9 @@ import { TIKTOK_PERCENT_METRICS } from '../constants.js';
  * @param {string} jobId - Job ID for logging.
  * @returns {Promise<object>} - { status, data, newRows, message? }.
  */
-export async function processBasicReport(params, templateConfig, accessToken, jobId) {
-  console.log(params)
+export async function processBasicReport(params, templateConfig, accessToken, jobId, task_logger) {
   const functionName = 'processBasicReport (TTA)';
-  logTiktok(jobId, functionName, 'Info', `Processing template: ${params.templateName}`);
+  task_logger.info(`Processing template: ${params.templateName}`);
   const { startDate, endDate, selectedFields, accountsToProcess } = params;
 
   const advertiserInfo = accountsToProcess?.[0] || {};
@@ -49,11 +48,11 @@ export async function processBasicReport(params, templateConfig, accessToken, jo
       provinceMap = await getProvinceNameMap();
   }
 
-  logTiktok(jobId, functionName, 'Info', `Fetching data in ${dateChunks.length} monthly chunks...`);
+  task_logger.info(`Fetching data in ${dateChunks.length} monthly chunks...`);
 
   // --- Fetch Data Month by Month ---
   for (const chunk of dateChunks) {
-    logTiktok(jobId, functionName, 'Info', `Fetching chunk: ${chunk.start} to ${chunk.end}`);
+    task_logger.info(`Fetching chunk: ${chunk.start} to ${chunk.end}`);
     const baseParams = {
       advertiser_id: advertiserId,
       start_date: chunk.start,
@@ -74,7 +73,7 @@ export async function processBasicReport(params, templateConfig, accessToken, jo
 
     try {
       const dataForChunk = await fetchAllTiktokPages(
-        templateConfig.api_endpoint, // Should be TIKTOK_REPORT_URL
+        templateConfig.api_endpoint, 
         baseParams,
         accessToken,
         jobId,
@@ -89,12 +88,12 @@ export async function processBasicReport(params, templateConfig, accessToken, jo
       allDataFromApi.push(...dataForChunk);
 
     } catch (e) {
-      logTiktok(jobId, functionName, 'Error', `Failed chunk ${chunk.start}-${chunk.end}: ${e.message}. Skipping.`);
+      task_logger.error(`Failed chunk ${chunk.start}-${chunk.end}: ${e.message}. Skipping.`);
     }
   } // End date chunk loop
 
   if (allDataFromApi.length === 0) {
-      logTiktok(jobId, functionName, 'Info', 'No data returned from API.');
+      task_logger.info('No data returned from API.');
       return { status: "SUCCESS", data: [], newRows: 0, message:"No data found for the selected criteria." };
   }
 
@@ -135,7 +134,7 @@ export async function processBasicReport(params, templateConfig, accessToken, jo
     return finalRow; // Return the row with only selected fields
   });
 
-  logTiktok(jobId, functionName, 'Success', `Processed ${dataToWrite.length} rows.`);
+  task_logger.info(`Processed ${dataToWrite.length} rows.`);
   // Return data for the Task Processor to handle writing
   return { status: "SUCCESS", data: dataToWrite, newRows: dataToWrite.length };
 }

@@ -22,11 +22,11 @@ const SLEEP_TIME = 4000; // 4 seconds sleep
  * @param {string} accessToken - The Facebook Access Token.
  * @returns {Promise<object>} - An object { status, data, newRows }.
  */
-export async function processGenericDailyReport(options, accessToken) {
+export async function processGenericDailyReport(options, accessToken, task_logger) {
   const { accountsToProcess, startDate, endDate, selectedFields, templateName } = options;
   const templateConfig = getFacebookTemplateConfigByName(templateName);
   
-  console.log(`Starting Daily Report (Batch): ${templateName}`);
+  task_logger.info(`Starting Daily Report (Batch): ${templateName}`);
   
   // --- 1. Prepare Initial API Requests (with Date Chunks) ---
   let allInitialRequests = [];
@@ -96,7 +96,7 @@ export async function processGenericDailyReport(options, accessToken) {
   let waveCount = 1;
 
   while (requestsForCurrentWave.length > 0) {
-    console.log(`--- Processing Wave ${waveCount} (${requestsForCurrentWave.length} requests) ---`);
+    task_logger.info(`--- Processing Wave ${waveCount} (${requestsForCurrentWave.length} requests) ---`);
     let requestsForNextWave = [];
     
     for (let i = 0; i < requestsForCurrentWave.length; i += BATCH_SIZE) {
@@ -105,7 +105,7 @@ export async function processGenericDailyReport(options, accessToken) {
       
       const responseJson = await fetchFacebookBatchApi(urlsForBatch, accessToken);
       if (!responseJson || !responseJson.results) {
-        console.warn(`Batch ${i/BATCH_SIZE + 1} failed or returned invalid data. Skipping.`);
+        task_logger.warn(`Batch ${i/BATCH_SIZE + 1} failed or returned invalid data. Skipping.`);
         continue;
       }
       
@@ -120,7 +120,7 @@ export async function processGenericDailyReport(options, accessToken) {
         const { level, account } = metadata;
         
         if (status_code !== 200) {
-          console.warn(`Request failed (Code: ${status_code}). Error: ${JSON.stringify(error)}`);
+          task_logger.warn(`Request failed (Code: ${status_code}). Error: ${JSON.stringify(error)}`);
           continue;
         }
         if (!responseBody || !responseBody.data) continue;
@@ -195,7 +195,7 @@ export async function processGenericDailyReport(options, accessToken) {
     waveCount++;
   } // end while(requestsForCurrentWave)
 
-  console.log(`Daily Report finished. Total rows: ${allProcessedData.length}`);
+  task_logger.info(`Daily Report finished. Total rows: ${allProcessedData.length}`);
   return { 
     status: "SUCCESS", 
     data: allProcessedData, 

@@ -64,6 +64,7 @@ model FAD_CampaignOverviewReport {
   onFacebookPurchases     Int? // "On-Facebook Purchases"
 
   // @@unique([account_id, date_start, date_stop])
+  @@index([user_id])
 }
 
 // Campaign Performance by Age
@@ -99,6 +100,7 @@ model FAD_CampaignPerformanceByAge {
   date_stop  DateTime?
 
   // @@unique([account_id, date_start, date_stop])
+  @@index([user_id])
 }
 
 // Campaign Performance by Gender
@@ -134,6 +136,7 @@ model FAD_CampaignPerformanceByGender {
   date_stop  DateTime?
 
   // @@unique([account_id, date_start, date_stop])
+  @@index([user_id])
 }
 
 // Campaign Performance by Platform
@@ -174,6 +177,7 @@ model FAD_CampaignPerformanceByPlatform {
   onFacebookPurchases     Int?
 
   // @@unique([account_id, date_start, date_stop])
+  @@index([user_id])
 }
 
 // Campaign Performance by Region
@@ -213,6 +217,7 @@ model FAD_CampaignPerformanceByRegion {
   date_stop  DateTime?
 
   // @@unique([account_id, date_start, date_stop])
+  @@index([user_id])
 }
 
 // Ad Set Performance Report
@@ -265,6 +270,7 @@ model FAD_AdSetPerformanceReport {
   date_stop  DateTime?
 
   // @@unique([account_id, date_start, date_stop])
+  @@index([user_id])
 }
 
 // Ad Performance Report
@@ -316,6 +322,7 @@ model FAD_AdPerformanceReport {
   date_stop  DateTime?
 
   // @@unique([account_id, date_start, date_stop])
+  @@index([user_id])
 }
 
 // Account Daily Report
@@ -354,6 +361,7 @@ model FAD_AccountDailyReport {
   onFacebookPurchases     Int?
 
   // @@unique([account_id, date_start, date_stop])
+  @@index([user_id])
 }
 
 // Campaign Daily Report
@@ -393,6 +401,7 @@ model FAD_CampaignDailyReport {
   onFacebookPurchases     Int?
 
   // @@unique([account_id, date_start, date_stop])
+  @@index([user_id])
 }
 
 // Ad Set Daily Report
@@ -443,6 +452,7 @@ model FAD_AdSetDailyReport {
   onFacebookPurchases     Int?
 
   // @@unique([account_id, date_start, date_stop])
+  @@index([user_id])
 }
 
 // Ad Daily Report
@@ -491,6 +501,7 @@ model FAD_AdDailyReport {
   onFacebookPurchases     Int?
 
   // @@unique([account_id, date_start, date_stop])
+  @@index([user_id])
 }
 
 // Ad Creative Report
@@ -546,6 +557,7 @@ model FAD_AdCreativeReport {
   date_stop  DateTime?
 
   // @@unique([account_id, date_start, date_stop])
+  @@index([user_id])
 }
 
 // BM & Ad Accounts
@@ -574,6 +586,7 @@ model FAD_BmAndAdAccounts {
   tax_and_fee              Float?
 
   // @@unique([bm_id, account_id])
+  @@index([user_id])
 }
 
 // ===============================================
@@ -613,6 +626,7 @@ model FBT_FbBillingData {
   downloadInvoiceLink String? @db.Text
 
   // @@unique([accountId, transactionId])
+  @@index([user_id])
 }
 
 // ===============================================
@@ -649,6 +663,8 @@ model MPI_BcHienThiTiepCanTrang {
   // 2.Tiếp cận (Reach)
   page_impressions_unique      Int?
   page_impressions_paid_unique Int?
+
+  @@index([user_id])
 }
 
 // BC Hiệu suất Bài viết (Tổng hợp)
@@ -696,6 +712,8 @@ model MPI_BcPhanTichCamXucBaiViet {
   post_reactions_haha_total  Int?
   post_reactions_sorry_total Int?
   post_reactions_anger_total Int?
+
+  @@index([user_id])
 }
 
 // BC Phân tích: Fan theo Vị trí
@@ -707,6 +725,8 @@ model MPI_BcPhanTichFanTheoViTri {
   // Metric
   page_fans_country Json?
   page_fans_city    Json?
+
+  @@index([user_id])
 }
 
 // BC Phân tích: Nguồn Lượt thích Mới
@@ -737,6 +757,8 @@ model MPI_BcHieuSuatVideoTungVideo {
 
   // 1. Tương tác trên Video
   post_video_likes_by_reaction_type Json?
+
+  @@index([user_id])
 }
 
 // BC Hiệu suất Video (Tổng hợp)
@@ -757,6 +779,8 @@ model MPI_BcHieuSuatVideoTongHop {
 
   // 3.Thời gian xem
   page_video_view_time Float?
+
+  @@index([user_id])
 }
 
 // BC Tổng hợp Hiệu suất Trang (Nâng cao)
@@ -797,6 +821,8 @@ model MPI_BcTongHopHieuSuatTrangNangCao {
   // Video
   video_views     Int?
   video_view_time Float?
+
+  @@index([user_id])
 }
 
 // BC Hiệu suất Bài viết (Lifetime)
@@ -812,6 +838,8 @@ model MPI_BcHieuSuatBaiVietLifetime {
   post_reactions_by_type_total  Json?
   post_video_views              Int?
   post_video_views_unique       Int?
+
+  @@index([user_id])
 }
 
 
@@ -837,6 +865,7 @@ model BCA_BCInfo {
   user_role   String?
   finance_role String?
 
+  @@index([user_id])
 }
 
 /// @model
@@ -864,6 +893,7 @@ model BCA_BCAccountInfo {
   balance         Float?
   role            String?
 
+  @@index([user_id])
 }
 
 /// @model
@@ -888,6 +918,7 @@ model BCA_BCAssetInfo {
   store_role      String?
   relation_status String?
 
+  @@index([user_id])
 }
 
 // -------------------------------------
@@ -938,6 +969,7 @@ model TTA_CampaignPerformance {
   onsite_shopping_roas        Float?
   cost_per_onsite_shopping    Float?
 
+  @@index([user_id])
 }
 
 /// @model
@@ -983,6 +1015,8 @@ model TTA_AdGroupPerformance {
   onsite_shopping             Int?
   onsite_shopping_roas        Float?
   cost_per_onsite_shopping    Float?
+
+  @@index([user_id])
 
 }
 
@@ -1032,6 +1066,8 @@ model TTA_AdPerformance {
   onsite_shopping_roas        Float?
   cost_per_onsite_shopping    Float?
 
+  @@index([user_id])
+
 }
 
 /// @model
@@ -1060,6 +1096,8 @@ model TTA_CreativePerformance {
   ctr             Float?
   conversion      Int?
   cost_per_conversion Float?
+
+  @@index([user_id])
 
 }
 
@@ -1110,6 +1148,8 @@ model TTA_AudienceRegionReport {
   video_views_p100   Int?
   average_video_play Float?
 
+  @@index([user_id])
+
 }
 
 /// @model
@@ -1146,6 +1186,8 @@ model TTA_AudienceCountryReport {
   shares          Int?
   follows         Int?
   profile_visits  Int?
+
+  @@index([user_id])
 
 }
 
@@ -1184,6 +1226,8 @@ model TTA_AudienceAgeReport {
   follows         Int?
   profile_visits  Int?
 
+  @@index([user_id])
+
 }
 
 /// @model
@@ -1220,6 +1264,8 @@ model TTA_AudienceGenderReport {
   shares          Int?
   follows         Int?
   profile_visits  Int?
+
+  @@index([user_id])
 
 }
 
@@ -1259,6 +1305,8 @@ model TTA_AudienceAgeGenderReport {
   follows         Int?
   profile_visits  Int?
 
+  @@index([user_id])
+
 }
 
 /// @model
@@ -1285,6 +1333,8 @@ model TTA_PlacementReport {
   conversion      Int?
   cost_per_conversion Float?
 
+  @@index([user_id])
+
 }
 
 /// @model
@@ -1310,6 +1360,8 @@ model TTA_PlatformReport {
   ctr             Float?
   conversion      Int?
   cost_per_conversion Float?
+
+  @@index([user_id])
 
 }
 
@@ -1349,6 +1401,8 @@ model GMV_AllCampaignPerformance {
   target_roi_budget   Float?
   bid_type        String?
   max_delivery_budget Float?
+
+  @@index([user_id])
 }
 
 model GMV_LiveCampaignPerformance {
@@ -1382,6 +1436,8 @@ model GMV_LiveCampaignPerformance {
   target_roi_budget   Float?
   bid_type        String?
   max_delivery_budget Float?
+
+  @@index([user_id])
 }
 
 model GMV_ProductCampaignPerformance {
@@ -1415,6 +1471,8 @@ model GMV_ProductCampaignPerformance {
   target_roi_budget   Float?
   bid_type        String?
   max_delivery_budget Float?
+
+  @@index([user_id])
 }
 
 /// Dữ liệu cho template "GMV Campaign / Product Detail"
@@ -1448,6 +1506,8 @@ model GMV_ProductDetailReport {
   roi               Float?
   currency          String?
   product_status    String?
+
+  @@index([user_id])
 }
 
 /// @model
@@ -1504,26 +1564,185 @@ model GMV_CreativeDetailReport {
   ad_video_view_rate_p75  Float?
   ad_video_view_rate_p100 Float?
 
+  @@index([user_id])
 }
 
 model User {
-  id        String  @id @default(cuid()) // Đây là 'userid' của bạn
-  username  String  @unique // Thêm: Dùng để đăng nhập
-  email     String? @unique // Thêm: Tùy chọn nhưng vẫn là duy nhất
-  password  String  // Thêm: Lưu mật khẩu đã băm
+  id        String  @id @default(cuid())
+  username  String  @unique 
+  email     String? @unique 
+  password  String  
   
-  settings  Json?   @default("{}") // Đã có
+  settings  Json?   @default("{}") 
 
-  refreshTokens RefreshToken[] // Thêm: Liên kết đến refresh tokens
+  refreshTokens RefreshToken[] 
   
-  // Xóa/sửa các trường cũ nếu cần (ví dụ: 'name'?)
+  @@index([id])
 }
 
 model RefreshToken {
   id        String   @id @default(cuid())
-  hashedToken String   @unique // Lưu token đã băm
+  hashedToken String   @unique 
   userId    String
   user      User     @relation(fields: [userId], references: [id], onDelete: Cascade) // Xóa token khi user bị xóa
   expiresAt DateTime
   createdAt DateTime @default(now())
+
+  @@index([userId])
+}
+
+model TaskLog {
+  id        String   @id @default(cuid())
+  taskId    String
+  userId    String   
+  level     String
+  message   String
+  timestamp DateTime @default(now())
+
+  @@index([taskId])
+  @@index([userId]) 
+}
+
+model POS_BasicReport {
+  // --- Metadata (Bắt buộc) ---
+  pkId      String   @id @default(dbgenerated("gen_random_uuid()"))
+  user_id   String
+  task_id   String?
+  createdAt DateTime @default(now()) 
+
+  // --- 01. Thông tin Định danh & Hệ thống ---
+  is_primary_row  Boolean?
+  order_id        String?   
+  display_id      String?
+  system_id       String?
+  shop_id         String?
+  conversation_id String?
+  order_link      String?
+  tracking_link   String?
+
+  // --- 02. Thời gian & Trạng thái ---
+  created_at          DateTime? 
+  created_date        String?   
+  updated_at          DateTime?
+  status_code         Int?      
+  status_name         String?
+  sub_status          String?
+  is_locked           Boolean?
+  is_received_at_shop Boolean?
+
+  // --- 03. Nguồn & Marketing ---
+  source_name   String?
+  source_id     String?
+  ads_source    String?
+  ad_id         String?
+  page_id       String?
+  page_name     String?
+  page_username String?
+  post_id       String?
+  marketer_id   String?
+  utm_source    String?
+  utm_medium    String?
+  utm_campaign  String?
+  utm_content   String?
+  utm_term      String?
+
+  // --- 04. Nhân sự (Người dùng) ---
+  creator_id         String?
+  creator_name       String?
+  seller_name        String?
+  seller_id          String?
+  seller_assigned_at DateTime? 
+  care_staff_name    String?
+  care_staff_id      String?
+  care_assigned_at   DateTime? 
+  last_editor_name   String?
+
+  // --- 05. Khách hàng & Địa chỉ ---
+  customer_system_id String? // (customer.id)
+  customer_uuid      String? // (customer.customer_id)
+  customer_name      String?
+  customer_phone     String?
+  customer_email     String?
+  customer_gender    String?
+  full_address       String?
+  street_address     String?
+  ward_name          String?
+  district_name      String?
+  province_name      String?
+  postal_code        String?
+
+  // --- 06. Tài chính (Tổng quan) ---
+  currency                    String?
+  total_amount                Float?
+  total_after_sub_discount    Float?
+  total_discount              Float?
+  amount_to_collect           Float?
+  cod_amount                  Float?
+  carrier_cod_amount          Float?
+  tax_amount                  Float?
+  surcharge_amount            Float?
+  surcharge_cost              Float?
+  shipping_fee_customer       Float?
+  shipping_fee_carrier        Float?
+  marketplace_fee             Float?
+  is_customer_paying_shipping Boolean?
+  is_free_shipping            Boolean?
+
+  // --- 07. Thanh toán ---
+  payment_methods String? 
+  payment_cash    Float?
+  payment_transfer Float?
+  payment_card    Float?
+  payment_momo    Float?
+  payment_vnpay   Float?
+  payment_qrpay   Float?
+  payment_kredivo Float?
+  payment_fundiin Float?
+  payment_prepaid Float?
+  payment_points  Float?
+  exchange_value  Float?
+
+  // --- 08. Vận chuyển & Kho ---
+  carrier_name       String?
+  tracking_code      String?
+  sent_to_carrier_at DateTime? 
+  shipping_service   String?
+  warehouse_id       String?
+  warehouse_name     String?
+  warehouse_address  String?
+
+  // --- 09. Chi tiết Sản phẩm (Item) ---
+  order_total_quantity Int?
+  order_item_count     Int?
+  
+  // (Level Item)
+  item_id            String?
+  product_code       String?
+  sku_code           String?
+  product_name       String?
+  item_quantity      Float?    
+  item_retail_price  Float?
+  item_cost_price    Float?
+  item_discount      Float?
+  item_price_final   Float?
+  item_total_amount  Float?
+  item_weight        Float?
+  item_note          String?
+  is_bonus_item      Boolean?
+  is_wholesale_item  Boolean?
+
+  // --- 10. Khác ---
+  internal_note      String?
+  printed_note       String?
+  tags               String?
+  is_livestream      Boolean?
+  is_live_shopping   Boolean?
+  is_social_commerce Boolean?
+  is_exchange_order  Boolean?
+  return_reason_id   String?
+  return_reason_name String?
+
+  // --- Index ---
+  @@index([user_id])
+  @@index([user_id, created_at])
 }

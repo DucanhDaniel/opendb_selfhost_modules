@@ -844,17 +844,15 @@ export const TIKTOK_REPORT_TEMPLATES_STRUCTURE = [
         },
       },
       {
-          name: "Ad Account GMV Ads Daily", // Tên template mới
+          name: "Ad Account GMV Ads Daily", 
           config: {
-              type: "GMV_ACCOUNT_DAILY", // Type mới để định danh
+              type: "GMV_ACCOUNT_DAILY", 
               api_endpoint: TIKTOK_GMV_REPORT_URL,
-              // Không cần selectable_fields vì các trường là cố định
           }
       },
     ],
   },
 ];
 
-// --- Gist URL for Province Map ---
 export const PROVINCE_MAP_GIST_URL =
   "https://gist.githubusercontent.com/manhpikaavn/368a4541c3b0163ef8dda2810b488728/raw/9e9ec775a40874eaa8294d6117237ff6787ac64a/gistfile1.txt";

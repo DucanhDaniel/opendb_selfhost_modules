@@ -1,5 +1,4 @@
 import { fetchAllTiktokPages } from '../api.js';
-import { logTiktok, splitDateRangeIntoMonths } from '../helpers.js';
 import { TIKTOK_PERCENT_METRICS, TIKTOK_GMV_REPORT_URL } from '../constants.js';
 
 import axios from 'axios';
@@ -15,7 +14,7 @@ import axios from 'axios';
 export async function processGmvBasicReport(params, templateConfig, accessToken, jobId) {
 
   const functionName = 'processGmvBasicReport';
-  logTiktok(jobId, functionName, 'Info', `Processing GMV Basic template: ${params.templateName}`);
+  task_logger.info(`Processing GMV Basic template: ${params.templateName}`);
 
   const { startDate, endDate, selectedFields, accountsToProcess, shopsToProcess } = params;
 
@@ -72,11 +71,11 @@ export async function processGmvBasicReport(params, templateConfig, accessToken,
   const dateChunks = splitDateRangeIntoMonths(startDate, endDate);
   let allDataFromApi = [];
 
-  logTiktok(jobId, functionName, 'Info', `Fetching GMV data in ${dateChunks.length} monthly chunks...`);
+  task_logger.info(`Fetching GMV data in ${dateChunks.length} monthly chunks...`);
 
   // --- 5. Vòng lặp lấy dữ liệu (Fetch Loop) ---
   for (const chunk of dateChunks) {
-    logTiktok(jobId, functionName, 'Info', `Fetching chunk: ${chunk.start} to ${chunk.end}`);
+    task_logger.info(`Fetching chunk: ${chunk.start} to ${chunk.end}`);
     
     const baseParams = {
       advertiser_id: advertiserId,
@@ -117,12 +116,12 @@ export async function processGmvBasicReport(params, templateConfig, accessToken,
       allDataFromApi.push(...dataForChunk);
 
     } catch (e) {
-      logTiktok(jobId, functionName, 'Error', `Failed chunk ${chunk.start}-${chunk.end}: ${e.message}. Skipping.`);
+      task_logger.error(`Failed chunk ${chunk.start}-${chunk.end}: ${e.message}. Skipping.`);
     }
   } 
 
   if (allDataFromApi.length === 0) {
-      logTiktok(jobId, functionName, 'Info', 'No data returned from API.');
+      task_logger.info('No data returned from API.');
       return { status: "SUCCESS", data: [], newRows: 0, message: "No data found." };
   }
 
@@ -161,7 +160,7 @@ export async function processGmvBasicReport(params, templateConfig, accessToken,
     return finalRow; 
   });
 
-  logTiktok(jobId, functionName, 'Success', `Processed ${dataToWrite.length} rows.`);
+  task_logger.info(`Processed ${dataToWrite.length} rows.`);
 
 
     return { status: "SUCCESS", data: dataToWrite, newRows: dataToWrite.length };
