@@ -6,6 +6,7 @@ import { authService } from '../services/auth/auth.service.js';
 
 import { processFacebookJob } from '../services/facebook/index.js';
 import { processTiktokJob } from '../services/tiktok/index.js'; 
+import { processPoscakeJob } from '../services/pancake/index.js';
 // import { processGoogleJob } from '../services/google/index.js'; 
 
 const CURRENT_TASK_PROPERTY = "TASK_MANAGER_CURRENT_TASK";
@@ -25,10 +26,10 @@ export const processJobWorker = async (job) => {
 
   try {
 
-    const isLicenseValid = await authService.checkUserLicensePermission(userId, task.taskType);
-    if (isLicenseValid) {
-      task_logger.info("License hợp lệ!");
-    }
+    // const isLicenseValid = await authService.checkUserLicensePermission(userId, task.taskType);
+    // if (isLicenseValid) {
+    //   task_logger.info("License hợp lệ!");
+    // }
 
     let result; // { status, data, newRows }
     
@@ -44,7 +45,10 @@ export const processJobWorker = async (job) => {
       // result = await processGoogleJob(task.params, accessToken, userId);
       throw new Error("Google processor chưa được implement");
       
-    } else {
+    } else if (task.taskType.startsWith("POSCAKE_")) {
+      result = await processPoscakeJob(task.params, accessToken, userId, task_logger, taskId);
+    } 
+    else {
       throw new Error(`Loại task không xác định: ${task.taskType}`);
     }
 

@@ -180,6 +180,8 @@ let accessToken;
     accessToken = currentSettings["FACEBOOK_ACCESS_TOKEN"]; 
   } else if (task.taskType.startsWith("TIKTOK")) {
     accessToken = currentSettings["TIKTOK_ACCESS_TOKEN"]; 
+  } else if (task.taskType.startsWith("POSCAKE")) {
+    accessToken = currentSettings["POSCAKE_ACCESS_TOKEN"];
   }
   
   if (!accessToken) {

@@ -1602,3 +1602,147 @@ model TaskLog {
   @@index([taskId])
   @@index([userId]) 
 }
+
+model POS_BasicReport {
+  // --- Metadata (Bắt buộc) ---
+  pkId      String   @id @default(dbgenerated("gen_random_uuid()"))
+  user_id   String
+  task_id   String?
+  createdAt DateTime @default(now()) 
+
+  // --- 01. Thông tin Định danh & Hệ thống ---
+  is_primary_row  Boolean?
+  order_id        String?   
+  display_id      String?
+  system_id       String?
+  shop_id         String?
+  conversation_id String?
+  order_link      String?
+  tracking_link   String?
+
+  // --- 02. Thời gian & Trạng thái ---
+  created_at          DateTime? 
+  created_date        String?   
+  updated_at          DateTime?
+  status_code         Int?      
+  status_name         String?
+  sub_status          String?
+  is_locked           Boolean?
+  is_received_at_shop Boolean?
+
+  // --- 03. Nguồn & Marketing ---
+  source_name   String?
+  source_id     String?
+  ads_source    String?
+  ad_id         String?
+  page_id       String?
+  page_name     String?
+  page_username String?
+  post_id       String?
+  marketer_id   String?
+  utm_source    String?
+  utm_medium    String?
+  utm_campaign  String?
+  utm_content   String?
+  utm_term      String?
+
+  // --- 04. Nhân sự (Người dùng) ---
+  creator_id         String?
+  creator_name       String?
+  seller_name        String?
+  seller_id          String?
+  seller_assigned_at DateTime? 
+  care_staff_name    String?
+  care_staff_id      String?
+  care_assigned_at   DateTime? 
+  last_editor_name   String?
+
+  // --- 05. Khách hàng & Địa chỉ ---
+  customer_system_id String? // (customer.id)
+  customer_uuid      String? // (customer.customer_id)
+  customer_name      String?
+  customer_phone     String?
+  customer_email     String?
+  customer_gender    String?
+  full_address       String?
+  street_address     String?
+  ward_name          String?
+  district_name      String?
+  province_name      String?
+  postal_code        String?
+
+  // --- 06. Tài chính (Tổng quan) ---
+  currency                    String?
+  total_amount                Float?
+  total_after_sub_discount    Float?
+  total_discount              Float?
+  amount_to_collect           Float?
+  cod_amount                  Float?
+  carrier_cod_amount          Float?
+  tax_amount                  Float?
+  surcharge_amount            Float?
+  surcharge_cost              Float?
+  shipping_fee_customer       Float?
+  shipping_fee_carrier        Float?
+  marketplace_fee             Float?
+  is_customer_paying_shipping Boolean?
+  is_free_shipping            Boolean?
+
+  // --- 07. Thanh toán ---
+  payment_methods String? 
+  payment_cash    Float?
+  payment_transfer Float?
+  payment_card    Float?
+  payment_momo    Float?
+  payment_vnpay   Float?
+  payment_qrpay   Float?
+  payment_kredivo Float?
+  payment_fundiin Float?
+  payment_prepaid Float?
+  payment_points  Float?
+  exchange_value  Float?
+
+  // --- 08. Vận chuyển & Kho ---
+  carrier_name       String?
+  tracking_code      String?
+  sent_to_carrier_at DateTime? 
+  shipping_service   String?
+  warehouse_id       String?
+  warehouse_name     String?
+  warehouse_address  String?
+
+  // --- 09. Chi tiết Sản phẩm (Item) ---
+  order_total_quantity Int?
+  order_item_count     Int?
+  
+  // (Level Item)
+  item_id            String?
+  product_code       String?
+  sku_code           String?
+  product_name       String?
+  item_quantity      Float?    
+  item_retail_price  Float?
+  item_cost_price    Float?
+  item_discount      Float?
+  item_price_final   Float?
+  item_total_amount  Float?
+  item_weight        Float?
+  item_note          String?
+  is_bonus_item      Boolean?
+  is_wholesale_item  Boolean?
+
+  // --- 10. Khác ---
+  internal_note      String?
+  printed_note       String?
+  tags               String?
+  is_livestream      Boolean?
+  is_live_shopping   Boolean?
+  is_social_commerce Boolean?
+  is_exchange_order  Boolean?
+  return_reason_id   String?
+  return_reason_name String?
+
+  // --- Index ---
+  @@index([user_id])
+  @@index([user_id, created_at])
+}

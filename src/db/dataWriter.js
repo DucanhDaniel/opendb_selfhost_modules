@@ -2,7 +2,7 @@ import prisma from './client.js';
 import { chunkArray } from '../utils/array_utils.js';
 
 // --- TYPE_CONFIG và KEY_MAP ---
-const DB_BATCH_SIZE_ROWS = 900;
+const DB_BATCH_SIZE_ROWS = 200;
 const TYPE_CONFIG = {
   TEXT: new Set([
     "advertiser_id", "campaign_id", "store_id", "item_group_id", "item_id",
@@ -18,9 +18,13 @@ const TYPE_CONFIG = {
     "billingHubLink", "downloadInvoiceLink", "platform", "user_id"
   ]),
   FLOAT: new Set([
-    "purchaseROAS", "frequency", "ctr", "spend", "cpc", "cpm", "average_video_play",
-    "cost_per_conversion", "total_onsite_shopping_value", "cost",
-    "cost_per_order", "gross_revenue", "net_cost", "roas_bid",
+    "purchaseROAS", "frequency", "ctr", "spend", "cpc", "cpm", "average_video_play", "total_amount", "total_after_sub_discount",
+    "cost_per_conversion", "total_onsite_shopping_value", "cost", "total_discount", "amount_to_collect", "cod_amount",
+    "cost_per_order", "gross_revenue", "net_cost", "roas_bid", "carrier_cod_amount", "tax_amount", "surcharge_amount",
+    "surcharge_cost", "shipping_fee_customer", "shipping_fee_carrier", "marketplace_fee", "payment_cash", "payment_transfer",
+    "payment_card", "payment_momo", "payment_vnpay", "payment_qrpay", "payment_kredivo", "payment_fundiin", "payment_prepaid",
+    "payment_points", "exchange_value", "item_quantity", "item_retail_price", "item_cost_price", "item_discount", "item_price_final",
+    "item_total_amount", "item_weight",
     "target_roi_budget", "max_delivery_budget", "daily_budget", "ad_video_view_rate_2s", "ad_video_view_rate_6s", "ad_video_view_rate_p100",
     "budget_remaining", "lifetime_budget", "roi", "tax_and_fee", "ad_video_view_rate_p25", "ad_video_view_rate_p50", "ad_video_view_rate_p75",
     "post_video_avg_time_watched", "post_video_view_time", "page_video_view_time", "product_click_rate",
@@ -42,20 +46,24 @@ const TYPE_CONFIG = {
     "post_video_followers", "post_video_social_actions", "page_video_views",
     "page_video_views_paid", "page_video_views_organic", "page_video_views_unique",
     "page_video_complete_views_30s", "page_video_complete_views_30s_unique",
-    "followers_total", "follows_new", "unfollows", "net_follows", "impressions_total",
-    "reach_total", "impressions_paid", "reach_paid", "page_views", "post_reach",
+    "followers_total", "follows_new", "unfollows", "net_follows", "impressions_total", "order_total_quantity",
+    "reach_total", "impressions_paid", "reach_paid", "page_views", "post_reach", 
     "engagements", "cta_clicks", "video_views", "post_video_views_unique", "profile_visits", "likes", "comments", "shares", "follows", "live_views",
-    "newMessagingConnections", "leads", "websitePurchases", "onFacebookPurchases", "purchases", "purchase", "onsite_shopping"
+    "newMessagingConnections", "leads", "websitePurchases", "onFacebookPurchases", "purchases", "purchase", "onsite_shopping", "status_code", "is_received_at_shop", "order_item_count"
   ]),
   DATE: new Set([
-    "start_time", "stop_time", "created_time", "updated_time", "date_start", "schedule_start_time", "schedule_end_time",
-    "date_stop", "bm_created_time", "fetchTimestamp", "date", "stat_time_day", "start_date", "end_date"
+    "start_time", "stop_time", "created_time", "updated_time", "date_start", "schedule_start_time", "schedule_end_time", "seller_assigned_at", 
+    "date_stop", "bm_created_time", "fetchTimestamp", "date", "stat_time_day", "start_date", "end_date", "created_at", "updated_at", "care_assigned_at", "sent_to_carrier_at"
   ]),
   JSON: new Set([
     "post_activity_by_action_type", "page_fans_country", "page_fans_city",
     "page_fan_adds_by_paid_non_paid_unique", "post_video_retention_graph",
     "post_video_likes_by_reaction_type", "post_reactions_by_type_total"
-  ])
+  ]),
+  BOOLEAN: new Set([
+    "is_primary_row", "is_locked", "is_received_at_shop", "is_customer_paying_shipping", "is_free_shipping", 
+    "is_bonus_item", "is_wholesale_item", "is_livestream", "is_live_shopping", "is_social_commerce", "is_exchange_order"
+  ])
 };
 
 const KEY_MAP = {
@@ -281,6 +289,13 @@ const TEMPLATE_MAP = {
     insightDateKey: ["start_date", "end_date"],
     filter_spend: false
   },
+
+  "Báo cáo đơn hàng chi tiết (Full Data)": {
+    tableName: "POS_BasicReport",
+    conflictTarget: ["shop_id", "order_id", "display_id", "system_id", "conversation_id"],
+    insightDateKey: [],
+    filter_spend: false
+  }
 };
 
 /**
@@ -294,10 +309,15 @@ function _transformAndSanitizeRow(rawRow, index, userId) {
       let value = originalValue;
       const newKey = KEY_MAP[friendlyKey] || friendlyKey;
 
+      if (value === -1 || value === "-1" || value == "") {
+        value = null;
+      }
+
       if (value === null || value === undefined) {
          if (TYPE_CONFIG.FLOAT.has(newKey) || TYPE_CONFIG.INTEGER.has(newKey) || TYPE_CONFIG.DECIMAL.has(newKey)) {
             value = 0;
-         } else if (TYPE_CONFIG.TEXT.has(newKey)) {
+         } 
+        else if (TYPE_CONFIG.TEXT.has(newKey)) {
             value = "";
          }
         else value = null;
@@ -331,6 +351,9 @@ function _transformAndSanitizeRow(rawRow, index, userId) {
       else if (TYPE_CONFIG.TEXT.has(newKey)) {
         value = String(value);
       }
+      else if (TYPE_CONFIG.BOOLEAN.has(newKey)) {
+        value = Boolean(value);
+      }
       sanitizedRow[newKey] = value;
     }
   }
@@ -442,7 +465,8 @@ export async function writeDataToDatabase(templateName, dataRows, userId) {
                 if (TYPE_CONFIG.DATE.has(col)) castType = "::timestamp";
                 else if (TYPE_CONFIG.JSON.has(col)) castType = "::jsonb";
                 else if (TYPE_CONFIG.DECIMAL.has(col)) castType = "::decimal";
-                
+                else if (TYPE_CONFIG.BOOLEAN.has(col)) castType = "::boolean";
+
                 rowParams.push(`$${deleteParamIndex++}${castType}`);
                 
                 const val = row[col];
@@ -473,6 +497,8 @@ export async function writeDataToDatabase(templateName, dataRows, userId) {
             if (val instanceof Date) return val.toISOString();
             if (TYPE_CONFIG.JSON.has(col) && typeof val === 'object') return JSON.stringify(val);
             if (TYPE_CONFIG.DECIMAL.has(col)) return String(val);
+            if (TYPE_CONFIG.BOOLEAN.has(col)) return Boolean(val);
+
             if (TYPE_CONFIG.INTEGER.has(col) || TYPE_CONFIG.FLOAT.has(col)) return Number(val);
             return String(val);
         }));
