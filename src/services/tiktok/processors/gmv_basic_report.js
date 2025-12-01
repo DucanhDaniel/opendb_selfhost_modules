@@ -1,6 +1,6 @@
 import { fetchAllTiktokPages } from '../api.js';
 import { TIKTOK_PERCENT_METRICS, TIKTOK_GMV_REPORT_URL } from '../constants.js';
-
+import { splitDateRangeIntoMonths } from '../helpers.js';
 import axios from 'axios';
 
 /**
@@ -11,7 +11,7 @@ import axios from 'axios';
  * @param {string} jobId - Job ID để log.
  * @returns {Promise<object>} - { status, data, newRows, message? }.
  */
-export async function processGmvBasicReport(params, templateConfig, accessToken, jobId) {
+export async function processGmvBasicReport(params, templateConfig, accessToken, jobId, task_logger) {
 
   const functionName = 'processGmvBasicReport';
   task_logger.info(`Processing GMV Basic template: ${params.templateName}`);

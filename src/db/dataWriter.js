@@ -292,7 +292,7 @@ const TEMPLATE_MAP = {
 
   "Báo cáo đơn hàng chi tiết (Full Data)": {
     tableName: "POS_BasicReport",
-    conflictTarget: ["shop_id", "order_id", "display_id", "system_id", "conversation_id"],
+    conflictTarget: ["shop_id", "order_id", "display_id", "system_id", "conversation_id", "source_id", "ad_id", "page_id", "post_id", "marketer_id", "creator_id", "seller_id", "care_staff_id", "customer_system_id", "warehouse_id", "item_id"],
     insightDateKey: [],
     filter_spend: false
   }

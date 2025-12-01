@@ -47,6 +47,7 @@ export async function processTiktokJob(task, accessToken, userId, task_logger, w
        break;
 
     case "GMV_BASIC":
+      console.log("Ckpt!");
       processorResult = await processGmvBasicReport(params, templateConfig, accessToken, taskId, task_logger);
       break;
 
