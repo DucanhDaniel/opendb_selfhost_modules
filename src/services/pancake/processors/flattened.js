@@ -108,7 +108,7 @@ export async function processFlattenedReport(options, config, maps, apiKey, task
   const { levelKey, flattenKey } = config;
 
   let totalRowsWritten = 0;
-  const BATCH_SIZE = 5; // Số lượng trang gọi song song (cẩn thận với Flattened vì data nhân lên nhiều)
+  const BATCH_SIZE = 5; // Số lượng trang gọi song song
 
   // --- 1. Hàm Helper: Tải và Làm phẳng 1 trang ---
   const fetchAndFlattenPage = async (pageNumber) => {
@@ -125,7 +125,6 @@ export async function processFlattenedReport(options, config, maps, apiKey, task
         return { data: [], totalPages: 0 };
       }
 
-      // Logic Làm Phẳng (Flattening) ngay tại đây
       const flattenedChunk = [];
       response.data.forEach((parentRow) => {
         const subArray = parentRow[flattenKey];
@@ -164,7 +163,6 @@ export async function processFlattenedReport(options, config, maps, apiKey, task
     }
   };
 
-  // --- 2. Hàm Helper: Ghi DB ---
   const writeBatchToDb = async (data) => {
       if (data.length === 0) return 0;
       const dbResult = await writeDataToDatabase(
@@ -175,7 +173,6 @@ export async function processFlattenedReport(options, config, maps, apiKey, task
       return dbResult.count;
   };
 
-  // --- 3. BẮT ĐẦU: Trang 1 (Tuần tự để lấy Total Pages) ---
   task_logger.info(`[Flattened] Đang gọi page: 1 (Init)`);
   const page1Result = await fetchAndFlattenPage(1);
   
@@ -218,7 +215,7 @@ export async function processFlattenedReport(options, config, maps, apiKey, task
 
   return { 
     status: "SUCCESS", 
-    data: [], // Trả về rỗng
+    data: [], 
     newRows: totalRowsWritten 
   };
 }
