@@ -65,7 +65,7 @@ export async function processPoscakeJob(options, apiKey, userId, task_logger, ta
       // Báo cáo cần làm phẳng mảng con (Chi tiết đơn hàng...)
         console.log("options: ", options);
         console.log("config: ", config);
-        processorResult = await processBasicReport(options, config, maps, apiKey, taskId);
+        processorResult = await processBasicReport(options, config, maps, apiKey, taskId, task_logger);
         // processorResult = { status: "SUCCESS", data: [], newRows: 0 };
         console.log("Đã xong processor!");
       break;
