@@ -65,7 +65,7 @@ export async function processPoscakeJob(options, apiKey, userId, task_logger, ta
       // Báo cáo cần làm phẳng mảng con (Chi tiết đơn hàng...)
         console.log("options: ", options);
         console.log("config: ", config);
-        processorResult = await processBasicReport(options, config, maps, apiKey, taskId, task_logger);
+        processorResult = await processBasicReport(options, config, maps, apiKey, taskId, task_logger, userId);
         // processorResult = { status: "SUCCESS", data: [], newRows: 0 };
         console.log("Đã xong processor!");
       break;
@@ -83,29 +83,29 @@ export async function processPoscakeJob(options, apiKey, userId, task_logger, ta
   }
 
   // 4. [LOGIC GHI DỮ LIỆU]
-  let rowsWritten = 0;
+  let rowsWritten = processorResult.newRows;
 
-  if (writeData) {
-    if (processorResult.data && processorResult.data.length > 0) {
-        task_logger.info(`Đã nhận ${processorResult.data.length} dòng từ API. Bắt đầu ghi vào DB...`);
+  // if (writeData) {
+  //   if (processorResult.data && processorResult.data.length > 0) {
+  //       task_logger.info(`Đã nhận ${processorResult.data.length} dòng từ API. Bắt đầu ghi vào DB...`);
         
-        const dbResult = await writeDataToDatabase(
-            templateName, 
-            processorResult.data,
-            userId
-        );
+  //       const dbResult = await writeDataToDatabase(
+  //           templateName, 
+  //           processorResult.data,
+  //           userId
+  //       );
 
-        if (!dbResult.success) {
-            throw new Error(dbResult.error || "Lỗi không xác định khi ghi DB");
-        }
-        rowsWritten = dbResult.count;
-        task_logger.info(`Đã ghi thành công ${rowsWritten} dòng vào Database.`);
-    } else {
-        task_logger.info("Không có dữ liệu mới để ghi vào database.");
-    }
-  } else {
-      task_logger.info("Chế độ ghi dữ liệu bị TẮT (writeData=false).");
-  }
+  //       if (!dbResult.success) {
+  //           throw new Error(dbResult.error || "Lỗi không xác định khi ghi DB");
+  //       }
+  //       rowsWritten = dbResult.count;
+  //       task_logger.info(`Đã ghi thành công ${rowsWritten} dòng vào Database.`);
+  //   } else {
+  //       task_logger.info("Không có dữ liệu mới để ghi vào database.");
+  //   }
+  // } else {
+  //     task_logger.info("Chế độ ghi dữ liệu bị TẮT (writeData=false).");
+  // }
 
   return { 
     status: 'SUCCESS', 
