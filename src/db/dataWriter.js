@@ -316,7 +316,9 @@ function _transformAndSanitizeRow(rawRow, index, userId) {
       if (value === null || value === undefined) {
          if (TYPE_CONFIG.FLOAT.has(newKey) || TYPE_CONFIG.INTEGER.has(newKey) || TYPE_CONFIG.DECIMAL.has(newKey)) {
             value = 0;
-         } 
+         } else if (TYPE_CONFIG.BOOLEAN.has(newKey)) {
+            if (newKey === "is_primary_row") {value = false; } // Đặc biệt cho trường POSCAKE
+         }
         else if (TYPE_CONFIG.TEXT.has(newKey)) {
             value = "";
          }

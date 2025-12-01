@@ -4,7 +4,7 @@ import { writeDataToDatabase } from '../../db/dataWriter.js';
 
 // Import các processors (Công nhân xử lý từng loại báo cáo)
 import { processBasicReport } from './processors/basic.js';
-// import { processFlattenedReport } from './processors/flattened.js';
+import { processFlattenedReport } from './processors/flattened.js';
 // import { processAnalyticsReport } from './processors/analytics.js';
 
 /**
@@ -65,7 +65,7 @@ export async function processPoscakeJob(options, apiKey, userId, task_logger, ta
       // Báo cáo cần làm phẳng mảng con (Chi tiết đơn hàng...)
         console.log("options: ", options);
         console.log("config: ", config);
-        processorResult = await processBasicReport(options, config, maps, apiKey, taskId, task_logger, userId);
+        processorResult = await processFlattenedReport(options, config, maps, apiKey, taskId, task_logger, userId);
         // processorResult = { status: "SUCCESS", data: [], newRows: 0 };
         console.log("Đã xong processor!");
       break;

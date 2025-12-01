@@ -1576,6 +1576,8 @@ model User {
   settings  Json?   @default("{}") 
 
   refreshTokens RefreshToken[] 
+
+  taskSchedules TaskSchedule[] // một user có thể có nhiều taskSchedules
   
   @@index([id])
 }
@@ -1745,4 +1747,47 @@ model POS_BasicReport {
   // --- Index ---
   @@index([user_id])
   @@index([user_id, created_at])
+}
+
+model TaskSchedule {
+  id             String   @id @default(cuid())
+  userId         String
+  name           String   
+  
+  taskData       Json     
+  
+  // Cấu hình Cron
+  cronExpression String   // "0 8 * * *"
+  timezone       String   @default("Asia/Ho_Chi_Minh")
+  isActive       Boolean  @default(true)
+  
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
+
+  user           User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  
+  executions     TaskMetric[] 
+
+  @@index([userId])
+}
+
+model TaskMetric {
+  id          String   @id @default(cuid())
+  taskId      String   @unique 
+  userId      String
+  taskType    String  
+  status      String   
+  
+  durationMs  Int      @default(0) 
+  rowsWritten Int      @default(0) 
+  apiCalls    Int      @default(0) 
+  
+  createdAt   DateTime @default(now()) 
+
+  scheduleId  String?
+  schedule    TaskSchedule? @relation(fields: [scheduleId], references: [id])
+
+  @@index([userId])
+  @@index([scheduleId]) 
+  @@index([createdAt]) 
 }
