@@ -2,7 +2,7 @@ import { fetchPoscakeApi } from '../api.js';
 import { processPoscakeRow } from '../helpers.js';
 import { sleep } from '../../../utils/sleep.js';
 
-export async function processBasicReport(options, config, maps, apiKey, taskId) {
+export async function processBasicReport(options, config, maps, apiKey, taskId, task_logger) {
   const {shopId, startDate, endDate, selectedFields } = options;
   
   // 1. Mảng chứa toàn bộ dữ liệu (Accumulator)
@@ -21,17 +21,11 @@ export async function processBasicReport(options, config, maps, apiKey, taskId) 
     console.log("queryParams: ", queryParams);
     console.log("endpoint: ", endpoint);
 
-    // break;
-
     const response = await fetchPoscakeApi(endpoint, 'get', null, queryParams, apiKey);
 
     // Điều kiện dừng vòng lặp
     if (!response || !response.success || !Array.isArray(response.data) || response.data.length === 0) break;
 
-    // 2. Xử lý dữ liệu của trang hiện tại
-    // const processedDataChunk = response.data.map(row =>
-    //   processPoscakeRow(row, config, selectedFields, maps)
-    // );
     const processedDataChunk = response.data.map(row => {
       // 1. Xử lý dữ liệu thô
       const processedRow = processPoscakeRow(row, config, selectedFields, maps);
@@ -48,12 +42,11 @@ export async function processBasicReport(options, config, maps, apiKey, taskId) 
     const totalPages = response.total_pages;
     if (totalPages && currentPage >= totalPages) break;
     if (!totalPages && response.data.length < 100) break;
-    console.log("Đang gọi page: ", currentPage);
+    task_logger.info("Đang gọi page: ", currentPage);
     currentPage++;
     await sleep(300);
   } while (true);
 
-  // 4. [QUAN TRỌNG] Trả về dữ liệu để Worker ghi
   return { 
     status: "SUCCESS", 
     data: allProcessedData, 

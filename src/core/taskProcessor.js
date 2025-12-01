@@ -47,21 +47,29 @@ export const processJobWorker = async (job) => {
       
     } else if (task.taskType.startsWith("POSCAKE_")) {
       result = await processPoscakeJob(task.params, accessToken, userId, task_logger, taskId);
+      console.log("Thoát processor poscake");
     } 
     else {
       throw new Error(`Loại task không xác định: ${task.taskType}`);
     }
-
+    console.log("Bắt đầu cập nhật trạng thái!");
     // 2. Xử lý kết quả THÀNH CÔNG
-    task_logger.info(`Task hoàn thành. Status: ${result.status}. New rows: ${result.newRows}`)
+    // task_logger.info(`Task hoàn thành. Status: ${result.status}. New rows: ${result.newRows}`)
+
+    console.log("Đang đóng logger...");
+    await task_logger.close(); 
+    console.log("Logger đã đóng.");
     
     // Cập nhật trạng thái
     const finalMessage = `Hoàn tất! (Tổng cộng ${result.newRows || 0} dòng mới)`;
+    console.log("Bắt đầu cập nhật trạng thái COMPLETED...");
     await updateTaskStatus(userId, taskId, "COMPLETED", finalMessage);
+    console.log("Hoàn thành cập nhật trạng thái!");
 
   } catch (error) {
     // 3. Xử lý lỗi (FAILED)
     task_logger.error(`Task thất bại: ${error.message}`);
+    await task_logger.close();
     await updateTaskStatus(userId, taskId, "FAILED", `Lỗi: ${error.message}`);
   }
 };
