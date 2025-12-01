@@ -58,7 +58,12 @@ export function processPoscakeRow(rawRow, config, selectedFields, maps, itemInde
 
     // Logic tính toán dựa trên TECHNICAL ID (fieldKey)
     switch (fieldKey) {
-        case "is_primary_row": value = (itemIndex === 1); break;
+        case "is_primary_row": 
+          if (itemIndex === 1) {
+            value = true;
+          } else value = false;
+          // value = (itemIndex === 1); 
+          break;
         case "item_index": value = itemIndex; break;
         
         case "total_price_calculated": 

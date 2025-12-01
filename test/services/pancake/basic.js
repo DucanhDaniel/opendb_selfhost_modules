@@ -6,7 +6,7 @@ import { processBasicReport } from '../../../src/services/pancake/processors/bas
 import { getWarehouseMap, getProductMap, getUserMap } from '../../../src/services/pancake/api.js';
 
 // --- CẤU HÌNH TEST (Điền thông tin thật của bạn vào đây) ---
-const API_KEY = process.env.POSCAKE_API_KEY || "594582e1efdd4a3eaae0c7a65a01134a";
+const API_KEY = "594582e1efdd4a3eaae0c7a65a01134a";
 const SHOP_ID = "2443210"; // ID của Shop Poscake
 const START_DATE = "2023-10-01";
 const END_DATE = "2023-10-05";
