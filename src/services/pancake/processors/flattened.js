@@ -1,3 +1,103 @@
+// import { fetchPoscakeApi } from '../api.js';
+// import { processPoscakeRow } from '../helpers.js';
+// import { sleep } from '../../../utils/sleep.js';
+// import { writeDataToDatabase } from '../../../db/dataWriter.js';
+
+// export async function processFlattenedReport(options, config, maps, apiKey, taskId, task_logger, userId) {
+//   const { shopId, startDate, endDate, selectedFields, templateName } = options;
+//   const { levelKey, flattenKey } = config;
+
+//   let totalRowsWritten = 0;
+//   let currentPage = 1;
+//   const MAX_PAGES_SAFETY = 5000;
+
+//   task_logger.info(`[Flattened] Bắt đầu xử lý ${templateName} (Shop: ${shopId})...`);
+
+//   do {
+//     // 1. Kiểm tra an toàn
+//     if (currentPage > MAX_PAGES_SAFETY) {
+//       task_logger.warn(`[Stop] Đạt giới hạn an toàn ${MAX_PAGES_SAFETY} trang.`);
+//       break;
+//     }
+
+//     const endpoint = `/shops/${shopId}${config.apiEndpoint}`;
+//     const queryParams = { page_number: currentPage, page_size: 1000 }; 
+    
+//     if (startDate) queryParams.startDateTime = Math.floor(new Date(startDate).getTime() / 1000);
+//     if (endDate) queryParams.endDateTime = Math.floor(new Date(endDate).getTime() / 1000) + 86399;
+
+//     // 2. Gọi API
+//     const response = await fetchPoscakeApi(endpoint, 'get', null, queryParams, apiKey);
+
+//     if (!response || !response.success || !Array.isArray(response.data) || response.data.length === 0) {
+//         break;
+//     }
+
+//     // 3. Logic Làm Phẳng (Flattening Logic)
+//     const flattenedRowsChunk = [];
+    
+//     response.data.forEach((parentRow) => {
+//       const subArray = parentRow[flattenKey]; // Ví dụ: parentRow['items']
+
+//       if (subArray && Array.isArray(subArray) && subArray.length > 0) {
+//         // Trường hợp 1: Có mảng con -> Tách thành nhiều dòng
+//         subArray.forEach((childItem, index) => {
+//           const flatRow = { ...parentRow };
+//           delete flatRow[flattenKey];     // Xóa mảng gốc để tiết kiệm bộ nhớ
+//           flatRow[levelKey] = childItem;  // Gán item con vào levelKey (ví dụ: 'item')
+          
+//           // Xử lý row
+//           const processed = processPoscakeRow(flatRow, config, selectedFields, maps, index + 1);
+//           processed.task_id = taskId;     // Gán taskId
+//           processed.user_id = userId;     // Gán userId
+          
+//           flattenedRowsChunk.push(processed);
+//         });
+//       } else {
+//         // Trường hợp 2: Mảng con rỗng -> Giữ 1 dòng cha (item con rỗng)
+//         const flatRow = { ...parentRow };
+//         delete flatRow[flattenKey];
+//         flatRow[levelKey] = {};
+
+//         const processed = processPoscakeRow(flatRow, config, selectedFields, maps, 1);
+//         processed.task_id = taskId;
+//         processed.user_id = userId;
+        
+//         flattenedRowsChunk.push(processed);
+//       }
+//     });
+
+//     // 4. Ghi ngay vào Database
+//     if (flattenedRowsChunk.length > 0) {
+//       const dbResult = await writeDataToDatabase(
+//         templateName,
+//         flattenedRowsChunk,
+//         userId
+//       );
+//       totalRowsWritten += dbResult.count;
+//     }
+
+//     // 5. Báo cáo tiến độ
+//     const totalPages = response.total_pages;
+//     if (currentPage % 5 === 0 || currentPage === 1) {
+//         task_logger.info(`Page ${currentPage}/${totalPages || '?'}. Processed: ${flattenedRowsChunk.length} rows. Total Written: ${totalRowsWritten}`);
+//     }
+
+//     // 6. Logic Phân trang
+//     if (totalPages && currentPage >= totalPages) break;
+//     if (!totalPages && response.data.length < queryParams.page_size) break;
+
+//     currentPage++;
+//     await sleep(300);
+//   } while (true);
+
+//   return { 
+//     status: "SUCCESS", 
+//     data: [], // Trả về rỗng để Worker không ghi lại
+//     newRows: totalRowsWritten 
+//   };
+// }
+
 import { fetchPoscakeApi } from '../api.js';
 import { processPoscakeRow } from '../helpers.js';
 import { sleep } from '../../../utils/sleep.js';
@@ -8,92 +108,117 @@ export async function processFlattenedReport(options, config, maps, apiKey, task
   const { levelKey, flattenKey } = config;
 
   let totalRowsWritten = 0;
-  let currentPage = 1;
-  const MAX_PAGES_SAFETY = 2000;
+  const BATCH_SIZE = 5; // Số lượng trang gọi song song (cẩn thận với Flattened vì data nhân lên nhiều)
 
-  task_logger.info(`[Flattened] Bắt đầu xử lý ${templateName} (Shop: ${shopId})...`);
-
-  do {
-    // 1. Kiểm tra an toàn
-    if (currentPage > MAX_PAGES_SAFETY) {
-      task_logger.warn(`[Stop] Đạt giới hạn an toàn ${MAX_PAGES_SAFETY} trang.`);
-      break;
-    }
-
+  // --- 1. Hàm Helper: Tải và Làm phẳng 1 trang ---
+  const fetchAndFlattenPage = async (pageNumber) => {
     const endpoint = `/shops/${shopId}${config.apiEndpoint}`;
-    const queryParams = { page_number: currentPage, page_size: 50 }; // Flattened nên lấy ít hơn (50) vì data sẽ nhân lên
+    const queryParams = { page_number: pageNumber, page_size: 1000 }; 
     
     if (startDate) queryParams.startDateTime = Math.floor(new Date(startDate).getTime() / 1000);
     if (endDate) queryParams.endDateTime = Math.floor(new Date(endDate).getTime() / 1000) + 86399;
 
-    // 2. Gọi API
-    const response = await fetchPoscakeApi(endpoint, 'get', null, queryParams, apiKey);
+    try {
+      const response = await fetchPoscakeApi(endpoint, 'get', null, queryParams, apiKey);
 
-    if (!response || !response.success || !Array.isArray(response.data) || response.data.length === 0) {
-        break;
-    }
-
-    // 3. Logic Làm Phẳng (Flattening Logic)
-    const flattenedRowsChunk = [];
-    
-    response.data.forEach((parentRow) => {
-      const subArray = parentRow[flattenKey]; // Ví dụ: parentRow['items']
-
-      if (subArray && Array.isArray(subArray) && subArray.length > 0) {
-        // Trường hợp 1: Có mảng con -> Tách thành nhiều dòng
-        subArray.forEach((childItem, index) => {
-          const flatRow = { ...parentRow };
-          delete flatRow[flattenKey];     // Xóa mảng gốc để tiết kiệm bộ nhớ
-          flatRow[levelKey] = childItem;  // Gán item con vào levelKey (ví dụ: 'item')
-          
-          // Xử lý row
-          const processed = processPoscakeRow(flatRow, config, selectedFields, maps, index + 1);
-          processed.task_id = taskId;     // Gán taskId
-          processed.user_id = userId;     // Gán userId
-          
-          flattenedRowsChunk.push(processed);
-        });
-      } else {
-        // Trường hợp 2: Mảng con rỗng -> Giữ 1 dòng cha (item con rỗng)
-        const flatRow = { ...parentRow };
-        delete flatRow[flattenKey];
-        flatRow[levelKey] = {};
-
-        const processed = processPoscakeRow(flatRow, config, selectedFields, maps, 1);
-        processed.task_id = taskId;
-        processed.user_id = userId;
-        
-        flattenedRowsChunk.push(processed);
+      if (!response || !response.success || !Array.isArray(response.data)) {
+        return { data: [], totalPages: 0 };
       }
-    });
 
-    // 4. Ghi ngay vào Database
-    if (flattenedRowsChunk.length > 0) {
+      // Logic Làm Phẳng (Flattening) ngay tại đây
+      const flattenedChunk = [];
+      response.data.forEach((parentRow) => {
+        const subArray = parentRow[flattenKey];
+
+        if (subArray && Array.isArray(subArray) && subArray.length > 0) {
+          subArray.forEach((childItem, index) => {
+            const flatRow = { ...parentRow };
+            delete flatRow[flattenKey];
+            flatRow[levelKey] = childItem;
+            
+            const processed = processPoscakeRow(flatRow, config, selectedFields, maps, index + 1);
+            processed.task_id = taskId;
+            processed.user_id = userId;
+            flattenedChunk.push(processed);
+          });
+        } else {
+          const flatRow = { ...parentRow };
+          delete flatRow[flattenKey];
+          flatRow[levelKey] = {};
+          
+          const processed = processPoscakeRow(flatRow, config, selectedFields, maps, 1);
+          processed.task_id = taskId;
+          processed.user_id = userId;
+          flattenedChunk.push(processed);
+        }
+      });
+
+      return { 
+        data: flattenedChunk, 
+        totalPages: response.total_pages || 1 
+      };
+
+    } catch (e) {
+      task_logger.warn(`Lỗi khi lấy trang ${pageNumber}: ${e.message}`);
+      return { data: [], totalPages: 0 };
+    }
+  };
+
+  // --- 2. Hàm Helper: Ghi DB ---
+  const writeBatchToDb = async (data) => {
+      if (data.length === 0) return 0;
       const dbResult = await writeDataToDatabase(
-        templateName,
-        flattenedRowsChunk,
-        userId
+          templateName,
+          data,
+          userId
       );
-      totalRowsWritten += dbResult.count;
+      return dbResult.count;
+  };
+
+  // --- 3. BẮT ĐẦU: Trang 1 (Tuần tự để lấy Total Pages) ---
+  task_logger.info(`[Flattened] Đang gọi page: 1 (Init)`);
+  const page1Result = await fetchAndFlattenPage(1);
+  
+  if (page1Result.data.length > 0) {
+    const count = await writeBatchToDb(page1Result.data);
+    totalRowsWritten += count;
+    task_logger.info(`Đã ghi trang 1: ${count} dòng.`);
+  } else {
+    return { status: "SUCCESS", data: [], newRows: 0 };
+  }
+
+  const totalPages = page1Result.totalPages;
+
+  // --- 4. Vòng lặp Song Song (Batch Processing) ---
+  if (totalPages > 1) {
+    const remainingPages = [];
+    for (let i = 2; i <= totalPages; i++) remainingPages.push(i);
+
+    for (let i = 0; i < remainingPages.length; i += BATCH_SIZE) {
+      const batchPages = remainingPages.slice(i, i + BATCH_SIZE);
+      
+      task_logger.info(`Đang gọi batch pages: ${batchPages.join(', ')}`);
+
+      // Gọi song song
+      const batchResults = await Promise.all(batchPages.map(page => fetchAndFlattenPage(page)));
+
+      // Gom dữ liệu
+      const batchDataToWrite = batchResults.flatMap(res => res.data);
+
+      // Ghi DB
+      if (batchDataToWrite.length > 0) {
+          const count = await writeBatchToDb(batchDataToWrite);
+          totalRowsWritten += count;
+          task_logger.info(`Đã ghi batch (${batchPages[0]}-${batchPages[batchPages.length-1]}): ${count} dòng.`);
+      }
+
+      await sleep(300);
     }
-
-    // 5. Báo cáo tiến độ
-    const totalPages = response.total_pages;
-    if (currentPage % 5 === 0 || currentPage === 1) {
-        task_logger.info(`Page ${currentPage}/${totalPages || '?'}. Processed: ${flattenedRowsChunk.length} rows. Total Written: ${totalRowsWritten}`);
-    }
-
-    // 6. Logic Phân trang
-    if (totalPages && currentPage >= totalPages) break;
-    if (!totalPages && response.data.length < queryParams.page_size) break;
-
-    currentPage++;
-    await sleep(300);
-  } while (true);
+  }
 
   return { 
     status: "SUCCESS", 
-    data: [], // Trả về rỗng để Worker không ghi lại
+    data: [], // Trả về rỗng
     newRows: totalRowsWritten 
   };
 }
