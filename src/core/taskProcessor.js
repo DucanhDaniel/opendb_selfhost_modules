@@ -7,6 +7,7 @@ import { authService } from '../services/auth/auth.service.js';
 import { processFacebookJob } from '../services/facebook/index.js';
 import { processTiktokJob } from '../services/tiktok/index.js'; 
 import { processPoscakeJob } from '../services/pancake/index.js';
+import { processScheduleTrigger } from './scheduleTrigger.js';
 // import { processGoogleJob } from '../services/google/index.js'; 
 
 const CURRENT_TASK_PROPERTY = "TASK_MANAGER_CURRENT_TASK";
@@ -17,9 +18,20 @@ const TASK_HISTORY_PROPERTY = "TASK_MANAGER_HISTORY";
  * @param {object} job - Job từ BullMQ
  */
 export const processJobWorker = async (job) => {
+  console.log(job);
+
+  if (job.name === 'schedule-trigger') {
+    return processScheduleTrigger(job);
+  }
+  
+  // 1. Bắt đầu đo giờ
+  const startTime = Date.now();
+  let status = "FAILED";
+  let rowsWritten = 0;
+
   const { task, userId, accessToken } = job.data;
   const taskId = task.taskId;
-  logger.info(`Worker bắt đầu xử lý task ${taskId} cho user ${userId}...`);
+  console.log(`Worker bắt đầu xử lý task ${taskId} cho user ${userId}...`);
 
   const task_logger = new TaskLogger(userId, taskId);
   task_logger.info(`Khởi tạo task logger thành công!`);
@@ -33,8 +45,6 @@ export const processJobWorker = async (job) => {
 
     let result; // { status, data, newRows }
     
-    // 1. [QUAN TRỌNG] Điều phối (Dispatch) tác vụ
-    // (Đây là logic switch-case bạn đã có trong GAS)
     if (task.taskType.startsWith("FACEBOOK_")) {
       result = await processFacebookJob(task.params, accessToken, userId, task_logger);
     
@@ -52,9 +62,6 @@ export const processJobWorker = async (job) => {
     else {
       throw new Error(`Loại task không xác định: ${task.taskType}`);
     }
-    console.log("Bắt đầu cập nhật trạng thái!");
-    // 2. Xử lý kết quả THÀNH CÔNG
-    // task_logger.info(`Task hoàn thành. Status: ${result.status}. New rows: ${result.newRows}`)
 
     console.log("Đang đóng logger...");
     await task_logger.close(); 
@@ -62,15 +69,47 @@ export const processJobWorker = async (job) => {
     
     // Cập nhật trạng thái
     const finalMessage = `Hoàn tất! (Tổng cộng ${result.newRows || 0} dòng mới)`;
+    rowsWritten = result.newRows || 0;
+
     console.log("Bắt đầu cập nhật trạng thái COMPLETED...");
+    status = "COMPLETED";
     await updateTaskStatus(userId, taskId, "COMPLETED", finalMessage);
     console.log("Hoàn thành cập nhật trạng thái!");
 
   } catch (error) {
     // 3. Xử lý lỗi (FAILED)
+    status = "FAILED";
     task_logger.error(`Task thất bại: ${error.message}`);
     await task_logger.close();
     await updateTaskStatus(userId, taskId, "FAILED", `Lỗi: ${error.message}`);
+  }
+  finally {
+    // 2. Kết thúc đo giờ
+    const durationMs = Date.now() - startTime;
+
+    // 3. Ghi tổng kết vào bảng TaskMetric
+    try {
+      const scheduleId = task.scheduleId || null;
+
+      await prisma.taskMetric.create({
+        data: {
+          taskId: taskId,
+          userId: userId,
+          taskType: task.taskType,
+          status: status,
+          
+          durationMs: durationMs,
+          rowsWritten: rowsWritten,
+          
+          scheduleId: scheduleId 
+        }
+      });
+      
+      logger.info(`[Metric] Ghi nhận lịch sử chạy cho Task ${taskId} (Schedule: ${scheduleId || 'Manual'})`);
+
+    } catch (e) {
+      logger.error(`Lỗi ghi TaskMetric: ${e.message}`);
+    }
   }
 };
 

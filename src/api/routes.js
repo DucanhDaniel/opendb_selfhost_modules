@@ -3,6 +3,7 @@ import userRoutes from './routes/user.routes.js';
 import taskRoutes from './routes/task.routes.js';
 import authRoutes from './routes/auth.routes.js'; 
 import dataRoutes from './routes/data.routes.js';
+import scheduleRoutes from './routes/schedule.routes.js';
 import { authMiddleware } from './middleware/auth.middleware.js'; 
 
 const router = Router();
@@ -17,4 +18,6 @@ router.use('/users', authMiddleware, userRoutes);
 router.use('/task', authMiddleware, taskRoutes);
 
 router.use('/data', authMiddleware, dataRoutes);
+
+router.use('/schedules', authMiddleware, scheduleRoutes);
 export default router;

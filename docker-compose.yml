@@ -1,26 +1,48 @@
-version: '3.8'
+# version: '3.8'
 
 services:
+  # === 1. Node.js API ===
   opendb_all_modules_api:
     container_name: opendb_all_modules_api
     build:
-      context: . # Xây dựng từ thư mục hiện tại (nơi có Dockerfile)
+      context: .
       dockerfile: Dockerfile
     ports:
-      - "3000:3000" # Ánh xạ cổng 3000 của container ra máy thật
+      - "3000:3000"
     env_file:
-      - ./.env # Tải file .env của bạn
+      - ./.env
     depends_on:
-      - redis     # Đảm bảo redis khởi động trước
-      - postgres  # Đảm bảo postgres khởi động trước
+      redis:
+        condition: service_healthy # Chỉ chạy Node khi Redis đã Healthcheck OK (ghi được)
+      postgres:
+        condition: service_started
+
+  # === 2. Redis  ===
   redis:
     container_name: opendb_redis
-    image: redis:7-alpine 
+    image: redis:7-alpine
     ports:
       - "6379:6379"
     volumes:
       - redis_data:/data
+    
+    # Cấu hình để KHÔNG chuyển sang Read-only khi lỗi lưu đĩa (bgsave error)
+    command: redis-server --save 60 1 --loglevel warning --stop-writes-on-bgsave-error no
+    
+    # Kiểm tra sức khỏe bằng cách thử GHI dữ liệu
+    healthcheck:
+      # Lệnh này thử set key 'health_check'. Nếu Redis bị Read-only -> Lỗi -> Unhealthy
+      test: ["CMD-SHELL", "redis-cli set health_check 'ok' || exit 1"]
+      interval: 10s       # Kiểm tra mỗi 10 giây
+      timeout: 5s         # Chờ tối đa 5 giây
+      retries: 3          # Thử 3 lần liên tiếp nếu lỗi mới coi là chết
+      start_period: 10s   # Chờ 10s đầu khi khởi động
 
+    # Gắn nhãn để Autoheal nhận diện và restart
+    labels:
+      autoheal: "true"
+
+  # === 3. PostgreSQL ===
   postgres:
     container_name: opendb-postgres
     image: postgres:16-alpine
@@ -32,6 +54,27 @@ services:
     volumes:
       - opendb-data:/var/lib/postgresql/data
 
+  # Service này sẽ theo dõi và restart các container bị đánh dấu unhealthy
+  autoheal:
+    image: willfarrell/autoheal
+    container_name: autoheal
+    restart: always
+    environment:
+      - AUTOHEAL_CONTAINER_LABEL=all # Theo dõi tất cả container có label autoheal
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock # Cần quyền docker socket để restart container khác
+
+  redis-insight:
+      image: redis/redisinsight:latest
+      container_name: opendb_redis_insight
+      ports:
+        - "5540:5540"
+      depends_on:
+        - redis
+      volumes:
+        - redis_insight_data:/data
+
 volumes:
   redis_data:
-  opendb-data: 
+  opendb-data:
+  redis_insight_data:
