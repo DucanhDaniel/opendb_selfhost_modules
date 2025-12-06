@@ -38,6 +38,9 @@ jobs:
           echo "POSCAKE_API_KEY=${{ secrets.POSCAKE_API_KEY }}" >> .env
           echo "FACEBOOK_ACCESS_TOKEN=${{ secrets.FACEBOOK_ACCESS_TOKEN }}" >> .env
 
+          echo "ACCESS_TOKEN_EXPIRATION=15m" >> .env
+          echo "REFRESH_TOKEN_EXPIRATION=7d" >> .env
+
       # 3. Khởi động toàn bộ hệ thống (Node + DB + Redis)
       - name: Start containers
         run: docker compose up -d --build

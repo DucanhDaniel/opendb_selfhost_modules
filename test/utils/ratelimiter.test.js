@@ -5,8 +5,9 @@ import RedisRateLimiter from '../../src/utils/rate_limiter.js';
 const sleep = (ms) => new Promise((resolve) => setTimeout(resolve, ms));
 
 const REDIS_CONFIG = {
-  host: 'localhost',
-  port: 6379,
+  host: process.env.REDIS_HOST,
+  port: process.env.REDIS_PORT,
+  maxRetriesPerRequest: 3,
 };
 
 describe('Integration Test: Redis Rate Limiter (Spam Logic)', () => {
