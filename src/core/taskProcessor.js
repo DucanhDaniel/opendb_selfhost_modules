@@ -18,7 +18,7 @@ const TASK_HISTORY_PROPERTY = "TASK_MANAGER_HISTORY";
  * @param {object} job - Job từ BullMQ
  */
 export const processJobWorker = async (job) => {
-  console.log(job);
+  // console.log(job);
 
   if (job.name === 'schedule-trigger') {
     return processScheduleTrigger(job);

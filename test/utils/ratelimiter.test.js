@@ -20,6 +20,8 @@ describe('Integration Test: Redis Rate Limiter (Spam Logic)', () => {
   // Setup & Teardown
   beforeAll(() => {
     redis = new Redis(REDIS_CONFIG);
+
+    
   });
 
   afterAll(async () => {

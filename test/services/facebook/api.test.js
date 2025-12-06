@@ -2,8 +2,9 @@ import request from 'supertest';
 import { createApiServer } from '../../../src/api/server.js';
 import prisma from '../../../src/db/client.js';
 import { authService } from '../../../src/services/auth/auth.service.js';
-import { initializeWorker, taskQueue } from '../../../src/core/jobQueue.js';
+import { initializeWorker, taskQueue, taskWorker } from '../../../src/core/jobQueue.js';
 import logger from '../../../src/utils/logger.js';
+import { jest } from '@jest/globals'
 
 const app = createApiServer();
 
@@ -89,6 +90,11 @@ describe('Facebook Module E2E Test Suite', () => {
 
   // --- SETUP (Chạy 1 lần) ---
   beforeAll(async () => {
+
+    jest.spyOn(console, 'log').mockImplementation(() => {});
+    jest.spyOn(console, 'info').mockImplementation(() => {});
+
+    
     initializeWorker();
     
     // Get or Create User
@@ -119,6 +125,11 @@ describe('Facebook Module E2E Test Suite', () => {
         await prisma.taskMetric.deleteMany({ where: { userId } });
     }
     await taskQueue.close();
+
+    if (taskWorker) {
+      await taskWorker.close();
+  }
+  
     await prisma.$disconnect();
   });
 

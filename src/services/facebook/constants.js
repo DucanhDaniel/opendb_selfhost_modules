@@ -4,7 +4,7 @@
 
 export const FACEBOOK_ACCOUNTS_SHEET_NAME = "[FB] BM & Ad Accounts"; // Kept for billing logic, though should be replaced by DB call
 
-export const BATCH_SERVER_URL = process.env.BATCH_SERVER_URL || "http://103.102.131.30:8010";
+export const BATCH_SERVER_URL = process.env.BATCH_SERVER_URL || "http://14.225.253.94:8010";
 export const FACEBOOK_API_VERSION = "v24.0";
 
 // --- Data Transformation Maps ---
