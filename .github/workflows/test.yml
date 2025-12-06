@@ -40,7 +40,7 @@ jobs:
 
       # 3. Khởi động toàn bộ hệ thống (Node + DB + Redis)
       - name: Start containers
-        run: docker-compose up -d --build
+        run: docker compose up -d --build
 
       # 4. Đợi một chút cho DB sẵn sàng (Optional nhưng nên có)
       - name: Wait for DB to be ready
@@ -49,9 +49,9 @@ jobs:
       # 5. Chạy Test (Bên trong container Node.js)
       # Dùng flag -T để tắt chế độ interactive (TTY) giúp không bị lỗi trên CI
       - name: Run Tests inside Container
-        run: docker-compose exec -T opendb_all_modules_api npm test
+        run: docker compose exec -T opendb_all_modules_api npm test
 
       # 6. Dọn dẹp (Tắt container sau khi xong)
       - name: Stop containers
         if: always()
-        run: docker-compose down -v
+        run: docker compose down -v
