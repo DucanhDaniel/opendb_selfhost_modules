@@ -1,28 +1,30 @@
 import dotenv from 'dotenv';
-import fs from 'fs'; // [MỚI] Import File System
-import path from 'path'; // [MỚI] Import Path
+import fs from 'fs'; 
+import path from 'path'; 
 import { processFacebookJob } from '../../../../src/services/facebook/index.js';
 import { writeDataToDatabase } from '../../../../src/db/dataWriter.js';
 import prisma from '../../../../src/db/client.js';
 
-// --- [BƯỚC 1] ---
 dotenv.config();
 
-// --- [BƯỚC 2] ---
 let accessToken;
 try {
-  const authConfig = JSON.parse(process.env.FB_AUTH_CONFIG);
-  if (!authConfig || !authConfig.token) {
-    throw new Error('FB_AUTH_CONFIG is missing or malformed in .env');
+  accessToken = process.env.FACEBOOK_ACCESS_TOKEN;
+  if (!accessToken) {
+    throw new Error('FACEBOOK_ACCESS_TOKEN is missing or malformed in .env');
   }
-  accessToken = authConfig.token;
   console.log("Đã tải Access Token thành công.");
 } catch (e) {
   console.error("Lỗi khi tải Access Token từ .env:", e.message);
   process.exit(1);
 }
 
-// --- [BƯỚC 3] ---
+const mockTaskLogger = {
+    info: (msg) => console.log(`[INFO] ${msg}`),
+    warn: (msg) => console.warn(`[WARN] ${msg}`),
+    error: (msg) => console.error(`[ERROR] ${msg}`),
+};
+
 const sampleTaskParams = {
   templateName: 'BM & Ad Accounts',
   selectedFields: [
@@ -50,7 +52,7 @@ async function runTest() {
   try {
     // 1. Gọi hàm xử lý Facebook
     console.log("Đang gọi processFacebookJob...");
-    const processorResult = await processFacebookJob(sampleTaskParams, accessToken);
+    const processorResult = await processFacebookJob(sampleTaskParams, accessToken, "Test user id", mockTaskLogger);
 
     if (processorResult.status !== "SUCCESS") {
       throw new Error(`Lỗi từ Facebook Processor: ${processorResult.message || 'Unknown error'}`);

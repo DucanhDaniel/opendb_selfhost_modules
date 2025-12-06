@@ -38,13 +38,11 @@ const mockRawRow = {
       quantity: 2
     }
   ],
-  // Dữ liệu item con (khi đã flatten)
   item: {
     variation_info: { name: "Áo Thun Size M" }
   }
 };
 
-// --- 4. Danh sách trường cần lấy (Technical IDs) ---
 const selectedFields = [
   "id",
   "inserted_at",
@@ -52,7 +50,8 @@ const selectedFields = [
   "total_price_calculated",
   "warehouse_name",
   "partner.partner_name",
-  "item.variation_info.name"
+  "item.variation_info.name",
+  ""
 ];
 
 function runTest() {

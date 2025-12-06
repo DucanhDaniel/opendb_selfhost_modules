@@ -63,8 +63,8 @@ export async function processPoscakeJob(options, apiKey, userId, task_logger, ta
 
     case "FLATTENED_REPORT":
       // Báo cáo cần làm phẳng mảng con (Chi tiết đơn hàng...)
-        console.log("options: ", options);
-        console.log("config: ", config);
+        // console.log("options: ", options);
+        // console.log("config: ", config);
         processorResult = await processFlattenedReport(options, config, maps, apiKey, taskId, task_logger, userId);
         // processorResult = { status: "SUCCESS", data: [], newRows: 0 };
         console.log("Đã xong processor!");
