@@ -1,11 +1,7 @@
-// src/services/data.service.js
 import prisma from '../../db/client.js';
 import logger from '../../utils/logger.js';
-// (Đảm bảo đường dẫn này đúng với cấu trúc của bạn)
 
 /**
- * [PHIÊN BẢN ĐÚNG]
- *
  * @param {string} userId - ID của user (từ token)
  * @param {object} options - { sheetName, limit, page }
  */
@@ -16,7 +12,7 @@ async function queryData(userId, { sheetName, limit, page }) {
   try {
 
     // 2. Lấy tên bảng động từ config
-    const tableName = sheetName; // Ví dụ: "FAD_AdPerformanceReport"
+    const tableName = sheetName; 
 
     if (!tableName || !prisma[tableName]) {
        throw new Error(`Tên bảng '${tableName}' không hợp lệ hoặc không tồn tại trong Prisma Client.`);

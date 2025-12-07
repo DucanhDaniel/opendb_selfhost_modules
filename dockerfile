@@ -9,6 +9,12 @@ RUN npx prisma generate
 
 COPY ./src ./src
 
+COPY ./test ./test
+
+COPY ./output ./output
+
+COPY jest.config.js .
+
 # [MỚI] Copy script entrypoint vào
 COPY ./docker-entrypoint.sh .
 RUN chmod +x ./docker-entrypoint.sh

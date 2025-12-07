@@ -30,8 +30,9 @@ logger.info('Đã kết nối Queue (BullMQ)');
 
 // 4. Khởi tạo đối tượng WORKER
 // File này sẽ được import trong index.js để khởi chạy worker
+export let taskWorker;
 export function initializeWorker() {
-  const taskWorker = new Worker(QUEUE_NAME, processJobWorker, {
+  taskWorker = new Worker(QUEUE_NAME, processJobWorker, {
     connection: connectionOptions,
     concurrency: 5, // Xử lý 5 job cùng lúc (tùy chỉnh)
     limiter: {      // Giới hạn (ví dụ: 100 job mỗi 30 giây)

@@ -15,7 +15,7 @@ const TYPE_CONFIG = {
     "bm_verification_status", "bm_profile_picture_uri", "account_type",
     "account_status_text", "currency", "timezone_name", "current_payment_method",
     "eventType", "dateTimeInTimezone", "transactionId", "action", "type",
-    "billingHubLink", "downloadInvoiceLink", "platform", "user_id"
+    "billingHubLink", "downloadInvoiceLink", "platform", "user_id", "order_id", "system_id", "shop_id"
   ]),
   FLOAT: new Set([
     "purchaseROAS", "frequency", "ctr", "spend", "cpc", "cpm", "average_video_play", "total_amount", "total_after_sub_discount",
@@ -208,7 +208,8 @@ const TEMPLATE_MAP = {
 
   "Audience Report: Region by Campaign": {
     tableName: "TTA_AudienceRegionReport",
-    conflictTarget: ["advertiser_id", "start_date", "end_date", "campaign_id", "province_id"],
+    filterNullMetrics: ["province_id"],
+    conflictTarget: ["start_date", "end_date", "advertiser_id", "advertiser_name", "campaign_id", "province_id", "province_name", "campaign_name"],
     insightDateKey: ["start_date", "end_date"],
     filter_spend: true 
   },
@@ -257,42 +258,42 @@ const TEMPLATE_MAP = {
 
   "GMV Campaign / Product Detail": {
     tableName: "GMV_ProductDetailReport",
-    conflictTarget: ["advertiser_id", "store_id", "campaign_id", "start_date", "end_date"],
+    conflictTarget: ["advertiser_id", "store_id", "campaign_id", "start_date", "end_date", "stat_time_day", "item_group_id"],
     insightDateKey: ["start_date", "end_date"],
     filter_spend: false // Trong logic của GMV detail đã có sẵn lọc cost để tối ưu xử lý
   },
 
   "GMV Campaign / Creative Detail": {
     tableName: "GMV_CreativeDetailReport",
-    conflictTarget: ["advertiser_id", "store_id", "campaign_id", "start_date", "end_date", "item_group_id"],
+    conflictTarget: ["advertiser_id", "store_id", "campaign_id", "start_date", "end_date", "item_group_id", "item_id"],
     insightDateKey: ["start_date", "end_date"],
     filter_spend: false // Trong logic của GMV detail đã có sẵn lọc cost để tối ưu xử lý
   },
 
   "GMV Product Campaign Performance": {
     tableName: "GMV_ProductCampaignPerformance",
-    conflictTarget: ["advertiser_id", "store_id", "campaign_id", "start_date", "end_date", "start_time_day"],
+    conflictTarget: ["advertiser_id", "store_id", "campaign_id", "start_date", "end_date", "stat_time_day"],
     insightDateKey: ["start_date", "end_date"],
     filter_spend: false
   },
 
   "GMV All Campaign Performance": {
     tableName: "GMV_AllCampaignPerformance",
-    conflictTarget: ["advertiser_id", "store_id", "campaign_id", "start_date", "end_date", "start_time_day"],
+    conflictTarget: ["advertiser_id", "store_id", "campaign_id", "start_date", "end_date", "stat_time_day"],
     insightDateKey: ["start_date", "end_date"],
     filter_spend: false
   },
 
   "GMV Live Campaign Performance": {
     tableName: "GMV_LiveCampaignPerformance",
-    conflictTarget: ["advertiser_id", "store_id", "campaign_id", "start_date", "end_date", "start_time_day"],
+    conflictTarget: ["advertiser_id", "store_id", "campaign_id", "start_date", "end_date", "stat_time_day"],
     insightDateKey: ["start_date", "end_date"],
     filter_spend: false
   },
 
   "Báo cáo đơn hàng chi tiết (Full Data)": {
     tableName: "POS_BasicReport",
-    conflictTarget: ["shop_id", "order_id", "display_id", "system_id", "conversation_id", "source_id", "ad_id", "page_id", "post_id", "marketer_id", "creator_id", "seller_id", "care_staff_id", "customer_system_id", "warehouse_id", "item_id"],
+    conflictTarget: ["order_id"],
     insightDateKey: [],
     filter_spend: false
   }
@@ -391,6 +392,17 @@ export async function writeDataToDatabase(templateName, dataRows, userId) {
       );
   }
 
+  // Yêu cầu tất cả các trường trong filterNullMetrics phải khác null!
+  if (config.filterNullMetrics && Array.isArray(config.filterNullMetrics)) {
+    filteredData = filteredData.filter(row => {
+      // Kiểm tra từng metric trong danh sách cần lọc
+      // Hàm .every() sẽ trả về true chỉ khi TẤT CẢ các metric đều thỏa mãn điều kiện
+      return config.filterNullMetrics.every(metric => 
+        row[metric] !== null && row[metric] !== undefined
+      );
+    });
+  }
+
 
   const originalCount = sanitizedData.length;
   const filteredCount = filteredData.length;
@@ -468,11 +480,15 @@ export async function writeDataToDatabase(templateName, dataRows, userId) {
                 else if (TYPE_CONFIG.JSON.has(col)) castType = "::jsonb";
                 else if (TYPE_CONFIG.DECIMAL.has(col)) castType = "::decimal";
                 else if (TYPE_CONFIG.BOOLEAN.has(col)) castType = "::boolean";
+                else if (TYPE_CONFIG.TEXT.has(col)) castType = "::text";
 
                 rowParams.push(`$${deleteParamIndex++}${castType}`);
                 
                 const val = row[col];
                 if (val instanceof Date) deleteValues.push(val.toISOString());
+                else if (TYPE_CONFIG.TEXT.has(col) && typeof val === 'number') {
+                    deleteValues.push(String(val));
+                }
                 else deleteValues.push(val);
             }
             return `(${rowParams.join(", ")})`;
@@ -508,22 +524,22 @@ export async function writeDataToDatabase(templateName, dataRows, userId) {
         const insertSql = `INSERT INTO "${tableName}" (${columnsSql}) VALUES ${valuePlaceholders};`;
 
         // 7. Thực thi 2 lệnh (DELETE, INSERT) cho đợt này
-        // const deleteCommand = tx.$executeRawUnsafe(deleteSql, ...deleteValues);
+        const deleteCommand = tx.$executeRawUnsafe(deleteSql, ...deleteValues);
         const insertCommand = tx.$executeRawUnsafe(insertSql, ...allInsertValues);
 
         // Chạy song song delete và insert cho đợt này
-        // const [deleteResultCount, insertResultCount] = await Promise.all([
-        //   deleteCommand,
-        //   insertCommand
-        // ]);
-
-        const [insertResultCount] = await Promise.all([
+        const [deleteResultCount, insertResultCount] = await Promise.all([
+          deleteCommand,
           insertCommand
         ]);
 
+        // const [insertResultCount] = await Promise.all([
+        //   insertCommand
+        // ]);
+
         totalInsertedCount += insertResultCount;
-        // console.log(`   ... Chunk ${index + 1} done. Deleted: ${deleteResultCount}, Inserted: ${insertResultCount}`);
-        console.log(`   ... Chunk ${index + 1} done. Deleted: ${0}, Inserted: ${insertResultCount}`);
+        console.log(`   ... Chunk ${index + 1} done. Deleted: ${deleteResultCount}, Inserted: ${insertResultCount}`);
+        // console.log(`   ... Chunk ${index + 1} done. Deleted: ${0}, Inserted: ${insertResultCount}`);
       }
       // Nếu vòng lặp 'for' hoàn thành mà không có lỗi, transaction sẽ tự động commit
     }, 

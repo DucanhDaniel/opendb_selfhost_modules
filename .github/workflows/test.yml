@@ -1,0 +1,60 @@
+name: Docker Compose CI
+
+on:
+  push:
+    branches: [ "main" ]
+  pull_request:
+    branches: [ "main" ]
+
+jobs:
+  test-with-docker:
+    runs-on: ubuntu-latest
+
+    steps:
+      # 1. Lấy code về
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      # 2. Tạo file .env (Bắt buộc vì git không lưu file này)
+      # Chúng ta lấy các giá trị mật từ GitHub Secrets
+      - name: Create .env file
+        run: |
+          touch .env
+          echo "PORT=3000" >> .env
+          echo "NODE_ENV=test" >> .env
+          
+          # Cấu hình Database & Redis (Khớp với docker-compose.yml)
+          echo "POSTGRES_DB=opendb" >> .env
+          echo "POSTGRES_USER=postgres" >> .env
+          echo "POSTGRES_PASSWORD=opendb_123" >> .env
+          echo "DATABASE_URL=postgresql://postgres:opendb_123@postgres:5432/opendb" >> .env
+          
+          echo "REDIS_HOST=redis" >> .env
+          echo "REDIS_PORT=6379" >> .env
+          
+          # Các Key Bí mật (Cài trong Repo Settings > Secrets)
+          echo "ACCESS_TOKEN_SECRET=${{ secrets.ACCESS_TOKEN_SECRET || 'test_secret' }}" >> .env
+          echo "TIKTOK_ACCESS_TOKEN=${{ secrets.TIKTOK_ACCESS_TOKEN }}" >> .env
+          echo "POSCAKE_API_KEY=${{ secrets.POSCAKE_API_KEY }}" >> .env
+          echo "FACEBOOK_ACCESS_TOKEN=${{ secrets.FACEBOOK_ACCESS_TOKEN }}" >> .env
+
+          echo "ACCESS_TOKEN_EXPIRATION=15m" >> .env
+          echo "REFRESH_TOKEN_EXPIRATION=7d" >> .env
+
+      # 3. Khởi động toàn bộ hệ thống (Node + DB + Redis)
+      - name: Start containers
+        run: docker compose up -d --build
+
+      # 4. Đợi một chút cho DB sẵn sàng (Optional nhưng nên có)
+      - name: Wait for DB to be ready
+        run: sleep 10
+
+      # 5. Chạy Test (Bên trong container Node.js)
+      # Dùng flag -T để tắt chế độ interactive (TTY) giúp không bị lỗi trên CI
+      - name: Run Tests inside Container
+        run: docker compose exec -T opendb_all_modules_api npm test
+
+      # 6. Dọn dẹp (Tắt container sau khi xong)
+      - name: Stop containers
+        if: always()
+        run: docker compose down -v

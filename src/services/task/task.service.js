@@ -60,7 +60,7 @@ async function deleteTaskHistory(userId) {
 }
 
 async function initiateTask(userId, taskData) {
-  const { taskType, params, description, runType } = taskData;
+  const { taskType, params, description, runType, scheduleId } = taskData;
   
   // 1. Tạo Task ID và đối tượng Task mới
   const taskId = randomUUID(); 
@@ -83,6 +83,8 @@ async function initiateTask(userId, taskData) {
     chunks: [],
     tempData: [],
     nextChunkIndex: 0,
+    
+    scheduleId: scheduleId || null,
   };
 
   const user = await prisma.user.findUnique({
