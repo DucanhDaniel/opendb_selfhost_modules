@@ -208,7 +208,8 @@ const TEMPLATE_MAP = {
 
   "Audience Report: Region by Campaign": {
     tableName: "TTA_AudienceRegionReport",
-    conflictTarget: ["advertiser_id", "start_date", "end_date", "campaign_id", "province_id"],
+    filterNullMetrics: ["province_id"],
+    conflictTarget: ["start_date", "end_date", "advertiser_id", "advertiser_name", "campaign_id", "province_id", "province_name", "campaign_name"],
     insightDateKey: ["start_date", "end_date"],
     filter_spend: true 
   },
@@ -257,14 +258,14 @@ const TEMPLATE_MAP = {
 
   "GMV Campaign / Product Detail": {
     tableName: "GMV_ProductDetailReport",
-    conflictTarget: ["advertiser_id", "store_id", "campaign_id", "start_date", "end_date"],
+    conflictTarget: ["advertiser_id", "store_id", "campaign_id", "start_date", "end_date", "stat_time_day", "item_group_id"],
     insightDateKey: ["start_date", "end_date"],
     filter_spend: false // Trong logic của GMV detail đã có sẵn lọc cost để tối ưu xử lý
   },
 
   "GMV Campaign / Creative Detail": {
     tableName: "GMV_CreativeDetailReport",
-    conflictTarget: ["advertiser_id", "store_id", "campaign_id", "start_date", "end_date", "item_group_id"],
+    conflictTarget: ["advertiser_id", "store_id", "campaign_id", "start_date", "end_date", "item_group_id", "item_id"],
     insightDateKey: ["start_date", "end_date"],
     filter_spend: false // Trong logic của GMV detail đã có sẵn lọc cost để tối ưu xử lý
   },
@@ -389,6 +390,17 @@ export async function writeDataToDatabase(templateName, dataRows, userId) {
     filteredData = sanitizedData.filter(row =>
           row.spend !== undefined && row.spend !== null && typeof row.spend === 'number' && row.spend >= 0
       );
+  }
+
+  // Yêu cầu tất cả các trường trong filterNullMetrics phải khác null!
+  if (config.filterNullMetrics && Array.isArray(config.filterNullMetrics)) {
+    filteredData = filteredData.filter(row => {
+      // Kiểm tra từng metric trong danh sách cần lọc
+      // Hàm .every() sẽ trả về true chỉ khi TẤT CẢ các metric đều thỏa mãn điều kiện
+      return config.filterNullMetrics.every(metric => 
+        row[metric] !== null && row[metric] !== undefined
+      );
+    });
   }
 
 

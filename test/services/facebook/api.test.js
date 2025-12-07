@@ -8,7 +8,6 @@ import { jest } from '@jest/globals'
 
 const app = createApiServer();
 
-// --- CẤU HÌNH DANH SÁCH CÁC BÁO CÁO CẦN TEST ---
 const FACEBOOK_TEST_CASES = [
   {
     name: "BM & Ad Accounts",
@@ -70,7 +69,154 @@ const FACEBOOK_TEST_CASES = [
     }
   },
 
+  {
+    name: "Campaign Performance by Age",
+    taskType: "FACEBOOK_FAD",
+    params: {
+      templateName: 'Campaign Performance by Age',
+      startDate: "2025-10-23",
+      endDate: "2025-10-28",
+      accountsToProcess: [
+        { id: "act_948290596967304", name: "BM MẠNH SÁO 2" }
+      ],
+        selectedFields: [
+            "campaign_id", "campaign_name", "account_id", "account_name", "age", "spend", "New Messaging Connections", "Cost per New Messaging", "Leads", "Cost Leads", 
+            "Purchases", "Cost Purchases", "Purchase Value", "Purchase ROAS", "Website Purchases", "On-Facebook Purchases", "date_start", "date_stop"
+        ]
+    }
+  },
 
+
+  {
+    name: "Campaign Performance by Platform",
+    taskType: "FACEBOOK_FAD",
+    params: {
+      templateName: 'Campaign Performance by Platform',
+      startDate: "2025-10-23",
+      endDate: "2025-10-28",
+      accountsToProcess: [
+        { id: "act_948290596967304", name: "BM MẠNH SÁO 2" }
+      ],
+        selectedFields: [
+          "account_id", "account_name", "campaign_id", "campaign_name", "publisher_platform", "platform_position", "date_start", "date_stop", "spend", "impressions", 
+          "clicks", "New Messaging Connections", "Cost per New Messaging", "Leads", "Cost Leads", "Purchases", "Cost Purchases", "Purchase Value", "Purchase ROAS", "Website Purchases", 
+          "On-Facebook Purchases"
+        ]
+    }
+  },
+
+  {
+    name: "Ad Set Performance Report",
+    taskType: "FACEBOOK_FAD",
+    params: {
+      templateName: 'Ad Set Performance Report',
+      startDate: "2025-10-23",
+      endDate: "2025-10-28",
+      accountsToProcess: [
+        { id: "act_948290596967304", name: "BM MẠNH SÁO 2" }
+      ],
+        selectedFields: [
+            "id", "name", "campaign_id", "campaign_name", "account_id", "account_name", "status", "effective_status", "created_time", "daily_budget", 
+            "lifetime_budget", "budget_remaining", "spend", "impressions", "reach", "clicks", "ctr", "cpc", "cpm", "New Messaging Connections", 
+            "Cost per New Messaging", "Leads", "Cost Leads", "Purchases", "Cost Purchases", "Purchase Value", "Purchase ROAS", "Website Purchases", "On-Facebook Purchases", "date_start", 
+            "date_stop"
+        ]
+    }
+  },
+
+  {
+    name: "Ad Performance Report",
+    taskType: "FACEBOOK_FAD",
+    params: {
+      templateName: 'Ad Performance Report',
+      startDate: "2025-10-23",
+      endDate: "2025-10-28",
+      accountsToProcess: [
+        { id: "act_948290596967304", name: "BM MẠNH SÁO 2" }
+      ],
+        selectedFields: [
+          "id", "name", "adset_id", "adset_name", "campaign_id", "campaign_name", "account_id", "account_name", "created_time", "updated_time", 
+          "status", "effective_status", "spend", "impressions", "reach", "clicks", "ctr", "cpc", "cpm", "frequency", 
+          "New Messaging Connections", "Cost per New Messaging", "Leads", "Cost Leads", "Purchases", "Cost Purchases", "Purchase Value", "Purchase ROAS", "Website Purchases", "On-Facebook Purchases", 
+          "date_start", "date_stop"
+        ]
+    }
+  },
+
+  {
+    name: "Account Daily Report",
+    taskType: "FACEBOOK_FAD",
+    params: {
+      templateName: 'Account Daily Report',
+      startDate: "2025-10-23",
+      endDate: "2025-10-28",
+      accountsToProcess: [
+        { id: "act_948290596967304", name: "BM MẠNH SÁO 2" }
+      ],
+        selectedFields: [
+          "account_id", "account_name", "account_currency", "date_start", "date_stop", "spend", "impressions", "clicks", "cpc", "cpm", 
+          "ctr", "reach", "frequency", "New Messaging Connections", "Cost per New Messaging", "Leads", "Cost Leads", "Purchases", "Cost Purchases", "Purchase Value", 
+          "Purchase ROAS", "Website Purchases", "On-Facebook Purchases"
+        ]
+    }
+  },
+
+  {
+    name: "Ad Set Daily Report",
+    taskType: "FACEBOOK_FAD",
+    params: {
+      templateName: 'Ad Set Daily Report',
+      startDate: "2025-10-23",
+      endDate: "2025-10-28",
+      accountsToProcess: [
+        { id: "act_948290596967304", name: "BM MẠNH SÁO 2" }
+      ],
+        selectedFields: [
+          "id", "name", "campaign_id", "campaign_name", "account_id", "account_name", "date_start", "date_stop", "status", "effective_status", 
+          "daily_budget", "lifetime_budget", "budget_remaining", "spend", "impressions", "reach", "clicks", "ctr", "cpc", "cpm", 
+          "frequency", "New Messaging Connections", "Cost per New Messaging", "Leads", "Cost Leads", "Purchases", "Cost Purchases", "Purchase Value", "Purchase ROAS", "Website Purchases", 
+          "On-Facebook Purchases"
+        ]
+    }
+  },
+
+  {
+    name: "Ad Daily Report",
+    taskType: "FACEBOOK_FAD",
+    params: {
+      templateName: 'Ad Daily Report',
+      startDate: "2025-10-23",
+      endDate: "2025-10-28",
+      accountsToProcess: [
+        { id: "act_948290596967304", name: "BM MẠNH SÁO 2" }
+      ],
+        selectedFields: [
+          "id", "name", "adset_id", "adset_name", "campaign_id", "campaign_name", "account_id", "account_name", "date_start", "date_stop", 
+          "status", "effective_status", "created_time", "spend", "impressions", "reach", "clicks", "ctr", "cpc", "cpm", 
+          "frequency", "New Messaging Connections", "Cost per New Messaging", "Leads", "Cost Leads", "Purchases", "Cost Purchases", "Purchase Value", "Purchase ROAS", "Website Purchases", 
+          "On-Facebook Purchases"
+        ]
+    }
+  },
+
+  {
+    name: "Ad Creative Report",
+    taskType: "FACEBOOK_FAD",
+    params: {
+      templateName: 'Ad Creative Report',
+      startDate: "2025-10-23",
+      endDate: "2025-10-28",
+      accountsToProcess: [
+        { id: "act_948290596967304", name: "BM MẠNH SÁO 2" }
+      ],
+        selectedFields: [
+          "id", "name", "adset_id", "adset_name", "campaign_id", "campaign_name", "account_id", "account_name", "status", "effective_status", 
+          "creative_id", "actor_id", "page_name", "creative_title", "creative_body", "creative_thumbnail_url", "creative_thumbnail_raw_url", "creative_link", "spend", "impressions", 
+          "Leads", "Cost Leads", "reach", "clicks", "ctr", "cpc", "cpm", "New Messaging Connections", "Cost per New Messaging", "Purchases", 
+          "Purchase Value", "Purchase ROAS", "date_start", "date_stop"
+        ]
+    }
+  },
 ];
 
 const TEST_USER = {
@@ -91,8 +237,8 @@ describe('Facebook Module E2E Test Suite', () => {
   // --- SETUP (Chạy 1 lần) ---
   beforeAll(async () => {
 
-    jest.spyOn(console, 'log').mockImplementation(() => {});
-    jest.spyOn(console, 'info').mockImplementation(() => {});
+    // jest.spyOn(console, 'log').mockImplementation(() => {});
+    // jest.spyOn(console, 'info').mockImplementation(() => {});
 
     
     initializeWorker();
