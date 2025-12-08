@@ -870,7 +870,7 @@ model BCA_BCInfo {
 
 /// @model
 /// Dữ liệu cho template "BC & Accounts Info"
-model BCA_BCAccountInfo {
+model bca_bc_account_info {
   pkId      String   @id @default(dbgenerated("gen_random_uuid()"))
   user_id  String
   createdAt DateTime @default(now()) 
