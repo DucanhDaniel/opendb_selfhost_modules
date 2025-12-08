@@ -225,7 +225,6 @@ const TEST_USER = {
   password: "password123",
   settings: {
     "FACEBOOK_ACCESS_TOKEN": process.env.FACEBOOK_ACCESS_TOKEN || "mock-token",
-    // Thêm license key nếu cần
     "SAVED_LICENSE_KEY": "VALID-LICENSE" 
   }
 };
@@ -234,7 +233,6 @@ describe('Facebook Module E2E Test Suite', () => {
   let token;
   let userId;
 
-  // --- SETUP (Chạy 1 lần) ---
   beforeAll(async () => {
 
     // jest.spyOn(console, 'log').mockImplementation(() => {});
@@ -255,7 +253,6 @@ describe('Facebook Module E2E Test Suite', () => {
         }
       });
     } else {
-        // Update settings mới nhất (token)
         await prisma.user.update({
             where: { id: user.id },
             data: { settings: TEST_USER.settings }
@@ -279,7 +276,6 @@ describe('Facebook Module E2E Test Suite', () => {
     await prisma.$disconnect();
   });
 
-  // --- DATA DRIVEN TEST ---
   // Jest sẽ lặp qua mảng FACEBOOK_TEST_CASES và chạy test cho từng item
   test.each(FACEBOOK_TEST_CASES)('Should process report: $name', async (testCase) => {
     logger.info(`\n🧪 Đang test template: ${testCase.name}`);
