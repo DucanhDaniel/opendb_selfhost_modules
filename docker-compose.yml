@@ -24,10 +24,7 @@ services:
     ports:
       - "6379:6379"
     volumes:
-      - redis_data:/data
-    
-    # Cấu hình để KHÔNG chuyển sang Read-only khi lỗi lưu đĩa (bgsave error)
-    command: redis-server --save 60 1 --loglevel warning --stop-writes-on-bgsave-error no
+      - opendb_redis_data:/data
     
     # Kiểm tra sức khỏe bằng cách thử GHI dữ liệu
     healthcheck:
@@ -75,6 +72,6 @@ services:
         - redis_insight_data:/data
 
 volumes:
-  redis_data:
+  opendb_redis_data:
   opendb-data:
   redis_insight_data:
