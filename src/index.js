@@ -2,6 +2,7 @@ import 'dotenv/config';
 import logger from './utils/logger.js';
 import { createApiServer } from './api/server.js';
 import { initializeWorker } from './core/jobQueue.js';
+import { runSchedulerWatchdog } from './core/schedulerWatchdog.js';
 
 const API_PORT = process.env.PORT || 3000;
 
@@ -11,6 +12,8 @@ async function main() {
   createApiServer(API_PORT);
 
   initializeWorker();
+
+  runSchedulerWatchdog();
   logger.info('Worker đang chạy...');
 
 }
