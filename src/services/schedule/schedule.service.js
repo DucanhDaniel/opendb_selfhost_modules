@@ -74,40 +74,36 @@ async function getUserSchedules(userId) {
 
 
 async function _addJobToQueue(schedule) {
-  // Tạo Job ID cố định: "sched:<UUID>" để dễ tìm và xóa sau này
-  const jobId = `sched:${schedule.id}`;
+  // Dùng ID làm tên Job luôn
+  const dynamicJobName = `sched:${schedule.id}`; 
 
   await taskQueue.add(
-    JOB_NAME, // Tên Job: 'schedule-trigger'
+    dynamicJobName, 
     { 
-      // Payload gửi cho Worker (chỉ cần ID là đủ để Worker tra cứu lại DB)
       scheduleId: schedule.id,
       userId: schedule.userId
     },
     {
-      jobId: jobId, 
       repeat: {
         pattern: schedule.cronExpression,
         tz: schedule.timezone || "Asia/Ho_Chi_Minh"
       },
-      // Giữ lại config này để debug
-      removeOnComplete: true,
-      removeOnFail: true
+      removeOnComplete: { count: 50 },
+      removeOnFail: { count: 100 }
     }
   );
 }
 
 async function _removeJobFromQueue(schedule) {
-  const jobId = `sched:${schedule.id}`;
+  const dynamicJobName = `sched:${schedule.id}`;
   
-  // BullMQ yêu cầu truyền đúng config repeat cũ để tìm và xóa
-  await taskQueue.removeRepeatable(
-    JOB_NAME,
+  // Xóa dựa trên Tên Job + Cấu hình repeat
+  await taskQueue.removeJobScheduler(
+    dynamicJobName, // <--- Thay đổi ở đây
     {
       pattern: schedule.cronExpression,
       tz: schedule.timezone || "Asia/Ho_Chi_Minh"
-    },
-    jobId 
+    }
   );
 }
 
@@ -154,5 +150,6 @@ export const scheduleService = {
   createSchedule,
   deleteSchedule,
   getUserSchedules,
-  updateSchedule
+  updateSchedule,
+  _addJobToQueue
 };
