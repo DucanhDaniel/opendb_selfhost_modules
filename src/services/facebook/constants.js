@@ -1,6 +1,5 @@
 // /src/services/facebook/constants.js
 
-// This file isolates the massive configuration objects to keep other files clean.
 
 export const FACEBOOK_ACCOUNTS_SHEET_NAME = "[FB] BM & Ad Accounts"; // Kept for billing logic, though should be replaced by DB call
 

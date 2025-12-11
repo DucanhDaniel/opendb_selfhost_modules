@@ -8,7 +8,7 @@ services:
       context: .
       dockerfile: Dockerfile
     ports:
-      - "3000:3000"
+      - "3001:3000"
     env_file:
       - ./.env
     depends_on:
@@ -22,7 +22,7 @@ services:
     container_name: opendb_redis
     image: redis:7-alpine
     ports:
-      - "6379:6379"
+      - "6380:6379"
     volumes:
       - opendb_redis_data:/data
     
@@ -70,6 +70,12 @@ services:
         - redis
       volumes:
         - redis_insight_data:/data
+        
+  frontend:
+      image: vietban2005/gas_to_host
+      container_name: frontend
+      ports:
+        - "3000:3000"
 
 volumes:
   opendb_redis_data:
