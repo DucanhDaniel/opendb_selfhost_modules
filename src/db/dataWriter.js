@@ -187,7 +187,7 @@ const TEMPLATE_MAP = {
 
   "AdGroup Performance": {
     tableName: "TTA_AdGroupPerformance",
-    conflictTarget: ["advertiser_id", "campaign_id", "adgroup_id", "start_date", "end_date"],
+    conflictTarget: ["advertiser_id", "adgroup_id", "start_date", "end_date"],
     insightDateKey: ["start_date", "end_date"],
     filter_spend: true 
   },
