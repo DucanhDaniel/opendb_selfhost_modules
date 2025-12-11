@@ -8,11 +8,6 @@ import logger from '../utils/logger.js';
 export function createApiServer(port) {
   const app = express();
 
-  app.use(cors({
-    origin: 'http://localhost:3000', // Chỉ cho phép Frontend port 3000
-    credentials: true                // Cho phép gửi cookie/session qua lại
-  }));
-
   // Middlewares
   app.use(express.json({ limit: '50mb' })); 
   app.use(express.urlencoded({ extended: true, limit: '50mb' }));
