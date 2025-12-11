@@ -22,7 +22,7 @@ services:
     container_name: opendb_redis
     image: redis:7-alpine
     ports:
-      - "6380:6379"
+      - "6379:6379"
     volumes:
       - opendb_redis_data:/data
     
