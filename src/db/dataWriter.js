@@ -293,7 +293,7 @@ const TEMPLATE_MAP = {
 
   "Báo cáo đơn hàng chi tiết (Full Data)": {
     tableName: "POS_BasicReport",
-    conflictTarget: ["order_id"],
+    conflictTarget: ["order_id", "item_id"],
     insightDateKey: [],
     filter_spend: false
   }
@@ -544,7 +544,7 @@ export async function writeDataToDatabase(templateName, dataRows, userId) {
       // Nếu vòng lặp 'for' hoàn thành mà không có lỗi, transaction sẽ tự động commit
     }, 
     {
-      timeout: 60000 // Tăng timeout lên 60 giây (mặc định là 5s)
+      timeout: 90000 // Tăng timeout lên 90 giây (mặc định là 5s)
     });
 
     // Giao dịch đã thành công

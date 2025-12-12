@@ -1747,6 +1747,7 @@ model POS_BasicReport {
   // --- Index ---
   @@index([user_id])
   @@index([user_id, created_at])
+  @@index([order_id, item_id])
 }
 
 model TaskSchedule {
