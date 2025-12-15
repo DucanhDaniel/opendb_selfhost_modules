@@ -63,7 +63,7 @@ model FAD_CampaignOverviewReport {
   websitePurchases        Int? // "Website Purchases"
   onFacebookPurchases     Int? // "On-Facebook Purchases"
 
-  // @@unique([account_id, date_start, date_stop])
+  @@unique([user_id, account_id, id, date_start, date_stop])
   @@index([user_id])
 }
 
@@ -99,7 +99,7 @@ model FAD_CampaignPerformanceByAge {
   date_start DateTime?
   date_stop  DateTime?
 
-  // @@unique([account_id, date_start, date_stop])
+  @@unique([user_id, account_id, date_start, date_stop, campaign_id, age])
   @@index([user_id])
 }
 
@@ -135,7 +135,7 @@ model FAD_CampaignPerformanceByGender {
   date_start DateTime?
   date_stop  DateTime?
 
-  // @@unique([account_id, date_start, date_stop])
+  @@unique([user_id, account_id, date_start, date_stop, campaign_id, gender])
   @@index([user_id])
 }
 
@@ -176,7 +176,7 @@ model FAD_CampaignPerformanceByPlatform {
   websitePurchases        Int?
   onFacebookPurchases     Int?
 
-  // @@unique([account_id, date_start, date_stop])
+  @@unique([user_id, account_id, date_start, date_stop, campaign_id, publisher_platform, platform_position])
   @@index([user_id])
 }
 
@@ -216,7 +216,7 @@ model FAD_CampaignPerformanceByRegion {
   date_start DateTime?
   date_stop  DateTime?
 
-  // @@unique([account_id, date_start, date_stop])
+  @@unique([user_id, account_id, date_start, date_stop, campaign_id, region])
   @@index([user_id])
 }
 
@@ -269,7 +269,7 @@ model FAD_AdSetPerformanceReport {
   date_start DateTime?
   date_stop  DateTime?
 
-  // @@unique([account_id, date_start, date_stop])
+  @@unique([user_id, account_id, date_start, date_stop, campaign_id, id])
   @@index([user_id])
 }
 
@@ -321,7 +321,7 @@ model FAD_AdPerformanceReport {
   date_start DateTime?
   date_stop  DateTime?
 
-  // @@unique([account_id, date_start, date_stop])
+  @@unique([user_id, account_id, date_start, date_stop, campaign_id, adset_id, id])
   @@index([user_id])
 }
 
@@ -360,7 +360,7 @@ model FAD_AccountDailyReport {
   websitePurchases        Int?
   onFacebookPurchases     Int?
 
-  // @@unique([account_id, date_start, date_stop])
+  @@unique([user_id, account_id, date_start, date_stop])
   @@index([user_id])
 }
 
@@ -400,7 +400,7 @@ model FAD_CampaignDailyReport {
   websitePurchases        Int?
   onFacebookPurchases     Int?
 
-  // @@unique([account_id, date_start, date_stop])
+  @@unique([user_id, account_id, campaign_id, date_start, date_stop])
   @@index([user_id])
 }
 
@@ -451,7 +451,7 @@ model FAD_AdSetDailyReport {
   websitePurchases        Int?
   onFacebookPurchases     Int?
 
-  // @@unique([account_id, date_start, date_stop])
+  @@unique([user_id, account_id, date_start, date_stop, campaign_id, id])
   @@index([user_id])
 }
 
@@ -500,7 +500,7 @@ model FAD_AdDailyReport {
   websitePurchases        Int?
   onFacebookPurchases     Int?
 
-  // @@unique([account_id, date_start, date_stop])
+  @@unique([user_id, account_id, date_start, date_stop, campaign_id, adset_id, id])
   @@index([user_id])
 }
 
@@ -556,7 +556,7 @@ model FAD_AdCreativeReport {
   date_start DateTime?
   date_stop  DateTime?
 
-  // @@unique([account_id, date_start, date_stop])
+  @@unique([user_id, account_id, date_start, date_stop, campaign_id, adset_id, id])
   @@index([user_id])
 }
 
@@ -585,7 +585,7 @@ model FAD_BmAndAdAccounts {
   current_payment_method   String?
   tax_and_fee              Float?
 
-  // @@unique([bm_id, account_id])
+  @@unique([user_id, bm_id, account_id])
   @@index([user_id])
 }
 
@@ -625,7 +625,7 @@ model FBT_FbBillingData {
   billingHubLink      String? @db.Text
   downloadInvoiceLink String? @db.Text
 
-  // @@unique([accountId, transactionId])
+  @@unique([user_id, accountId, transactionId])
   @@index([user_id])
 }
 
@@ -865,6 +865,7 @@ model BCA_BCInfo {
   user_role   String?
   finance_role String?
 
+  @@unique([user_id, bc_id])
   @@index([user_id])
 }
 
@@ -969,6 +970,7 @@ model TTA_CampaignPerformance {
   onsite_shopping_roas        Float?
   cost_per_onsite_shopping    Float?
 
+  @@unique([user_id, advertiser_id, campaign_id, objective_type, start_date, end_date, stat_time_day])
   @@index([user_id])
 }
 
@@ -1016,6 +1018,7 @@ model TTA_AdGroupPerformance {
   onsite_shopping_roas        Float?
   cost_per_onsite_shopping    Float?
 
+  @@unique([user_id, advertiser_id, adgroup_id, start_date, end_date, stat_time_day])
   @@index([user_id])
 
 }
@@ -1066,6 +1069,7 @@ model TTA_AdPerformance {
   onsite_shopping_roas        Float?
   cost_per_onsite_shopping    Float?
 
+  @@unique([user_id, advertiser_id, campaign_name, adgroup_name, ad_id, start_date, end_date, stat_time_day])
   @@index([user_id])
 
 }
@@ -1097,6 +1101,7 @@ model TTA_CreativePerformance {
   conversion      Int?
   cost_per_conversion Float?
 
+  @@unique([user_id, advertiser_id, campaign_id, adgroup_id, ad_id, start_date, end_date])
   @@index([user_id])
 
 }
@@ -1148,6 +1153,7 @@ model TTA_AudienceRegionReport {
   video_views_p100   Int?
   average_video_play Float?
 
+  @@unique([user_id, start_date, end_date, advertiser_id, campaign_id, province_id])
   @@index([user_id])
 
 }
@@ -1187,6 +1193,7 @@ model TTA_AudienceCountryReport {
   follows         Int?
   profile_visits  Int?
 
+  @@unique([user_id, start_date, end_date, advertiser_id, campaign_id, country_code, stat_time_day])
   @@index([user_id])
 
 }
@@ -1226,6 +1233,7 @@ model TTA_AudienceAgeReport {
   follows         Int?
   profile_visits  Int?
 
+  @@unique([user_id, start_date, end_date, advertiser_id, campaign_id, age, stat_time_day])
   @@index([user_id])
 
 }
@@ -1265,6 +1273,7 @@ model TTA_AudienceGenderReport {
   follows         Int?
   profile_visits  Int?
 
+  @@unique([user_id, start_date, end_date, advertiser_id, campaign_id, gender, stat_time_day])
   @@index([user_id])
 
 }
@@ -1305,6 +1314,7 @@ model TTA_AudienceAgeGenderReport {
   follows         Int?
   profile_visits  Int?
 
+  @@unique([user_id, start_date, end_date, advertiser_id, campaign_id, age, gender, stat_time_day])
   @@index([user_id])
 
 }
@@ -1333,6 +1343,7 @@ model TTA_PlacementReport {
   conversion      Int?
   cost_per_conversion Float?
 
+  @@unique([user_id, start_date, end_date, advertiser_id, campaign_id, placement])
   @@index([user_id])
 
 }
@@ -1361,6 +1372,7 @@ model TTA_PlatformReport {
   conversion      Int?
   cost_per_conversion Float?
 
+  @@unique([user_id, start_date, end_date, advertiser_id, campaign_id, platform])
   @@index([user_id])
 
 }
@@ -1402,6 +1414,7 @@ model GMV_AllCampaignPerformance {
   bid_type        String?
   max_delivery_budget Float?
 
+  @@unique([user_id, advertiser_id, store_id, campaign_id, start_date, end_date, stat_time_day])
   @@index([user_id])
 }
 
@@ -1437,6 +1450,7 @@ model GMV_LiveCampaignPerformance {
   bid_type        String?
   max_delivery_budget Float?
 
+  @@unique([user_id, advertiser_id, store_id, campaign_id, start_date, end_date, stat_time_day])
   @@index([user_id])
 }
 
@@ -1472,6 +1486,7 @@ model GMV_ProductCampaignPerformance {
   bid_type        String?
   max_delivery_budget Float?
 
+  @@unique([user_id, advertiser_id, store_id, campaign_id, start_date, end_date, stat_time_day])
   @@index([user_id])
 }
 
@@ -1507,6 +1522,7 @@ model GMV_ProductDetailReport {
   currency          String?
   product_status    String?
 
+  @@unique([user_id, advertiser_id, store_id, campaign_id, start_date, end_date, stat_time_day, item_group_id])
   @@index([user_id])
 }
 
@@ -1564,6 +1580,7 @@ model GMV_CreativeDetailReport {
   ad_video_view_rate_p75  Float?
   ad_video_view_rate_p100 Float?
 
+  @@unique([user_id, advertiser_id, store_id, campaign_id, start_date, end_date, item_group_id, item_id])
   @@index([user_id])
 }
 
@@ -1746,8 +1763,7 @@ model POS_BasicReport {
 
   // --- Index ---
   @@index([user_id])
-  @@index([user_id, created_at])
-  @@index([order_id, item_id])
+  @@unique([user_id, order_id, item_id])
 }
 
 model TaskSchedule {

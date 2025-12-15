@@ -224,7 +224,7 @@ const TIKTOK_TEST_CASES = [
   },
 
   {
-    name: "AdGroup Performance",
+    name: "Ad Performance",
     taskType: "TIKTOK_TTA",
     params: {
     endDate: "2025-10-10",
@@ -232,7 +232,7 @@ const TIKTOK_TEST_CASES = [
     accountsToProcess: [ 
       { id: '6967547145545105410', name: ' Dung dịch phụ nữ Chilly' }, 
     ],
-      templateName: "AdGroup Performance", 
+      templateName: "Ad Performance", 
       selectedFields: [
               "start_date",
               "end_date",
@@ -299,7 +299,6 @@ const TIKTOK_TEST_CASES = [
     },
   },
 
-  // GMV Tasks
 
   {
     name: "GMV Campaign / Creative Detail",

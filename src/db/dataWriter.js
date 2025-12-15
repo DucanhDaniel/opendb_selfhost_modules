@@ -103,25 +103,25 @@ const TEMPLATE_MAP = {
   },
    "Campaign Performance by Age": {
      tableName: "FAD_CampaignPerformanceByAge",
-     conflictTarget: ["account_id", "date_start", "date_stop", "campaign_name", "age"],
+     conflictTarget: ["account_id", "date_start", "date_stop", "campaign_id", "age"],
       filter_spend: true,
       insightDateKey: ["date_start", "date_stop"]
    },
    "Campaign Performance by Gender": {
      tableName: "FAD_CampaignPerformanceByGender",
-     conflictTarget: ["account_id", "date_start", "date_stop", "campaign_name", "gender"],
+     conflictTarget: ["account_id", "date_start", "date_stop", "campaign_id", "gender"],
       filter_spend: true,
       insightDateKey: ["date_start", "date_stop"]
    },
    "Campaign Performance by Platform": {
      tableName: "FAD_CampaignPerformanceByPlatform",
-     conflictTarget: ["account_id", "date_start", "date_stop", "campaign_name", "publisher_platform", "platform_position"],
+     conflictTarget: ["account_id", "date_start", "date_stop", "campaign_id", "publisher_platform", "platform_position"],
       filter_spend: true,
       insightDateKey: ["date_start", "date_stop"]
    },
     "Campaign Performance by Region": {
       tableName: "FAD_CampaignPerformanceByRegion",
-      conflictTarget: ["account_id", "date_start", "date_stop", "campaign_name", "region"],
+      conflictTarget: ["account_id", "date_start", "date_stop", "campaign_id", "region"],
       filter_spend: true,
       insightDateKey: ["date_start", "date_stop"]
   },
@@ -180,21 +180,21 @@ const TEMPLATE_MAP = {
   // TTA
   "Campaign Performance": {
     tableName: "TTA_CampaignPerformance",
-    conflictTarget: ["advertiser_id", "campaign_id", "objective_type", "start_date", "end_date"],
+    conflictTarget: ["advertiser_id", "campaign_id", "objective_type", "start_date", "end_date", "stat_time_day"],
     insightDateKey: ["start_date", "end_date"],
     filter_spend: true 
   }, 
 
   "AdGroup Performance": {
     tableName: "TTA_AdGroupPerformance",
-    conflictTarget: ["advertiser_id", "adgroup_id", "start_date", "end_date"],
+    conflictTarget: ["advertiser_id", "adgroup_id", "start_date", "end_date", "stat_time_day"],
     insightDateKey: ["start_date", "end_date"],
     filter_spend: true 
   },
 
   "Ad Performance": {
     tableName: "TTA_AdPerformance",
-    conflictTarget: ["advertiser_id", "campaign_name", "adgroup_name", "ad_id", "start_date", "end_date"],
+    conflictTarget: ["advertiser_id", "campaign_name", "adgroup_name", "ad_id", "start_date", "end_date", "stat_time_day"],
     insightDateKey: ["start_date", "end_date"],
     filter_spend: true 
   },
@@ -209,7 +209,7 @@ const TEMPLATE_MAP = {
   "Audience Report: Region by Campaign": {
     tableName: "TTA_AudienceRegionReport",
     filterNullMetrics: ["province_id"],
-    conflictTarget: ["start_date", "end_date", "advertiser_id", "advertiser_name", "campaign_id", "province_id", "province_name", "campaign_name"],
+    conflictTarget: ["start_date", "end_date", "advertiser_id", "campaign_id", "province_id"],
     insightDateKey: ["start_date", "end_date"],
     filter_spend: true 
   },
@@ -363,203 +363,369 @@ function _transformAndSanitizeRow(rawRow, index, userId) {
   return sanitizedRow;
 }
 
+// export async function writeDataToDatabase(templateName, dataRows, userId) {
+//   // 1. Kiểm tra đầu vào
+//   if (!dataRows || dataRows.length === 0) {
+//     console.log(`DB Writer: No data to write/upsert for "${templateName}".`);
+//     return { success: true, count: 0 };
+//   }
+
+//   // 2. Tìm config
+//   const config = TEMPLATE_MAP[templateName];
+//   if (!config || !config.tableName || !config.conflictTarget) {
+//     console.warn(`DB Writer: Incomplete config for template: "${templateName}"`);
+//     return { success: false, count: 0, error: `Incomplete config for template: ${templateName}` };
+//   }
+
+//   // Thêm user id vào conflictTarget
+//   const { tableName } = config;
+//   const conflictTarget = [...config.conflictTarget, "user_id"];
+
+//   // 3. Chuẩn hóa dữ liệu
+//   const sanitizedData = dataRows.map((row, index) => _transformAndSanitizeRow(row, index + 1, userId));
+
+//   // 4. Lọc spend (optional, bypassed)
+//   let filteredData = sanitizedData
+//   if (config.filter_spend) {
+//     filteredData = sanitizedData.filter(row =>
+//           row.spend !== undefined && row.spend !== null && typeof row.spend === 'number' && row.spend >= 0
+//       );
+//   }
+
+//   // Yêu cầu tất cả các trường trong filterNullMetrics phải khác null!
+//   if (config.filterNullMetrics && Array.isArray(config.filterNullMetrics)) {
+//     filteredData = filteredData.filter(row => {
+//       // Kiểm tra từng metric trong danh sách cần lọc
+//       // Hàm .every() sẽ trả về true chỉ khi TẤT CẢ các metric đều thỏa mãn điều kiện
+//       return config.filterNullMetrics.every(metric => 
+//         row[metric] !== null && row[metric] !== undefined
+//       );
+//     });
+//   }
+
+
+//   const originalCount = sanitizedData.length;
+//   const filteredCount = filteredData.length;
+
+//   if (originalCount > 0 && originalCount !== filteredCount) {
+//     console.log(`DB Writer (${templateName}): Filtered out ${originalCount - filteredCount} rows due to invalid spend (negative?).`);
+//   }
+//   
+
+//   const deduplicatedData = filteredData;
+
+//   if (deduplicatedData.length < filteredData.length) {
+//     console.log(`DB Writer (${templateName}): Deduplicated ${filteredData.length - deduplicatedData.length} rows with the same conflict key (within the batch).`);
+//   }
+
+//   if (deduplicatedData.length === 0) {
+//     console.log(`DB Writer (${templateName}): No valid rows remaining after filtering/deduplicating.`);
+//     return { success: true, count: 0 };
+//   }
+
+//   // 5: Chuẩn hóa cột (cho INSERT)
+//   const allPossibleColumns = new Set();
+//   deduplicatedData.forEach(row => {
+//       Object.keys(row).forEach(key => {
+//           if (key !== 'pkId' && key !== 'createdAt' && key !== 'updatedAt') {
+//               allPossibleColumns.add(key);
+//           }
+//       });
+//   });
+//   
+//   const finalColumns = Array.from(allPossibleColumns);
+
+//   const normalizedData = deduplicatedData.map(row => {
+//       const normalizedRow = {};
+//       for (const col of finalColumns) {
+//           normalizedRow[col] = Object.prototype.hasOwnProperty.call(row, col) ? row[col] : null;
+//       }
+//       return normalizedRow;
+//   });
+
+//   // 6.  Xây dựng 2 câu lệnh: DELETE và INSERT
+//   if (normalizedData.length === 0) {
+//       return { success: true, count: 0 };
+//   }
+
+//   const dataChunks = chunkArray(normalizedData, DB_BATCH_SIZE_ROWS);
+//   let totalInsertedCount = 0;
+
+//   let deleteValues = [];
+//   let allInsertValues = [];
+
+//   console.log(`DB Writer (${templateName}): Preparing transaction for ${normalizedData.length} rows, divided into ${dataChunks.length} chunks of ~${DB_BATCH_SIZE_ROWS} rows.`);
+
+//   // 7. [LOGIC MỚI] Thực thi trong một Interactive Transaction
+//   try {
+//     // Bắt đầu một giao dịch lớn
+//     await prisma.$transaction(async (tx) => {
+//       console.log(`DB Writer (${templateName}): Transaction started...`);
+
+//       // Lặp qua từng đợt dữ liệu
+//       for (const [index, chunk] of dataChunks.entries()) {
+//         if (chunk.length === 0) continue;
+        
+//         console.log(`   -> Processing chunk ${index + 1}/${dataChunks.length} (${chunk.length} rows)...`);
+
+//         // === 6.A. Xây dựng lệnh DELETE (cho đợt này) ===
+//         const conflictTargetSql = conflictTarget.map(col => `"${col}"`).join(", ");
+//         let deleteParamIndex = 1;
+//         deleteValues = []; 
+//         const deletePlaceholders = chunk.map(row => {
+//             const rowParams = [];
+//             for (const col of conflictTarget) {
+//                 let castType = "";
+//                 if (TYPE_CONFIG.DATE.has(col)) castType = "::timestamp";
+//                 else if (TYPE_CONFIG.JSON.has(col)) castType = "::jsonb";
+//                 else if (TYPE_CONFIG.DECIMAL.has(col)) castType = "::decimal";
+//                 else if (TYPE_CONFIG.BOOLEAN.has(col)) castType = "::boolean";
+//                 else if (TYPE_CONFIG.TEXT.has(col)) castType = "::text";
+
+//                 rowParams.push(`$${deleteParamIndex++}${castType}`);
+                
+//                 const val = row[col];
+//                 if (val instanceof Date) deleteValues.push(val.toISOString());
+//                 else if (TYPE_CONFIG.TEXT.has(col) && typeof val === 'number') {
+//                     deleteValues.push(String(val));
+//                 }
+//                 else deleteValues.push(val);
+//             }
+//             return `(${rowParams.join(", ")})`;
+//         }).join(", ");
+
+//         const deleteSql = `DELETE FROM "${tableName}" WHERE (${conflictTargetSql}) IN (${deletePlaceholders});`;
+
+//         // === 6.B. Xây dựng lệnh INSERT (cho đợt này) ===
+//         const columnsSql = finalColumns.map(col => `"${col}"`).join(", ");
+//         const valuePlaceholders = chunk.map((_, rowIndex) => 
+//             `(${finalColumns.map((col, colIndex) => {
+//                 const paramIndex = rowIndex * finalColumns.length + colIndex + 1;
+//                 let castType = "";
+//                 if (TYPE_CONFIG.DATE.has(col)) castType = "::timestamp";
+//                 else if (TYPE_CONFIG.JSON.has(col)) castType = "::jsonb";
+//                 else if (TYPE_CONFIG.DECIMAL.has(col)) castType = "::decimal";
+//                 return `$${paramIndex}${castType}`;
+//             }).join(", ")})`
+//         ).join(", ");
+
+//         allInsertValues = chunk.flatMap(row => finalColumns.map(col => { 
+//             const val = row[col];
+//             if (val === null || val === undefined) return null;
+//             if (val instanceof Date) return val.toISOString();
+//             if (TYPE_CONFIG.JSON.has(col) && typeof val === 'object') return JSON.stringify(val);
+//             if (TYPE_CONFIG.DECIMAL.has(col)) return String(val);
+//             if (TYPE_CONFIG.BOOLEAN.has(col)) return Boolean(val);
+
+//             if (TYPE_CONFIG.INTEGER.has(col) || TYPE_CONFIG.FLOAT.has(col)) return Number(val);
+//             return String(val);
+//         }));
+        
+//         const insertSql = `INSERT INTO "${tableName}" (${columnsSql}) VALUES ${valuePlaceholders};`;
+
+//         // 7. Thực thi 2 lệnh (DELETE, INSERT) cho đợt này
+//         const deleteCommand = tx.$executeRawUnsafe(deleteSql, ...deleteValues);
+//         const insertCommand = tx.$executeRawUnsafe(insertSql, ...allInsertValues);
+
+//         // Chạy song song delete và insert cho đợt này
+//         const [deleteResultCount, insertResultCount] = await Promise.all([
+//           deleteCommand,
+//           insertCommand
+//         ]);
+
+//         // const [insertResultCount] = await Promise.all([
+//         //   insertCommand
+//         // ]);
+
+//         totalInsertedCount += insertResultCount;
+//         console.log(`   ... Chunk ${index + 1} done. Deleted: ${deleteResultCount}, Inserted: ${insertResultCount}`);
+//         // console.log(`   ... Chunk ${index + 1} done. Deleted: ${0}, Inserted: ${insertResultCount}`);
+//       }
+//       // Nếu vòng lặp 'for' hoàn thành mà không có lỗi, transaction sẽ tự động commit
+//     }, 
+//     {
+//       timeout: 90000 // Tăng timeout lên 90 giây (mặc định là 5s)
+//     });
+
+//     // Giao dịch đã thành công
+//     console.log(`DB Writer (${templateName}): Transaction successful.`);
+//     console.log(`   - Total Rows Inserted: ${totalInsertedCount}`);
+    
+//     return { success: true, count: totalInsertedCount };
+
+//   } catch (e) {
+//     // Nếu bất kỳ đợt nào (chunk) thất bại, toàn bộ giao dịch sẽ bị rollback
+//     console.error(`DB Writer (${templateName}): Transaction FAILED and was Rolled Back:`, e.message);
+//     console.error("   - Delete Value count (last chunk):", deleteValues?.length || "N/A");
+//     console.error("   - Insert Value count (last chunk):", allInsertValues?.length || "N/A");
+//     if (e.message && e.message.includes("is of type")) {
+//         console.error("   - Potential type mismatch detected by DB.");
+//     }
+//     return { success: false, count: 0, error: e.message };
+//   }
+// }
 export async function writeDataToDatabase(templateName, dataRows, userId) {
-  // 1. Kiểm tra đầu vào
-  if (!dataRows || dataRows.length === 0) {
-    console.log(`DB Writer: No data to write/upsert for "${templateName}".`);
-    return { success: true, count: 0 };
-  }
-
-  // 2. Tìm config
-  const config = TEMPLATE_MAP[templateName];
-  if (!config || !config.tableName || !config.conflictTarget) {
-    console.warn(`DB Writer: Incomplete config for template: "${templateName}"`);
-    return { success: false, count: 0, error: `Incomplete config for template: ${templateName}` };
-  }
-
-  // Thêm user id vào conflictTarget
-  const { tableName } = config;
-  const conflictTarget = [...config.conflictTarget, "user_id"];
-
-  // 3. Chuẩn hóa dữ liệu
-  const sanitizedData = dataRows.map((row, index) => _transformAndSanitizeRow(row, index + 1, userId));
-
-  // 4. Lọc spend (optional, bypassed)
-  let filteredData = sanitizedData
-  if (config.filter_spend) {
-    filteredData = sanitizedData.filter(row =>
-          row.spend !== undefined && row.spend !== null && typeof row.spend === 'number' && row.spend >= 0
-      );
+  // 1. Kiểm tra đầu vào
+  if (!dataRows || dataRows.length === 0) {
+    console.log(`DB Writer: No data to write/upsert for "${templateName}".`);
+    return { success: true, count: 0 };
   }
 
-  // Yêu cầu tất cả các trường trong filterNullMetrics phải khác null!
+  // 2. Tìm config
+  const config = TEMPLATE_MAP[templateName];
+  if (!config || !config.tableName || !config.conflictTarget) {
+    console.warn(`DB Writer: Incomplete config for template: "${templateName}"`);
+    return { success: false, count: 0, error: `Incomplete config for template: ${templateName}` };
+  }
+
+  // Thêm user id vào conflictTarget (Đây là các cột xác định tính duy nhất)
+  const { tableName } = config;
+  const conflictTarget = [...config.conflictTarget, "user_id"];
+
+  // 3. Chuẩn hóa dữ liệu
+  const sanitizedData = dataRows.map((row, index) => _transformAndSanitizeRow(row, index + 1, userId));
+
+  // 4. Lọc spend 
+  let filteredData = sanitizedData;
+  if (config.filter_spend) {
+    filteredData = sanitizedData.filter(row =>
+      row.spend !== undefined && row.spend !== null && typeof row.spend === 'number' && row.spend >= 0
+    );
+  }
+
   if (config.filterNullMetrics && Array.isArray(config.filterNullMetrics)) {
     filteredData = filteredData.filter(row => {
-      // Kiểm tra từng metric trong danh sách cần lọc
-      // Hàm .every() sẽ trả về true chỉ khi TẤT CẢ các metric đều thỏa mãn điều kiện
-      return config.filterNullMetrics.every(metric => 
+      return config.filterNullMetrics.every(metric =>
         row[metric] !== null && row[metric] !== undefined
       );
     });
   }
 
-
-  const originalCount = sanitizedData.length;
-  const filteredCount = filteredData.length;
-
-  if (originalCount > 0 && originalCount !== filteredCount) {
-    console.log(`DB Writer (${templateName}): Filtered out ${originalCount - filteredCount} rows due to invalid spend (negative?).`);
-  }
-  
-
   const deduplicatedData = filteredData;
+  if (deduplicatedData.length === 0) {
+    console.log(`DB Writer (${templateName}): No valid rows remaining after filtering/deduplicating.`);
+    return { success: true, count: 0 };
+  }
 
-  if (deduplicatedData.length < filteredData.length) {
-    console.log(`DB Writer (${templateName}): Deduplicated ${filteredData.length - deduplicatedData.length} rows with the same conflict key (within the batch).`);
-  }
+  // 5: Chuẩn hóa cột
+  const allPossibleColumns = new Set();
+  deduplicatedData.forEach(row => {
+    Object.keys(row).forEach(key => {
+      if (key !== 'pkId' && key !== 'createdAt' && key !== 'updatedAt') {
+        allPossibleColumns.add(key);
+      }
+    });
+  });
 
-  if (deduplicatedData.length === 0) {
-    console.log(`DB Writer (${templateName}): No valid rows remaining after filtering/deduplicating.`);
-    return { success: true, count: 0 };
-  }
+  const finalColumns = Array.from(allPossibleColumns);
 
-  // 5: Chuẩn hóa cột (cho INSERT)
-  const allPossibleColumns = new Set();
-  deduplicatedData.forEach(row => {
-      Object.keys(row).forEach(key => {
-          if (key !== 'pkId' && key !== 'createdAt' && key !== 'updatedAt') {
-              allPossibleColumns.add(key);
-          }
-      });
-  });
-  
-  const finalColumns = Array.from(allPossibleColumns);
+  // Tạo data chuẩn hóa (fill null)
+  const normalizedData = deduplicatedData.map(row => {
+    const normalizedRow = {};
+    for (const col of finalColumns) {
+      normalizedRow[col] = Object.prototype.hasOwnProperty.call(row, col) ? row[col] : null;
+    }
+    return normalizedRow;
+  });
 
-  const normalizedData = deduplicatedData.map(row => {
-      const normalizedRow = {};
-      for (const col of finalColumns) {
-          normalizedRow[col] = Object.prototype.hasOwnProperty.call(row, col) ? row[col] : null;
-      }
-      return normalizedRow;
-  });
-
-  // 6.  Xây dựng 2 câu lệnh: DELETE và INSERT
-  if (normalizedData.length === 0) {
-      return { success: true, count: 0 };
-  }
+  if (normalizedData.length === 0) {
+    return { success: true, count: 0 };
+  }
 
   const dataChunks = chunkArray(normalizedData, DB_BATCH_SIZE_ROWS);
-  let totalInsertedCount = 0;
-
-  let deleteValues = [];
+  let totalUpsertedCount = 0;
   let allInsertValues = [];
 
-  console.log(`DB Writer (${templateName}): Preparing transaction for ${normalizedData.length} rows, divided into ${dataChunks.length} chunks of ~${DB_BATCH_SIZE_ROWS} rows.`);
+  console.log(`DB Writer (${templateName}): Preparing UPSERT transaction for ${normalizedData.length} rows.`);
 
-  // 7. [LOGIC MỚI] Thực thi trong một Interactive Transaction
   try {
-    // Bắt đầu một giao dịch lớn
     await prisma.$transaction(async (tx) => {
       console.log(`DB Writer (${templateName}): Transaction started...`);
 
-      // Lặp qua từng đợt dữ liệu
       for (const [index, chunk] of dataChunks.entries()) {
         if (chunk.length === 0) continue;
-        
-        console.log(`   -> Processing chunk ${index + 1}/${dataChunks.length} (${chunk.length} rows)...`);
 
-        // === 6.A. Xây dựng lệnh DELETE (cho đợt này) ===
-        const conflictTargetSql = conflictTarget.map(col => `"${col}"`).join(", ");
-        let deleteParamIndex = 1;
-        deleteValues = []; 
-        const deletePlaceholders = chunk.map(row => {
-            const rowParams = [];
-            for (const col of conflictTarget) {
-                let castType = "";
-                if (TYPE_CONFIG.DATE.has(col)) castType = "::timestamp";
-                else if (TYPE_CONFIG.JSON.has(col)) castType = "::jsonb";
-                else if (TYPE_CONFIG.DECIMAL.has(col)) castType = "::decimal";
-                else if (TYPE_CONFIG.BOOLEAN.has(col)) castType = "::boolean";
-                else if (TYPE_CONFIG.TEXT.has(col)) castType = "::text";
+        console.log(`   -> Processing chunk ${index + 1}/${dataChunks.length} (${chunk.length} rows)...`);
 
-                rowParams.push(`$${deleteParamIndex++}${castType}`);
-                
-                const val = row[col];
-                if (val instanceof Date) deleteValues.push(val.toISOString());
-                else if (TYPE_CONFIG.TEXT.has(col) && typeof val === 'number') {
-                    deleteValues.push(String(val));
-                }
-                else deleteValues.push(val);
-            }
-            return `(${rowParams.join(", ")})`;
-        }).join(", ");
-
-        const deleteSql = `DELETE FROM "${tableName}" WHERE (${conflictTargetSql}) IN (${deletePlaceholders});`;
-
-        // === 6.B. Xây dựng lệnh INSERT (cho đợt này) ===
+        // === 6.A. Xây dựng phần INSERT ===
         const columnsSql = finalColumns.map(col => `"${col}"`).join(", ");
-        const valuePlaceholders = chunk.map((_, rowIndex) => 
-            `(${finalColumns.map((col, colIndex) => {
-                const paramIndex = rowIndex * finalColumns.length + colIndex + 1;
-                let castType = "";
-                if (TYPE_CONFIG.DATE.has(col)) castType = "::timestamp";
-                else if (TYPE_CONFIG.JSON.has(col)) castType = "::jsonb";
-                else if (TYPE_CONFIG.DECIMAL.has(col)) castType = "::decimal";
-                return `$${paramIndex}${castType}`;
-            }).join(", ")})`
+        
+        // Tạo placeholders ($1, $2...) và cast kiểu dữ liệu
+        const valuePlaceholders = chunk.map((_, rowIndex) =>
+          `(${finalColumns.map((col, colIndex) => {
+            const paramIndex = rowIndex * finalColumns.length + colIndex + 1;
+            let castType = "";
+            if (TYPE_CONFIG.DATE.has(col)) castType = "::timestamp";
+            else if (TYPE_CONFIG.JSON.has(col)) castType = "::jsonb";
+            else if (TYPE_CONFIG.DECIMAL.has(col)) castType = "::decimal";
+            return `$${paramIndex}${castType}`;
+          }).join(", ")})`
         ).join(", ");
 
-        allInsertValues = chunk.flatMap(row => finalColumns.map(col => { 
-            const val = row[col];
-            if (val === null || val === undefined) return null;
-            if (val instanceof Date) return val.toISOString();
-            if (TYPE_CONFIG.JSON.has(col) && typeof val === 'object') return JSON.stringify(val);
-            if (TYPE_CONFIG.DECIMAL.has(col)) return String(val);
-            if (TYPE_CONFIG.BOOLEAN.has(col)) return Boolean(val);
-
-            if (TYPE_CONFIG.INTEGER.has(col) || TYPE_CONFIG.FLOAT.has(col)) return Number(val);
-            return String(val);
+        // Chuẩn bị mảng giá trị phẳng (flat array) để đưa vào executeRawUnsafe
+        allInsertValues = chunk.flatMap(row => finalColumns.map(col => {
+          const val = row[col];
+          if (val === null || val === undefined) return null;
+          if (val instanceof Date) return val.toISOString();
+          if (TYPE_CONFIG.JSON.has(col) && typeof val === 'object') return JSON.stringify(val);
+          if (TYPE_CONFIG.DECIMAL.has(col)) return String(val);
+          if (TYPE_CONFIG.BOOLEAN.has(col)) return Boolean(val);
+          if (TYPE_CONFIG.INTEGER.has(col) || TYPE_CONFIG.FLOAT.has(col)) return Number(val);
+          return String(val);
         }));
+
+        // === 6.B. Xây dựng phần ON CONFLICT (Upsert Logic) ===
         
-        const insertSql = `INSERT INTO "${tableName}" (${columnsSql}) VALUES ${valuePlaceholders};`;
+        // Xác định các cột Conflict (để đưa vào mệnh đề ON CONFLICT)
+        const conflictTargetSql = conflictTarget.map(col => `"${col}"`).join(", ");
 
-        // 7. Thực thi 2 lệnh (DELETE, INSERT) cho đợt này
-        const deleteCommand = tx.$executeRawUnsafe(deleteSql, ...deleteValues);
-        const insertCommand = tx.$executeRawUnsafe(insertSql, ...allInsertValues);
+        // Xác định các cột cần Update (SET ... = EXCLUDED...)
+        // Chúng ta update tất cả các cột TRỪ các cột nằm trong conflictTarget (khóa chính)
+        const columnsToUpdate = finalColumns.filter(col => !conflictTarget.includes(col));
 
-        // Chạy song song delete và insert cho đợt này
-        const [deleteResultCount, insertResultCount] = await Promise.all([
-          deleteCommand,
-          insertCommand
-        ]);
+        let updateClause = "";
+        if (columnsToUpdate.length > 0) {
+          // Cú pháp: "column_name" = EXCLUDED."column_name"
+          // EXCLUDED tham chiếu đến giá trị mới đang cố gắng insert vào
+          const setStatements = columnsToUpdate.map(col => `"${col}" = EXCLUDED."${col}"`).join(", ");
+          updateClause = `DO UPDATE SET ${setStatements}`;
+        } else {
+          // Trường hợp hiếm: Bảng chỉ toàn khóa chính, không có dữ liệu khác để update
+          updateClause = `DO NOTHING`;
+        }
 
-        // const [insertResultCount] = await Promise.all([
-        //   insertCommand
-        // ]);
+        // === 6.C. Ghép câu lệnh SQL hoàn chỉnh ===
+        const upsertSql = `
+          INSERT INTO "${tableName}" (${columnsSql}) 
+          VALUES ${valuePlaceholders}
+          ON CONFLICT (${conflictTargetSql}) 
+          ${updateClause};
+        `;
 
-        totalInsertedCount += insertResultCount;
-        console.log(`   ... Chunk ${index + 1} done. Deleted: ${deleteResultCount}, Inserted: ${insertResultCount}`);
-        // console.log(`   ... Chunk ${index + 1} done. Deleted: ${0}, Inserted: ${insertResultCount}`);
+        // 7. Thực thi lệnh UPSERT
+        const resultCount = await tx.$executeRawUnsafe(upsertSql, ...allInsertValues);
+
+        // Lưu ý: Với Upsert, Postgres có thể trả về số row bị ảnh hưởng khó đoán hơn (đôi khi update tính là 1, insert tính là 1)
+        // Tuy nhiên executeRawUnsafe thường trả về tổng số row inserted hoặc updated.
+        totalUpsertedCount += resultCount;
+        
+        console.log(`   ... Chunk ${index + 1} done. Rows processed: ${resultCount}`);
       }
-      // Nếu vòng lặp 'for' hoàn thành mà không có lỗi, transaction sẽ tự động commit
-    }, 
+    },
     {
-      timeout: 90000 // Tăng timeout lên 90 giây (mặc định là 5s)
+      timeout: 90000 
     });
 
-    // Giao dịch đã thành công
     console.log(`DB Writer (${templateName}): Transaction successful.`);
-    console.log(`   - Total Rows Inserted: ${totalInsertedCount}`);
-    
-    return { success: true, count: totalInsertedCount };
+    console.log(`   - Total Rows Upserted: ${totalUpsertedCount}`);
+
+    return { success: true, count: totalUpsertedCount };
 
   } catch (e) {
-    // Nếu bất kỳ đợt nào (chunk) thất bại, toàn bộ giao dịch sẽ bị rollback
     console.error(`DB Writer (${templateName}): Transaction FAILED and was Rolled Back:`, e.message);
-    console.error("   - Delete Value count (last chunk):", deleteValues?.length || "N/A");
-    console.error("   - Insert Value count (last chunk):", allInsertValues?.length || "N/A");
+    console.error("   - Insert Value count (last chunk):", allInsertValues?.length || "N/A");
     if (e.message && e.message.includes("is of type")) {
-        console.error("   - Potential type mismatch detected by DB.");
+        console.error("   - Potential type mismatch detected by DB.");
     }
     return { success: false, count: 0, error: e.message };
   }
