@@ -86,6 +86,23 @@ const FACEBOOK_TEST_CASES = [
     }
   },
 
+  {
+    name: "Campaign Performance by Gender",
+    taskType: "FACEBOOK_FAD",
+    params: {
+      templateName: 'Campaign Performance by Gender',
+      startDate: "2025-10-23",
+      endDate: "2025-10-28",
+      accountsToProcess: [
+        { id: "act_948290596967304", name: "BM MẠNH SÁO 2" }
+      ],
+        selectedFields: [
+            "campaign_id", "campaign_name", "account_id", "account_name", "gender", "spend", "New Messaging Connections", "Cost per New Messaging", "Leads", "Cost Leads", 
+            "Purchases", "Cost Purchases", "Purchase Value", "Purchase ROAS", "Website Purchases", "On-Facebook Purchases", "date_start", "date_stop"
+        ]
+    }
+  },
+
 
   {
     name: "Campaign Performance by Platform",
@@ -101,6 +118,34 @@ const FACEBOOK_TEST_CASES = [
           "account_id", "account_name", "campaign_id", "campaign_name", "publisher_platform", "platform_position", "date_start", "date_stop", "spend", "impressions", 
           "clicks", "New Messaging Connections", "Cost per New Messaging", "Leads", "Cost Leads", "Purchases", "Cost Purchases", "Purchase Value", "Purchase ROAS", "Website Purchases", 
           "On-Facebook Purchases"
+        ]
+    }
+  },
+
+  {
+    name: "Campaign Performance by Region",
+    taskType: "FACEBOOK_FAD",
+    params: {
+      templateName: 'Campaign Performance by Region',
+      startDate: "2025-10-23",
+      endDate: "2025-10-28",
+      accountsToProcess: [
+        { id: "act_948290596967304", name: "BM MẠNH SÁO 2" }
+      ],
+        selectedFields: [
+              "campaign_id",
+              "campaign_name",
+              "account_id",
+              "account_name", "region", "spend", "impressions", "clicks", "ctr",               "New Messaging Connections",
+              "Cost per New Messaging",
+              "Leads",
+              "Cost Leads",
+              "Purchases",
+              "Cost Purchases",
+              "Purchase Value",
+              "Website Purchases",
+              "On-Facebook Purchases", "date_start", "date_stop", 
+
         ]
     }
   },
