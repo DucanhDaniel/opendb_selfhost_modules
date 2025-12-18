@@ -190,8 +190,7 @@ const TIKTOK_TEST_CASES = [
     ],
       templateName: "AdGroup Performance", 
       selectedFields: [
-              "start_date",
-              "end_date",
+              "start_date", "end_date",
               "advertiser_id",
               "advertiser_name", "stat_time_day", "adgroup_id",
               "adgroup_name",
@@ -227,10 +226,10 @@ const TIKTOK_TEST_CASES = [
     name: "Ad Performance",
     taskType: "TIKTOK_TTA",
     params: {
-    endDate: "2025-10-10",
-    startDate: "2025-10-01", 
+    endDate: "2025-11-30",
+    startDate: "2025-11-01", 
     accountsToProcess: [ 
-      { id: '6967547145545105410', name: ' Dung dịch phụ nữ Chilly' }, 
+      { id: '6967547145545105410', name: 'Dung dịch phụ nữ Chilly' }, 
     ],
       templateName: "Ad Performance", 
       selectedFields: [
@@ -299,7 +298,6 @@ const TIKTOK_TEST_CASES = [
     },
   },
 
-
   {
     name: "GMV Campaign / Creative Detail",
     taskType: "TIKTOK_GMV",
@@ -322,7 +320,6 @@ const TIKTOK_TEST_CASES = [
       ]
     },
   },
-
     {
         name: "GMV Campaign / Product Detail",
         taskType: "TIKTOK_GMV",
@@ -340,6 +337,112 @@ const TIKTOK_TEST_CASES = [
             ]
         },
     },
+
+  {
+    name: "GMV All Campaign Performance",
+    "taskType": "TIKTOK_GMV",
+    "params": {
+      "endDate": "2025-10-01",
+      "startDate": "2025-10-01",
+      "templateName": "GMV All Campaign Performance",
+      "accountsToProcess": [{ "id": "6967547145545105410", "name": "Test Advertiser" }],
+      "shopsToProcess": [{ "id": "7494600253418473607", "name": "Test Store" }],
+      "selectedFields": [
+                "start_date",
+                "end_date",
+                "advertiser_id",
+                "advertiser_name",
+                "store_id",
+                "store_name", "campaign_id", "stat_time_day",
+                "campaign_name",
+                "cost",
+                "orders",
+                "roi",
+                "cost_per_order",
+                "gross_revenue",
+                "net_cost",
+                "roas_bid",
+                "operation_status",
+                "schedule_type",
+                "schedule_start_time",
+                "schedule_end_time",
+                "target_roi_budget",
+                "bid_type",
+                "max_delivery_budget"
+      ]
+    }
+  },
+
+  {
+    name: "GMV Product Campaign Performance",
+    "taskType": "TIKTOK_GMV",
+    "description": "TIKTOK_GMV TASK",
+    "params": {
+      "endDate": "2025-10-01",
+      "startDate": "2025-10-01",
+      "templateName": "GMV Product Campaign Performance",
+      "accountsToProcess": [{ "id": "6967547145545105410", "name": "Test Advertiser" }],
+      "shopsToProcess": [{ "id": "7494600253418473607", "name": "Test Store" }],
+      "selectedFields": [
+                "start_date",
+                "end_date",
+                "advertiser_id",
+                "advertiser_name",
+                "store_id",
+                "store_name", "campaign_id", "stat_time_day",
+                "campaign_name",
+                "cost",
+                "orders",
+                "roi",
+                "cost_per_order",
+                "gross_revenue",
+                "net_cost",
+                "roas_bid",
+                "operation_status",
+                "schedule_type",
+                "schedule_start_time",
+                "schedule_end_time",
+                "target_roi_budget",
+                "bid_type",
+                "max_delivery_budget"
+      ]
+    }
+  },
+  {
+    name: "GMV Live Campaign Performance",
+    "taskType": "TIKTOK_GMV",
+    "description": "TIKTOK_GMV TASK",
+    "params": {
+      "endDate": "2025-10-01",
+      "startDate": "2025-10-01",
+      "templateName": "GMV Live Campaign Performance",
+      "accountsToProcess": [{ "id": "6967547145545105410", "name": "Test Advertiser" }],
+      "shopsToProcess": [{ "id": "7494600253418473607", "name": "Test Store" }],
+      "selectedFields": [
+                "start_date",
+                "end_date",
+                "advertiser_id",
+                "advertiser_name",
+                "store_id",
+                "store_name", "campaign_id", "stat_time_day",
+                "campaign_name",
+                "cost",
+                "orders",
+                "roi",
+                "cost_per_order",
+                "gross_revenue",
+                "net_cost",
+                "roas_bid",
+                "operation_status",
+                "schedule_type",
+                "schedule_start_time",
+                "schedule_end_time",
+                "target_roi_budget",
+                "bid_type",
+                "max_delivery_budget"
+      ]
+    }
+  }
   
 ];
 
@@ -350,7 +453,9 @@ const TEST_USER = {
   settings: {
     "TIKTOK_ACCESS_TOKEN": process.env.TIKTOK_ACCESS_TOKEN || "mock-token",
     // Thêm license key nếu cần
-    "SAVED_LICENSE_KEY": "VALID-LICENSE" 
+    "SAVED_LICENSE_KEY": "VALID-LICENSE",
+    "TIKTOK_CLIENT_ID": process.env.TIKTOK_CLIENT_ID,
+    "TIKTOK_CLIENT_SECRET": process.env.TIKTOK_CLIENT_SECRET
   }
 };
 

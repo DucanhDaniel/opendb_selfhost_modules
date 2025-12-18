@@ -17,6 +17,19 @@ services:
       postgres:
         condition: service_started
 
+  watchdog:
+    build: . # Dùng chung source code
+    container_name: opendb_watchdog
+    # Ghi đè lệnh khởi động để chạy file entrypoint mới tạo
+    command: ["node", "src/schedule-entry.js"] 
+    restart: always
+    env_file:
+      - ./.env
+    depends_on:
+      - opendb_all_modules_api
+      - postgres
+      - redis
+
   # === 2. Redis  ===
   redis:
     container_name: opendb_redis

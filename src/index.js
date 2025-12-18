@@ -13,7 +13,6 @@ async function main() {
 
   initializeWorker();
 
-  runSchedulerWatchdog();
   logger.info('Worker đang chạy...');
 
 }
