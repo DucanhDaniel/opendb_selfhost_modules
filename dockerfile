@@ -17,6 +17,7 @@ COPY jest.config.js .
 
 # [MỚI] Copy script entrypoint vào
 COPY ./docker-entrypoint.sh .
+RUN dos2unix ./docker-entrypoint.sh
 RUN chmod +x ./docker-entrypoint.sh
 
 EXPOSE 3000

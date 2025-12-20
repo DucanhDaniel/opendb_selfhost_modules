@@ -90,7 +90,8 @@ export async function processFacebookJob(options, accessToken, userId, task_logg
       const dbResult = await writeDataToDatabase(
         templateName, 
         processorResult.data,
-        userId
+        userId,
+        taskId
       );
 
       processorResult.newRows = dbResult.count;

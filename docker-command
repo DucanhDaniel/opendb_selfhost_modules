@@ -14,3 +14,7 @@ Trong cửa sổ mới hiện ra:
     Username: postgres (Đây là user mặc định)
     Password: opendb_123 (Mật khẩu bạn đã đặt ở -e POSTGRES_PASSWORD)
 Nhấn Save.
+
+Khi clone code về dev, cần phải chạy 
+npx prisma generate để tạo client Prisma
+npx prisma migrate deploy để tạo các bảng trong database.

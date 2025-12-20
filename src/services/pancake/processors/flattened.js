@@ -68,7 +68,7 @@ export async function processFlattenedReport(options, config, maps, apiKey, task
       const dbResult = await writeDataToDatabase(
           templateName,
           data,
-          userId
+          userId, taskId
       );
       return dbResult.count;
   };

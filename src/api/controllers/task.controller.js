@@ -121,3 +121,42 @@ export const handleGetTaskStatusByQuery = async (req, res, next) => {
     next(error);
   }
 };
+
+export const handleStopTask = async (req, res, next) => {
+  try {
+    // 1. Lấy userId từ token (đảm bảo user chỉ stop được task của chính mình) -> chưa implement
+    const { userId } = req.user;
+
+    // 2. Lấy taskId. 
+    // Lưu ý: Route của bạn phải định nghĩa là /:taskId/stop thì mới dùng req.params
+    // Nếu bạn gửi taskId trong body, hãy đổi thành req.body.taskId
+    const { taskId } = req.params;
+
+    if (!taskId) {
+        return res.status(400).json({ success: false, message: "Thiếu taskId." });
+    }
+
+    // 3. Gọi service
+    const result = await taskService.stopTask(taskId);
+
+    // 4. Trả về kết quả thành công
+    res.status(200).json({
+      success: true,
+      message: result.message
+    });
+
+  } catch (error) {
+    logger.error(`Lỗi khi dừng task ${req.params.taskId}:`, error);
+
+    // Xử lý các lỗi cụ thể từ Service ném ra
+    if (error.message.includes('not found') || error.message.includes('Không tìm thấy')) {
+        return res.status(404).json({ success: false, message: error.message });
+    }
+
+    if (error.message.includes('cannot stop') || error.message.includes('finished')) {
+        return res.status(400).json({ success: false, message: error.message }); // Lỗi logic (task xong rồi thì ko dừng đc)
+    }
+
+    next(error);
+  }
+};
