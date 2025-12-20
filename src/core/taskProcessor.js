@@ -78,11 +78,19 @@ export const processJobWorker = async (job) => {
     console.log("Hoàn thành cập nhật trạng thái!");
 
   } catch (error) {
-    // 3. Xử lý lỗi (FAILED)
-    status = "FAILED";
-    task_logger.error(`Task thất bại: ${error.message}`);
-    await task_logger.close();
-    await updateTaskStatus(userId, taskId, "FAILED", `Lỗi: ${error.message}`);
+    if (error.message === "JOB_CANCELLED_BY_USER") {
+      status = "CANCELLED";
+      task_logger.info('Task đã bị dừng bởi người dùng!');
+      await task_logger.close();
+      await updateTaskStatus(userId, taskId, "CANCELLED", `Task đã bị dừng bởi người dùng`);
+    }
+    else {
+      // 3. Xử lý lỗi (FAILED)
+      status = "FAILED";
+      task_logger.error(`Task thất bại: ${error.message}`);
+      await task_logger.close();
+      await updateTaskStatus(userId, taskId, "FAILED", `Lỗi: ${error.message}`);
+    }
   }
   finally {
     // 2. Kết thúc đo giờ

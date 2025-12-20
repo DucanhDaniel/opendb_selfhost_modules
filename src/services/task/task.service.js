@@ -1,7 +1,7 @@
 import prisma from '../../db/client.js';
 import logger from '../../utils/logger.js';
 import { randomUUID } from 'crypto';
-
+import { taskSignal } from '../../utils/taskSignal.js';
 import { taskQueue } from '../../core/jobQueue.js';
 
 const CURRENT_TASK_PROPERTY = "TASK_MANAGER_CURRENT_TASK";
@@ -208,6 +208,8 @@ let accessToken;
       task: task, // Toàn bộ object task
       userId: userId, // ID của user để worker cập nhật lại settings
       accessToken: accessToken // Token để worker sử dụng
+    }, {
+      jobId: taskId
     });
     
     logger.info(`Đã thêm task ${task.taskId} vào hàng đợi.`);
@@ -273,6 +275,24 @@ async function getTaskStatus(userId, taskId) {
   throw new Error("Không tìm thấy Task ID.");
 }
 
+async function stopTask(taskId) {
+    // 1. Kiểm tra xem job có tồn tại trong queue không (Optional - để báo lỗi 404 cho chuẩn)
+    const job = await taskQueue.getJob(taskId); // Lưu ý: taskId phải khớp jobId như đã bàn ở bài trước
+    
+    if (!job) {
+        throw new Error('Job not found');
+    }
+
+    // 2. Cắm cờ dừng vào Redis
+    await taskSignal.setStopSignal(taskId);
+    
+    // (Optional) Vẫn có thể gọi job.discard() nếu muốn BullMQ biết, 
+    // nhưng không bắt buộc vì Worker sẽ tự throw lỗi.
+    try { await job.discard(); } catch (e) {}
+
+    return { message: 'Signal sent successfully' };
+}
+
 // Export service
 export const taskService = {
   getTaskHistory,
@@ -280,5 +300,6 @@ export const taskService = {
   initiateTask,
   executeTask,
   getTaskParams,
-  getTaskStatus
+  getTaskStatus,
+  stopTask
 };

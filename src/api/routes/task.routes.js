@@ -8,7 +8,7 @@ import {
   handleGetTaskHistory, 
   handleDeleteTaskHistory,
   handleInitiateTask, handleExecuteTask,
-  handleGetTaskParams, handleGetTaskStatusByQuery
+  handleGetTaskParams, handleGetTaskStatusByQuery, handleStopTask
 } from '../controllers/task.controller.js';
 
 const router = Router();
@@ -54,4 +54,8 @@ router.get(
   validate(getTaskParamsSchema), 
   handleGetTaskStatusByQuery
 );
+
+// POST /api/task/stop/:taskId
+router.post('/stop/:taskId', handleStopTask);
+
 export default router;

@@ -68,7 +68,8 @@ export async function processTiktokJob(task, accessToken, userId, task_logger, w
       const dbResult = await writeDataToDatabase(
         templateName, 
         processorResult.data,
-        userId
+        userId,
+        taskId
       );
 
       processorResult.newRows = dbResult.count;
