@@ -1,6 +1,7 @@
 import prisma from './client.js';
 import { chunkArray } from '../utils/array_utils.js';
 import { taskSignal } from '../utils/taskSignal.js';
+import { randomUUID } from 'crypto'; // Native Node.js
 
 // --- TYPE_CONFIG và KEY_MAP ---
 const DB_BATCH_SIZE_ROWS = 200;
@@ -97,118 +98,118 @@ const KEY_MAP = {
 const TEMPLATE_MAP = {
   // --- FAD ---
   "Campaign Overview Report": {
-    tableName: "FAD_CampaignOverviewReport",
+    tableName: "fad_campaign_overview_report",
     conflictTarget: ["account_id", "date_start", "date_stop", "id"], // Columns to delete old rows, ensure data is not duplicated
     filter_spend: true, // Specify if this template need to be filtered when spend is null
     insightDateKey: ["date_start", "date_stop"]
   },
    "Campaign Performance by Age": {
-     tableName: "FAD_CampaignPerformanceByAge",
+     tableName: "fad_campaign_performance_by_age",
      conflictTarget: ["account_id", "date_start", "date_stop", "campaign_id", "age"],
       filter_spend: true,
       insightDateKey: ["date_start", "date_stop"]
    },
    "Campaign Performance by Gender": {
-     tableName: "FAD_CampaignPerformanceByGender",
+     tableName: "fad_campaign_performance_by_gender",
      conflictTarget: ["account_id", "date_start", "date_stop", "campaign_id", "gender"],
       filter_spend: true,
       insightDateKey: ["date_start", "date_stop"]
    },
    "Campaign Performance by Platform": {
-     tableName: "FAD_CampaignPerformanceByPlatform",
+     tableName: "fad_campaign_performance_by_platform",
      conflictTarget: ["account_id", "date_start", "date_stop", "campaign_id", "publisher_platform", "platform_position"],
       filter_spend: true,
       insightDateKey: ["date_start", "date_stop"]
    },
     "Campaign Performance by Region": {
-      tableName: "FAD_CampaignPerformanceByRegion",
+      tableName: "fad_campaign_performance_by_region",
       conflictTarget: ["account_id", "date_start", "date_stop", "campaign_id", "region"],
       filter_spend: true,
       insightDateKey: ["date_start", "date_stop"]
   },
   "Ad Set Performance Report": {
-      tableName: "FAD_AdSetPerformanceReport",
+      tableName: "fad_ad_set_performance_report",
       conflictTarget: ["account_id", "date_start", "date_stop", "campaign_id", "id"],
       filter_spend: true,
       insightDateKey: ["date_start", "date_stop"]
   },
  "Ad Performance Report": {
-     tableName: "FAD_AdPerformanceReport",
+     tableName: "fad_ad_performance_report",
      conflictTarget: ["account_id", "date_start", "date_stop", "campaign_id", "adset_id", "id"], 
       filter_spend: true,
       insightDateKey: ["date_start", "date_stop"]
  },
  "Account Daily Report": {
-     tableName: "FAD_AccountDailyReport",
+     tableName: "fad_account_daily_report",
      conflictTarget: ["account_id", "date_start", "date_stop"],
       filter_spend: true,
       insightDateKey: ["date_start", "date_stop"]
  },
  "Campaign Daily Report": {
-     tableName: "FAD_CampaignDailyReport",
+     tableName: "fad_campaign_daily_report",
      conflictTarget: ["account_id", "date_start", "date_stop", "campaign_id"],
       filter_spend: true,
       insightDateKey: ["date_start", "date_stop"]
  },
  "Ad Set Daily Report": {
-     tableName: "FAD_AdSetDailyReport",
+     tableName: "fad_ad_set_daily_report",
      conflictTarget: ["account_id", "date_start", "date_stop", "campaign_id", "id"],
       filter_spend: true,
       insightDateKey: ["date_start", "date_stop"]
  },
  "Ad Daily Report": {
-     tableName: "FAD_AdDailyReport",
+     tableName: "fad_ad_daily_report",
      conflictTarget: ["account_id", "date_start", "date_stop", "campaign_id", "adset_id", "id"],
       filter_spend: true,
       insightDateKey: ["date_start", "date_stop"]
  },
  "Ad Creative Report": {
-    tableName: "FAD_AdCreativeReport",
+    tableName: "fad_ad_creative_report",
     conflictTarget: ["account_id", "date_start", "date_stop", "campaign_id", "adset_id", "id"],
       filter_spend: true,
       insightDateKey: ["date_start", "date_stop"]
  },
  "BM & Ad Accounts": {
-     tableName: "FAD_BmAndAdAccounts",
+     tableName: "fad_bm_and_ad_accounts",
      conflictTarget: ["bm_id", "account_id"], 
  },
  // FBT
  "FB Billing Data": {
-   tableName: "FBT_FbBillingData",
+   tableName: "fbt_fb_billing_data",
    conflictTarget: ["accountId", "transactionId"], 
  },
 
   // TTA
   "Campaign Performance": {
-    tableName: "TTA_CampaignPerformance",
+    tableName: "tta_campaign_performance",
     conflictTarget: ["advertiser_id", "campaign_id", "objective_type", "start_date", "end_date", "stat_time_day"],
     insightDateKey: ["start_date", "end_date"],
     filter_spend: true 
   }, 
 
   "AdGroup Performance": {
-    tableName: "TTA_AdGroupPerformance",
+    tableName: "tta_adgroup_performance",
     conflictTarget: ["advertiser_id", "adgroup_id", "start_date", "end_date", "stat_time_day"],
     insightDateKey: ["start_date", "end_date"],
     filter_spend: true 
   },
 
   "Ad Performance": {
-    tableName: "TTA_AdPerformance",
+    tableName: "tta_ad_performance",
     conflictTarget: ["advertiser_id", "campaign_name", "adgroup_name", "ad_id", "start_date", "end_date", "stat_time_day"],
     insightDateKey: ["start_date", "end_date"],
     filter_spend: true 
   },
 
   "Creative Performance (Video/Image)": {
-    tableName: "TTA_CreativePerformance",
+    tableName: "tta_creative_performance",
     conflictTarget: ["advertiser_id", "campaign_id", "adgroup_id", "ad_id", "start_date", "end_date"],
     insightDateKey: ["start_date", "end_date"],
     filter_spend: true 
   },
 
   "Audience Report: Region by Campaign": {
-    tableName: "TTA_AudienceRegionReport",
+    tableName: "tta_audience_region_report",
     filterNullMetrics: ["province_id"],
     conflictTarget: ["start_date", "end_date", "advertiser_id", "campaign_id", "province_id"],
     insightDateKey: ["start_date", "end_date"],
@@ -216,84 +217,84 @@ const TEMPLATE_MAP = {
   },
 
   "Audience Report: Country by Campaign": {
-    tableName: "TTA_AudienceCountryReport",
+    tableName: "tta_audience_country_report",
     conflictTarget: ["stat_time_day", "advertiser_id", "campaign_id", "start_date", "end_date", "country_code"],
     insightDateKey: ["start_date", "end_date"],
     filter_spend: true 
   },
 
   "Audience Report: Age by Campaign": {
-    tableName: "TTA_AudienceAgeReport",
+    tableName: "tta_audience_age_report",
     conflictTarget: ["stat_time_day", "advertiser_id", "campaign_id", "start_date", "end_date", "age"],
     insightDateKey: ["start_date", "end_date"],
     filter_spend: true 
   },
 
   "Audience Report: Gender by Campaign": {
-    tableName: "TTA_AudienceGenderReport",
+    tableName: "tta_audience_gender_report",
     conflictTarget: ["stat_time_day", "advertiser_id", "campaign_id", "start_date", "end_date", "gender"],
     insightDateKey: ["start_date", "end_date"],
     filter_spend: true
   },
 
   "Audience Report: Age & Gender by Campaign": {
-    tableName: "TTA_AudienceAgeGenderReport",
+    tableName: "tta_audience_age_gender_report",
     conflictTarget: ["stat_time_day", "campaign_id", "gender", "age", "start_date", "end_date", "advertiser_id"],
     insightDateKey: ["start_date", "end_date"],
     filter_spend: true
   },
 
   "Placement Report by Campaign": {
-    tableName: "TTA_PlacementReport",
+    tableName: "tta_placement_report",
     conflictTarget: ["advertiser_id", "campaign_id", "start_date", "end_date", "placement"],
     insightDateKey: ["start_date", "end_date"],
     filter_spend: true
   },
 
   "Platform Report by Campaign": {
-    tableName: "TTA_PlatformReport",
+    tableName: "tta_platform_report",
     conflictTarget: ["advertiser_id", "campaign_id", "start_date", "end_date", "platform"],
     insightDateKey: ["start_date", "end_date"],
     filter_spend: true
   },
 
   "GMV Campaign / Product Detail": {
-    tableName: "GMV_ProductDetailReport",
+    tableName: "gmv_product_detail_report",
     conflictTarget: ["advertiser_id", "store_id", "campaign_id", "start_date", "end_date", "stat_time_day", "item_group_id"],
     insightDateKey: ["start_date", "end_date"],
     filter_spend: false // Trong logic của GMV detail đã có sẵn lọc cost để tối ưu xử lý
   },
 
   "GMV Campaign / Creative Detail": {
-    tableName: "GMV_CreativeDetailReport",
+    tableName: "gmv_creative_detail_report",
     conflictTarget: ["advertiser_id", "store_id", "campaign_id", "start_date", "end_date", "item_group_id", "item_id"],
     insightDateKey: ["start_date", "end_date"],
     filter_spend: false // Trong logic của GMV detail đã có sẵn lọc cost để tối ưu xử lý
   },
 
   "GMV Product Campaign Performance": {
-    tableName: "GMV_ProductCampaignPerformance",
+    tableName: "gmv_product_campaign_performance",
     conflictTarget: ["advertiser_id", "store_id", "campaign_id", "start_date", "end_date", "stat_time_day"],
     insightDateKey: ["start_date", "end_date"],
     filter_spend: false
   },
 
   "GMV All Campaign Performance": {
-    tableName: "GMV_AllCampaignPerformance",
+    tableName: "gmv_all_campaign_performance",
     conflictTarget: ["advertiser_id", "store_id", "campaign_id", "start_date", "end_date", "stat_time_day"],
     insightDateKey: ["start_date", "end_date"],
     filter_spend: false
   },
 
   "GMV Live Campaign Performance": {
-    tableName: "GMV_LiveCampaignPerformance",
+    tableName: "gmv_live_campaign_performance",
     conflictTarget: ["advertiser_id", "store_id", "campaign_id", "start_date", "end_date", "stat_time_day"],
     insightDateKey: ["start_date", "end_date"],
     filter_spend: false
   },
 
   "Báo cáo đơn hàng chi tiết (Full Data)": {
-    tableName: "POS_BasicReport",
+    tableName: "pos_basic_report",
     conflictTarget: ["order_id", "item_id"],
     insightDateKey: [],
     filter_spend: false
@@ -409,9 +410,12 @@ export async function writeDataToDatabase(templateName, dataRows, userId, taskId
 
   // 5: Chuẩn hóa cột
   const allPossibleColumns = new Set();
+
+  allPossibleColumns.add('pkId');
+
   deduplicatedData.forEach(row => {
     Object.keys(row).forEach(key => {
-      if (key !== 'pkId' && key !== 'createdAt' && key !== 'updatedAt') {
+      if (key !== 'createdAt' && key !== 'updatedAt') {
         allPossibleColumns.add(key);
       }
     });
@@ -423,7 +427,12 @@ export async function writeDataToDatabase(templateName, dataRows, userId, taskId
   const normalizedData = deduplicatedData.map(row => {
     const normalizedRow = {};
     for (const col of finalColumns) {
-      normalizedRow[col] = Object.prototype.hasOwnProperty.call(row, col) ? row[col] : null;
+      if (col === 'pkId') {
+         // [FIX] Tự sinh UUID nếu row chưa có
+         normalizedRow[col] = row[col] || randomUUID(); 
+      } else {
+         normalizedRow[col] = Object.prototype.hasOwnProperty.call(row, col) ? row[col] : null;
+      }
     }
     return normalizedRow;
   });

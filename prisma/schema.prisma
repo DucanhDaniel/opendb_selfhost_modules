@@ -16,7 +16,7 @@ datasource db {
 
 // Campaign Overview Report
 model FAD_CampaignOverviewReport {
-  pkId String @id @default(dbgenerated("gen_random_uuid()"))
+  pkId String @id @default(uuid())
   user_id  String
   createdAt DateTime @default(now())
 
@@ -65,19 +65,20 @@ model FAD_CampaignOverviewReport {
 
   @@unique([user_id, account_id, id, date_start, date_stop])
   @@index([user_id])
+  @@map("fad_campaign_overview_report")
 }
 
 // Campaign Performance by Age
 model FAD_CampaignPerformanceByAge {
-  pkId String @id @default(dbgenerated("gen_random_uuid()"))
+  pkId String @id @default(uuid())
   user_id  String
   createdAt DateTime @default(now())
 
   // 1.Thông tin Chiến dịch
   campaign_id   String?
-  campaign_name String?
+  campaign_name String? @db.Text()
   account_id    String?
-  account_name  String?
+  account_name  String? @db.Text()
 
   // 2.Phân loại (Breakdown)
   age String?
@@ -101,19 +102,20 @@ model FAD_CampaignPerformanceByAge {
 
   @@unique([user_id, account_id, date_start, date_stop, campaign_id, age])
   @@index([user_id])
+  @@map("fad_campaign_performance_by_age")
 }
 
 // Campaign Performance by Gender
 model FAD_CampaignPerformanceByGender {
-  pkId String @id @default(dbgenerated("gen_random_uuid()"))
+  pkId String @id @default(uuid())
   user_id  String
   createdAt DateTime @default(now())
 
   // 1.Thông tin Chiến dịch
   campaign_id   String?
-  campaign_name String?
+  campaign_name String? @db.Text()
   account_id    String?
-  account_name  String?
+  account_name  String? @db.Text()
 
   // 2.Phân loại (Breakdown)
   gender String?
@@ -137,19 +139,20 @@ model FAD_CampaignPerformanceByGender {
 
   @@unique([user_id, account_id, date_start, date_stop, campaign_id, gender])
   @@index([user_id])
+  @@map("fad_campaign_performance_by_gender")
 }
 
 // Campaign Performance by Platform
 model FAD_CampaignPerformanceByPlatform {
-  pkId String @id @default(dbgenerated("gen_random_uuid()"))
+  pkId String @id @default(uuid())
   user_id  String
   createdAt DateTime @default(now())
 
   // 1.Thông tin Định danh
   account_id    String?
-  account_name  String?
+  account_name  String? @db.Text()
   campaign_id   String?
-  campaign_name String?
+  campaign_name String? @db.Text()
 
   // 2.Phân loại (Breakdown)
   publisher_platform String?
@@ -178,19 +181,20 @@ model FAD_CampaignPerformanceByPlatform {
 
   @@unique([user_id, account_id, date_start, date_stop, campaign_id, publisher_platform, platform_position])
   @@index([user_id])
+  @@map("fad_campaign_performance_by_platform")
 }
 
 // Campaign Performance by Region
 model FAD_CampaignPerformanceByRegion {
-  pkId String @id @default(dbgenerated("gen_random_uuid()"))
+  pkId String @id @default(uuid())
   user_id  String
   createdAt DateTime @default(now())
 
   // 1.Thông tin Chiến dịch
   campaign_id   String?
-  campaign_name String?
+  campaign_name String? @db.Text()
   account_id    String?
-  account_name  String?
+  account_name  String? @db.Text()
 
   // 2.Phân loại (Breakdown)
   region String?
@@ -218,21 +222,22 @@ model FAD_CampaignPerformanceByRegion {
 
   @@unique([user_id, account_id, date_start, date_stop, campaign_id, region])
   @@index([user_id])
+  @@map("fad_campaign_performance_by_region")
 }
 
 // Ad Set Performance Report
 model FAD_AdSetPerformanceReport {
-  pkId String @id @default(dbgenerated("gen_random_uuid()"))
+  pkId String @id @default(uuid())
   user_id  String
   createdAt DateTime @default(now())
 
   // 1.Thông tin định danh
   id            String?
-  name          String?
+  name          String? @db.Text()
   campaign_id   String?
-  campaign_name String?
+  campaign_name String? @db.Text()
   account_id    String?
-  account_name  String?
+  account_name  String? @db.Text()
 
   // 2.Trạng thái & Chẩn đoán
   status           String?
@@ -271,23 +276,24 @@ model FAD_AdSetPerformanceReport {
 
   @@unique([user_id, account_id, date_start, date_stop, campaign_id, id])
   @@index([user_id])
+  @@map("fad_ad_set_performance_report")
 }
 
 // Ad Performance Report
 model FAD_AdPerformanceReport {
-  pkId String @id @default(dbgenerated("gen_random_uuid()"))
+  pkId String @id @default(uuid())
   user_id  String
   createdAt DateTime @default(now())
 
   // 1.Thông tin định danh
   id            String?
-  name          String?
+  name          String? @db.Text()
   adset_id      String?
-  adset_name    String?
+  adset_name    String? @db.Text()
   campaign_id   String?
-  campaign_name String?
+  campaign_name String? @db.Text()
   account_id    String?
-  account_name  String?
+  account_name  String? @db.Text()
   created_time  DateTime?
   updated_time  DateTime?
 
@@ -323,17 +329,18 @@ model FAD_AdPerformanceReport {
 
   @@unique([user_id, account_id, date_start, date_stop, campaign_id, adset_id, id])
   @@index([user_id])
+  @@map("fad_ad_performance_report")
 }
 
 // Account Daily Report
 model FAD_AccountDailyReport {
-  pkId String @id @default(dbgenerated("gen_random_uuid()"))
+  pkId String @id @default(uuid())
   user_id  String
   createdAt DateTime @default(now())
 
   // 1.Thông tin định danh
   account_id       String?
-  account_name     String?
+  account_name     String? @db.Text()
   account_currency String?
   date_start       DateTime?
   date_stop        DateTime?
@@ -362,19 +369,20 @@ model FAD_AccountDailyReport {
 
   @@unique([user_id, account_id, date_start, date_stop])
   @@index([user_id])
+  @@map("fad_account_daily_report")
 }
 
 // Campaign Daily Report
 model FAD_CampaignDailyReport {
-  pkId String @id @default(dbgenerated("gen_random_uuid()"))
+  pkId String @id @default(uuid())
   user_id  String
   createdAt DateTime @default(now())
 
   // 1.Thông tin định danh
   campaign_id   String?
-  campaign_name String?
+  campaign_name String? @db.Text()
   account_id    String?
-  account_name  String?
+  account_name  String? @db.Text()
   date_start    DateTime?
   date_stop     DateTime?
 
@@ -402,21 +410,22 @@ model FAD_CampaignDailyReport {
 
   @@unique([user_id, account_id, campaign_id, date_start, date_stop])
   @@index([user_id])
+  @@map("fad_campaign_daily_report")
 }
 
 // Ad Set Daily Report
 model FAD_AdSetDailyReport {
-  pkId String @id @default(dbgenerated("gen_random_uuid()"))
+  pkId String @id @default(uuid())
   user_id  String
   createdAt DateTime @default(now())
 
   // Thông tin định danh
   id            String?
-  name          String?
+  name          String? @db.Text()
   campaign_id   String?
-  campaign_name String?
+  campaign_name String? @db.Text()
   account_id    String?
-  account_name  String?
+  account_name  String? @db.Text()
   date_start    DateTime?
   date_stop     DateTime?
 
@@ -453,23 +462,24 @@ model FAD_AdSetDailyReport {
 
   @@unique([user_id, account_id, date_start, date_stop, campaign_id, id])
   @@index([user_id])
+  @@map("fad_ad_set_daily_report")
 }
 
 // Ad Daily Report
 model FAD_AdDailyReport {
-  pkId String @id @default(dbgenerated("gen_random_uuid()"))
+  pkId String @id @default(uuid())
   user_id  String
   createdAt DateTime @default(now())
 
   // 1.Thông tin định danh
   id            String?
-  name          String?
+  name          String? @db.Text()
   adset_id      String?
-  adset_name    String?
+  adset_name    String? @db.Text()
   campaign_id   String?
-  campaign_name String?
+  campaign_name String? @db.Text()
   account_id    String?
-  account_name  String?
+  account_name  String? @db.Text()
   date_start    DateTime?
   date_stop     DateTime?
 
@@ -502,23 +512,24 @@ model FAD_AdDailyReport {
 
   @@unique([user_id, account_id, date_start, date_stop, campaign_id, adset_id, id])
   @@index([user_id])
+  @@map("fad_ad_daily_report")
 }
 
 // Ad Creative Report
 model FAD_AdCreativeReport {
-  pkId String @id @default(dbgenerated("gen_random_uuid()"))
+  pkId String @id @default(uuid())
   user_id  String
   createdAt DateTime @default(now())
 
   // 1.Thông tin định danh
   id            String?
-  name          String?
+  name          String? @db.Text()
   adset_id      String?
-  adset_name    String?
+  adset_name    String? @db.Text()
   campaign_id   String?
-  campaign_name String?
+  campaign_name String? @db.Text()
   account_id    String?
-  account_name  String?
+  account_name  String? @db.Text()
 
   // 2.Trạng thái
   status           String?
@@ -527,11 +538,11 @@ model FAD_AdCreativeReport {
   // 3.Thông tin Sáng tạo
   creative_id                String?
   actor_id                   String?
-  page_name                  String?
+  page_name                  String? @db.Text()
   creative_title             String? @db.Text
   creative_body              String? @db.Text
-  creative_thumbnail_url     String?
-  creative_thumbnail_raw_url String?
+  creative_thumbnail_url     String? @db.Text
+  creative_thumbnail_raw_url String? @db.Text
   creative_link              String?
 
   // 4.Chỉ số Hiệu suất
@@ -558,28 +569,29 @@ model FAD_AdCreativeReport {
 
   @@unique([user_id, account_id, date_start, date_stop, campaign_id, adset_id, id])
   @@index([user_id])
+  @@map("fad_ad_creative_report")
 }
 
 // BM & Ad Accounts
 model FAD_BmAndAdAccounts {
-  pkId String @id @default(dbgenerated("gen_random_uuid()"))
+  pkId String @id @default(uuid())
   user_id  String
   createdAt DateTime @default(now())
 
   // 1.Thông tin Business Manager
   bm_id                    String?
-  bm_name                  String?
+  bm_name                  String? @db.Text()
   bm_created_time          DateTime?
   bm_verification_status   String?
-  bm_profile_picture_uri   String?
+  bm_profile_picture_uri   String? @db.Text()
 
   // 2.Thông tin Tài khoản QC
   account_type             String?
   account_id               String?
-  account_name             String?
+  account_name             String? @db.Text()
   account_status_text      String?
   currency                 String?
-  timezone_name            String?
+  timezone_name            String? @db.Text()
   amount_spent             Float?
   balance                  Float?
   current_payment_method   String?
@@ -587,6 +599,7 @@ model FAD_BmAndAdAccounts {
 
   @@unique([user_id, bm_id, account_id])
   @@index([user_id])
+  @@map("fad_bm_and_ad_accounts")
 }
 
 // ===============================================
@@ -596,13 +609,13 @@ model FAD_BmAndAdAccounts {
 // FB Billing Data
 // Dựa trên các trường từ Google Sheet
 model FBT_FbBillingData {
-  pkId      String   @id @default(dbgenerated("gen_random_uuid()"))
+  pkId      String   @id @default(uuid())
   user_id  String
   createdAt DateTime @default(now())
 
   // === Các trường từ Sheet ===
   accountId           String? // "act_65024989..."
-  accountName         String? // "Cara Luna 02"
+  accountName         String?  @db.Text()// "Cara Luna 02"
   eventType           String? // "ad_account_bill"
   dateTimeInTimezone  String? // "10/20/2025 at 10:04 AM" (Lưu dạng String vì không phải ISO)
   fetchTimestamp      DateTime? // "2025-10-24 22:4..."
@@ -627,6 +640,7 @@ model FBT_FbBillingData {
 
   @@unique([user_id, accountId, transactionId])
   @@index([user_id])
+  @@map("fbt_fb_billing_data")
 }
 
 // ===============================================
@@ -635,7 +649,7 @@ model FBT_FbBillingData {
 
 // BC Tương tác & Tăng trưởng Cộng đồng
 model MPI_BcTuongTacTangTruongCongDong {
-  pkId String @id @default(dbgenerated("gen_random_uuid()"))
+  pkId String @id @default(uuid())
   user_id  String
   createdAt DateTime @default(now())
 
@@ -648,11 +662,13 @@ model MPI_BcTuongTacTangTruongCongDong {
   page_fan_adds    Int?
   page_fan_removes Int?
   page_views_total Int?
+  @@index(user_id)
+  @@map("mpi_bc_tuong_tac_tang_truong_cong_dong")
 }
 
 // BC Hiển thị & Tiếp cận Trang
 model MPI_BcHienThiTiepCanTrang {
-  pkId String @id @default(dbgenerated("gen_random_uuid()"))
+  pkId String @id @default(uuid())
   user_id  String
   createdAt DateTime @default(now())
 
@@ -665,11 +681,12 @@ model MPI_BcHienThiTiepCanTrang {
   page_impressions_paid_unique Int?
 
   @@index([user_id])
+  @@map("mpi_bc_hien_thi_tiep_can_trang")
 }
 
 // BC Hiệu suất Bài viết (Tổng hợp)
 model MPI_BcHieuSuatBaiVietTongHop {
-  pkId String @id @default(dbgenerated("gen_random_uuid()"))
+  pkId String @id @default(uuid())
   user_id  String
   createdAt DateTime @default(now())
 
@@ -697,11 +714,13 @@ model MPI_BcHieuSuatBaiVietTongHop {
   post_reactions_anger_total   Int?
   post_video_views             Int?
   post_activity_by_action_type Json?
+
+  @@map("mpi_bc_hieu_suat_bai_viet_tong_hop")
 }
 
 // BC Phân tích Cảm xúc Bài viết
 model MPI_BcPhanTichCamXucBaiViet {
-  pkId String @id @default(dbgenerated("gen_random_uuid()"))
+  pkId String @id @default(uuid())
   user_id  String
   createdAt DateTime @default(now())
 
@@ -714,11 +733,12 @@ model MPI_BcPhanTichCamXucBaiViet {
   post_reactions_anger_total Int?
 
   @@index([user_id])
+  @@map("mpi_bc_phan_tich_cam_xuc_bai_viet")
 }
 
 // BC Phân tích: Fan theo Vị trí
 model MPI_BcPhanTichFanTheoViTri {
-  pkId String @id @default(dbgenerated("gen_random_uuid()"))
+  pkId String @id @default(uuid())
   user_id  String
   createdAt DateTime @default(now())
 
@@ -727,21 +747,25 @@ model MPI_BcPhanTichFanTheoViTri {
   page_fans_city    Json?
 
   @@index([user_id])
+  @@map("mpi_bc_phan_tich_fan_theo_vi_tri")
 }
 
 // BC Phân tích: Nguồn Lượt thích Mới
 model MPI_BcPhanTichNguonLuotThichMoi {
-  pkId String @id @default(dbgenerated("gen_random_uuid()"))
+  pkId String @id @default(uuid())
   user_id  String
   createdAt DateTime @default(now())
 
   // Metric
   page_fan_adds_by_paid_non_paid_unique Json?
+  
+  @@index([user_id])
+  @@map("mpi_bc_phan_tich_nguon_luot_thich_moi")
 }
 
 // BC Hiệu suất Video (Từng video)
 model MPI_BcHieuSuatVideoTungVideo {
-  pkId String @id @default(dbgenerated("gen_random_uuid()"))
+  pkId String @id @default(uuid())
   user_id  String
   createdAt DateTime @default(now())
 
@@ -759,11 +783,12 @@ model MPI_BcHieuSuatVideoTungVideo {
   post_video_likes_by_reaction_type Json?
 
   @@index([user_id])
+  @@map("mpi_bc_hieu_suat_video_tung_video")
 }
 
 // BC Hiệu suất Video (Tổng hợp)
 model MPI_BcHieuSuatVideoTongHop {
-  pkId String @id @default(dbgenerated("gen_random_uuid()"))
+  pkId String @id @default(uuid())
   user_id  String
   createdAt DateTime @default(now())
 
@@ -781,18 +806,19 @@ model MPI_BcHieuSuatVideoTongHop {
   page_video_view_time Float?
 
   @@index([user_id])
+  @@map("mpi_bc_hieu_suat_video_tong_hop")
 }
 
 // BC Tổng hợp Hiệu suất Trang (Nâng cao)
 model MPI_BcTongHopHieuSuatTrangNangCao {
-  pkId String @id @default(dbgenerated("gen_random_uuid()"))
+  pkId String @id @default(uuid())
   user_id  String
   createdAt DateTime @default(now())
 
   // 1.Thông tin cơ bản
   platform  String?
   page_id   String?
-  page_name String?
+  page_name String? @db.Text()
   date      DateTime?
 
   // 2.Tăng trưởng Follower
@@ -823,11 +849,12 @@ model MPI_BcTongHopHieuSuatTrangNangCao {
   video_view_time Float?
 
   @@index([user_id])
+  @@map("mpi_bc_tong_hop_hieu_suat_trang_nang_cao")
 }
 
 // BC Hiệu suất Bài viết (Lifetime)
 model MPI_BcHieuSuatBaiVietLifetime {
-  pkId String @id @default(dbgenerated("gen_random_uuid()"))
+  pkId String @id @default(uuid())
   user_id  String
   createdAt DateTime @default(now())
 
@@ -840,6 +867,7 @@ model MPI_BcHieuSuatBaiVietLifetime {
   post_video_views_unique       Int?
 
   @@index([user_id])
+  @@map("mpi_bc_hieu_suat_bai_viet_lifetime")
 }
 
 
@@ -850,13 +878,13 @@ model MPI_BcHieuSuatBaiVietLifetime {
 /// @model
 /// Dữ liệu cho template "BCs Info"
 model BCA_BCInfo {
-  pkId      String   @id @default(dbgenerated("gen_random_uuid()"))
+  pkId      String   @id @default(uuid())
   user_id  String
   createdAt DateTime @default(now()) 
 
   // Metrics
   bc_id       String?
-  bc_name     String?
+  bc_name     String? @db.Text()
   company     String?
   currency    String?
   status      String?
@@ -867,18 +895,19 @@ model BCA_BCInfo {
 
   @@unique([user_id, bc_id])
   @@index([user_id])
+  @@map("bca_bc_info")
 }
 
 /// @model
 /// Dữ liệu cho template "BC & Accounts Info"
 model bca_bc_account_info {
-  pkId      String   @id @default(dbgenerated("gen_random_uuid()"))
+  pkId      String   @id @default(uuid())
   user_id  String
   createdAt DateTime @default(now()) 
 
   // Metrics
   advertiser_id   String?
-  name            String?
+  name            String? @db.Text()
   status          String?
   currency        String?
   timezone        String?
@@ -895,12 +924,13 @@ model bca_bc_account_info {
   role            String?
 
   @@index([user_id])
+  @@map("bca_bc_account_info")
 }
 
 /// @model
 /// Dữ liệu cho template "BC Assets Info"
 model BCA_BCAssetInfo {
-  pkId      String   @id @default(dbgenerated("gen_random_uuid()"))
+  pkId      String   @id @default(uuid())
   user_id  String
   createdAt DateTime @default(now()) 
 
@@ -910,8 +940,8 @@ model BCA_BCAssetInfo {
 
   // Metrics
   asset_id        String?
-  asset_name      String?
-  owner_bc_name   String?
+  asset_name      String? @db.Text()
+  owner_bc_name   String? @db.Text()
   relation_type   String?
   advertiser_status String?
   advertiser_role String?
@@ -920,6 +950,7 @@ model BCA_BCAssetInfo {
   relation_status String?
 
   @@index([user_id])
+  @@map("bca_bc_asset_info")
 }
 
 // -------------------------------------
@@ -929,7 +960,7 @@ model BCA_BCAssetInfo {
 /// @model
 /// Dữ liệu cho template "Campaign Performance" (Ví dụ của bạn)
 model TTA_CampaignPerformance {
-  pkId      String   @id @default(dbgenerated("gen_random_uuid()"))
+  pkId      String   @id @default(uuid())
   user_id  String
   createdAt DateTime @default(now()) 
 
@@ -939,8 +970,8 @@ model TTA_CampaignPerformance {
   start_date      DateTime?
   end_date        DateTime?
   advertiser_id   String?
-  advertiser_name String?
-  campaign_name   String?
+  advertiser_name String? @db.Text()
+  campaign_name   String? @db.Text()
   objective_type  String?
 
   // Số liệu (Metrics)
@@ -972,12 +1003,13 @@ model TTA_CampaignPerformance {
 
   @@unique([user_id, advertiser_id, campaign_id, objective_type, start_date, end_date, stat_time_day])
   @@index([user_id])
+  @@map("tta_campaign_performance")
 }
 
 /// @model
 /// Dữ liệu cho template "AdGroup Performance"
 model TTA_AdGroupPerformance {
-  pkId      String   @id @default(dbgenerated("gen_random_uuid()"))
+  pkId      String   @id @default(uuid())
   user_id  String
   createdAt DateTime @default(now()) 
 
@@ -987,11 +1019,11 @@ model TTA_AdGroupPerformance {
   start_date      DateTime?
   end_date        DateTime?
   advertiser_id   String?
-  advertiser_name String?
+  advertiser_name String? @db.Text()
 
   // Metrics
-  adgroup_name    String?
-  campaign_name   String?
+  adgroup_name    String? @db.Text()
+  campaign_name   String? @db.Text()
   spend           Float?
   impressions     Int?
   clicks          Int?
@@ -1020,13 +1052,13 @@ model TTA_AdGroupPerformance {
 
   @@unique([user_id, advertiser_id, adgroup_id, start_date, end_date, stat_time_day])
   @@index([user_id])
-
+  @@map("tta_adgroup_performance")
 }
 
 /// @model
 /// Dữ liệu cho template "Ad Performance"
 model TTA_AdPerformance {
-  pkId      String   @id @default(dbgenerated("gen_random_uuid()"))
+  pkId      String   @id @default(uuid())
   user_id  String
   createdAt DateTime @default(now()) 
 
@@ -1036,13 +1068,13 @@ model TTA_AdPerformance {
   start_date      DateTime?
   end_date        DateTime?
   advertiser_id   String?
-  advertiser_name String?
-  campaign_name   String?
-  adgroup_name     String?
+  advertiser_name String? @db.Text()
+  campaign_name   String? @db.VarChar(255)
+  adgroup_name     String? @db.VarChar(255)
 
   // Metrics
-  ad_text         String?
-  ad_name         String?
+  ad_text         String? @db.Text()
+  ad_name         String? @db.Text()
   spend           Float?
   impressions     Int?
   clicks          Int?
@@ -1071,13 +1103,14 @@ model TTA_AdPerformance {
 
   @@unique([user_id, advertiser_id, campaign_name, adgroup_name, ad_id, start_date, end_date, stat_time_day])
   @@index([user_id])
+  @@map("tta_ad_performance")
 
 }
 
 /// @model
 /// Dữ liệu cho template "Creative Performance (Video/Image)"
 model TTA_CreativePerformance {
-  pkId      String   @id @default(dbgenerated("gen_random_uuid()"))
+  pkId      String   @id @default(uuid())
   user_id  String
   createdAt DateTime @default(now()) 
 
@@ -1086,14 +1119,14 @@ model TTA_CreativePerformance {
   start_date      DateTime?
   end_date        DateTime?
   advertiser_id   String?
-  advertiser_name String?
+  advertiser_name String? @db.Text()
 
   // Metrics
   campaign_id     String?
-  campaign_name   String?
+  campaign_name   String? @db.Text()
   adgroup_id      String?
-  adgroup_name    String?
-  ad_name         String?
+  adgroup_name    String? @db.Text()
+  ad_name         String? @db.Text()
   spend           Float?
   impressions     Int?
   clicks          Int?
@@ -1103,7 +1136,7 @@ model TTA_CreativePerformance {
 
   @@unique([user_id, advertiser_id, campaign_id, adgroup_id, ad_id, start_date, end_date])
   @@index([user_id])
-
+  @@map("tta_creative_performance")
 }
 
 // -------------------------------------
@@ -1113,20 +1146,20 @@ model TTA_CreativePerformance {
 /// @model
 /// Dữ liệu cho template "Audience Report: Region by Campaign"
 model TTA_AudienceRegionReport {
-  pkId      String   @id @default(dbgenerated("gen_random_uuid()"))
+  pkId      String   @id @default(uuid())
   user_id  String
   createdAt DateTime @default(now()) 
   // Dimensions
   campaign_id     String?
   province_id     String?
-  province_name   String?
+  province_name   String? @db.Text()
   start_date      DateTime?
   end_date        DateTime?
   advertiser_id   String?
-  advertiser_name String?
+  advertiser_name String? @db.Text()
 
   // Metrics
-  campaign_name   String?
+  campaign_name   String? @db.Text()
   spend           Float?
   impressions     Int?
   clicks          Int?
@@ -1155,13 +1188,14 @@ model TTA_AudienceRegionReport {
 
   @@unique([user_id, start_date, end_date, advertiser_id, campaign_id, province_id])
   @@index([user_id])
+  @@map("tta_audience_region_report")
 
 }
 
 /// @model
 /// Dữ liệu cho template "Audience Report: Country by Campaign"
 model TTA_AudienceCountryReport {
-  pkId      String   @id @default(dbgenerated("gen_random_uuid()"))
+  pkId      String   @id @default(uuid())
   user_id  String
   createdAt DateTime @default(now()) 
 
@@ -1172,10 +1206,10 @@ model TTA_AudienceCountryReport {
   start_date      DateTime?
   end_date        DateTime?
   advertiser_id   String?
-  advertiser_name String?
+  advertiser_name String? @db.Text()
 
   // Metrics
-  campaign_name   String?
+  campaign_name   String? @db.Text()
   spend           Float?
   impressions     Int?
   clicks          Int?
@@ -1195,13 +1229,13 @@ model TTA_AudienceCountryReport {
 
   @@unique([user_id, start_date, end_date, advertiser_id, campaign_id, country_code, stat_time_day])
   @@index([user_id])
-
+  @@map("tta_audience_country_report")
 }
 
 /// @model
 /// Dữ liệu cho template "Audience Report: Age by Campaign"
 model TTA_AudienceAgeReport {
-  pkId      String   @id @default(dbgenerated("gen_random_uuid()"))
+  pkId      String   @id @default(uuid())
   user_id  String
   createdAt DateTime @default(now()) 
 
@@ -1212,10 +1246,10 @@ model TTA_AudienceAgeReport {
   start_date      DateTime?
   end_date        DateTime?
   advertiser_id   String?
-  advertiser_name String?
+  advertiser_name String? @db.Text()
 
   // Metrics (Tương tự Country Report)
-  campaign_name   String?
+  campaign_name   String? @db.Text()
   spend           Float?
   impressions     Int?
   clicks          Int?
@@ -1235,13 +1269,14 @@ model TTA_AudienceAgeReport {
 
   @@unique([user_id, start_date, end_date, advertiser_id, campaign_id, age, stat_time_day])
   @@index([user_id])
+  @@map("tta_audience_age_report")
 
 }
 
 /// @model
 /// Dữ liệu cho template "Audience Report: Gender by Campaign"
 model TTA_AudienceGenderReport {
-  pkId      String   @id @default(dbgenerated("gen_random_uuid()"))
+  pkId      String   @id @default(uuid())
   user_id  String
   createdAt DateTime @default(now()) 
 
@@ -1252,10 +1287,10 @@ model TTA_AudienceGenderReport {
   start_date      DateTime?
   end_date        DateTime?
   advertiser_id   String?
-  advertiser_name String?
+  advertiser_name String? @db.Text()
 
   // Metrics (Tương tự Country Report)
-  campaign_name   String?
+  campaign_name   String? @db.Text()
   spend           Float?
   impressions     Int?
   clicks          Int?
@@ -1275,13 +1310,13 @@ model TTA_AudienceGenderReport {
 
   @@unique([user_id, start_date, end_date, advertiser_id, campaign_id, gender, stat_time_day])
   @@index([user_id])
-
+  @@map("tta_audience_gender_report")
 }
 
 /// @model
 /// Dữ liệu cho template "Audience Report: Age & Gender by Campaign"
 model TTA_AudienceAgeGenderReport {
-  pkId      String   @id @default(dbgenerated("gen_random_uuid()"))
+  pkId      String   @id @default(uuid())
   user_id  String
   createdAt DateTime @default(now()) 
 
@@ -1293,10 +1328,10 @@ model TTA_AudienceAgeGenderReport {
   start_date      DateTime?
   end_date        DateTime?
   advertiser_id   String?
-  advertiser_name String?
+  advertiser_name String? @db.Text()
 
   // Metrics (Tương tự Country Report)
-  campaign_name   String?
+  campaign_name   String? @db.Text()
   spend           Float?
   impressions     Int?
   clicks          Int?
@@ -1316,13 +1351,14 @@ model TTA_AudienceAgeGenderReport {
 
   @@unique([user_id, start_date, end_date, advertiser_id, campaign_id, age, gender, stat_time_day])
   @@index([user_id])
+  @@map("tta_audience_age_gender_report")
 
 }
 
 /// @model
 /// Dữ liệu cho template "Placement Report by Campaign"
 model TTA_PlacementReport {
-  pkId      String   @id @default(dbgenerated("gen_random_uuid()"))
+  pkId      String   @id @default(uuid())
   user_id  String
   createdAt DateTime @default(now()) 
 
@@ -1332,10 +1368,10 @@ model TTA_PlacementReport {
   start_date      DateTime?
   end_date        DateTime?
   advertiser_id   String?
-  advertiser_name String?
+  advertiser_name String? @db.Text()
 
   // Metrics
-  campaign_name   String?
+  campaign_name   String? @db.Text()
   spend           Float?
   impressions     Int?
   clicks          Int?
@@ -1345,13 +1381,13 @@ model TTA_PlacementReport {
 
   @@unique([user_id, start_date, end_date, advertiser_id, campaign_id, placement])
   @@index([user_id])
-
+  @@map("tta_placement_report")
 }
 
 /// @model
 /// Dữ liệu cho template "Platform Report by Campaign"
 model TTA_PlatformReport {
-  pkId      String   @id @default(dbgenerated("gen_random_uuid()"))
+  pkId      String   @id @default(uuid())
   user_id  String
   createdAt DateTime @default(now()) 
 
@@ -1361,10 +1397,10 @@ model TTA_PlatformReport {
   start_date      DateTime?
   end_date        DateTime?
   advertiser_id   String?
-  advertiser_name String?
+  advertiser_name String? @db.Text()
 
   // Metrics
-  campaign_name   String?
+  campaign_name   String? @db.Text()
   spend           Float?
   impressions     Int?
   clicks          Int?
@@ -1374,7 +1410,7 @@ model TTA_PlatformReport {
 
   @@unique([user_id, start_date, end_date, advertiser_id, campaign_id, platform])
   @@index([user_id])
-
+  @@map("tta_platform_report")
 }
 
 // -------------------------------------
@@ -1383,7 +1419,7 @@ model TTA_PlatformReport {
 
 /// @model
 model GMV_AllCampaignPerformance {
-  pkId      String   @id @default(dbgenerated("gen_random_uuid()"))
+  pkId      String   @id @default(uuid())
   user_id  String
   createdAt DateTime @default(now()) 
 
@@ -1393,12 +1429,12 @@ model GMV_AllCampaignPerformance {
   start_date      DateTime?
   end_date        DateTime?
   advertiser_id   String?
-  advertiser_name String?
+  advertiser_name String? @db.Text()
   store_id        String?
-  store_name      String?
+  store_name      String? @db.Text()
   
   // Metrics
-  campaign_name   String?
+  campaign_name   String? @db.Text()
   cost            Float?
   orders          Int?
   roi             Float?
@@ -1416,10 +1452,11 @@ model GMV_AllCampaignPerformance {
 
   @@unique([user_id, advertiser_id, store_id, campaign_id, start_date, end_date, stat_time_day])
   @@index([user_id])
+  @@map("gmv_all_campaign_performance")
 }
 
 model GMV_LiveCampaignPerformance {
-  pkId      String   @id @default(dbgenerated("gen_random_uuid()"))
+  pkId      String   @id @default(uuid())
   user_id  String
   createdAt DateTime @default(now()) 
 
@@ -1429,12 +1466,12 @@ model GMV_LiveCampaignPerformance {
   start_date      DateTime?
   end_date        DateTime?
   advertiser_id   String?
-  advertiser_name String?
+  advertiser_name String? @db.Text()
   store_id        String?
-  store_name      String?
+  store_name      String? @db.Text()
   
   // Metrics
-  campaign_name   String?
+  campaign_name   String? @db.Text()
   cost            Float?
   orders          Int?
   roi             Float?
@@ -1452,10 +1489,11 @@ model GMV_LiveCampaignPerformance {
 
   @@unique([user_id, advertiser_id, store_id, campaign_id, start_date, end_date, stat_time_day])
   @@index([user_id])
+  @@map("gmv_live_campaign_performance")
 }
 
 model GMV_ProductCampaignPerformance {
-  pkId      String   @id @default(dbgenerated("gen_random_uuid()"))
+  pkId      String   @id @default(uuid())
   user_id  String
   createdAt DateTime @default(now()) 
 
@@ -1465,12 +1503,12 @@ model GMV_ProductCampaignPerformance {
   start_date      DateTime?
   end_date        DateTime?
   advertiser_id   String?
-  advertiser_name String?
+  advertiser_name String? @db.Text()
   store_id        String?
-  store_name      String?
+  store_name      String? @db.Text()
   
   // Metrics
-  campaign_name   String?
+  campaign_name   String? @db.Text()
   cost            Float?
   orders          Int?
   roi             Float?
@@ -1488,11 +1526,12 @@ model GMV_ProductCampaignPerformance {
 
   @@unique([user_id, advertiser_id, store_id, campaign_id, start_date, end_date, stat_time_day])
   @@index([user_id])
+  @@map("gmv_product_campaign_performance")
 }
 
 /// Dữ liệu cho template "GMV Campaign / Product Detail"
 model GMV_ProductDetailReport {
-  pkId      String   @id @default(dbgenerated("gen_random_uuid()"))
+  pkId      String   @id @default(uuid())
   user_id  String
   createdAt DateTime @default(now()) 
 
@@ -1500,20 +1539,20 @@ model GMV_ProductDetailReport {
   stat_time_day   DateTime?
   campaign_id     String?
   item_group_id   String?
-  product_img     String? // Mặc dù tên là img, đây có thể là URL
+  product_img     String? @db.Text()
   start_date      DateTime?
   end_date        DateTime?
   advertiser_id   String?
-  advertiser_name String?
+  advertiser_name String? @db.Text() 
   store_id        String?
-  store_name      String?
+  store_name      String? @db.Text()
   
   // Metrics
-  campaign_name     String?
+  campaign_name     String? @db.Text()
   operation_status  String?
   bid_type          String?
-  product_name      String?
-  product_image_url String?
+  product_name      String? @db.Text()
+  product_image_url String? @db.Text()
   orders            Int?
   gross_revenue     Float?
   cost              Float?
@@ -1524,12 +1563,13 @@ model GMV_ProductDetailReport {
 
   @@unique([user_id, advertiser_id, store_id, campaign_id, start_date, end_date, stat_time_day, item_group_id])
   @@index([user_id])
+  @@map("gmv_product_detail_report")
 }
 
 /// @model
 /// Dữ liệu cho template "GMV Campaign / Creative Detail"
 model GMV_CreativeDetailReport {
-  pkId      String   @id @default(dbgenerated("gen_random_uuid()"))
+  pkId      String   @id @default(uuid())
   user_id  String
   createdAt DateTime @default(now()) @map("created_at")
 
@@ -1537,24 +1577,24 @@ model GMV_CreativeDetailReport {
   campaign_id     String?
   item_group_id   String?
   item_id         String? // Creative ID
-  product_img     String?
+  product_img     String? @db.Text() 
   start_date      DateTime?
   end_date        DateTime?
   advertiser_id   String?
-  advertiser_name String?
+  advertiser_name String? @db.Text()
   store_id        String?
-  store_name      String?
+  store_name      String? @db.Text()
 
   // Metrics - Thuộc tính
-  campaign_name   String?
+  campaign_name   String? @db.Text()
   operation_status String?
-  product_name    String?
+  product_name    String? @db.Text()
   product_status  String?
-  product_image_url String?
+  product_image_url String? @db.Text()
   creative_delivery_status String?
-  title           String?
-  tt_account_name String?
-  tt_account_profile_image_url String?
+  title           String? @db.Text()
+  tt_account_name String? @db.Text()
+  tt_account_profile_image_url String? @db.Text()
 
   // Metrics - Hiệu suất chính
   cost            Float?
@@ -1582,6 +1622,7 @@ model GMV_CreativeDetailReport {
 
   @@unique([user_id, advertiser_id, store_id, campaign_id, start_date, end_date, item_group_id, item_id])
   @@index([user_id])
+  @@map("gmv_creative_detail_report")
 }
 
 model User {
@@ -1597,6 +1638,7 @@ model User {
   taskSchedules TaskSchedule[] // một user có thể có nhiều taskSchedules
   
   @@index([id])
+  @@map("user")
 }
 
 model RefreshToken {
@@ -1608,23 +1650,25 @@ model RefreshToken {
   createdAt DateTime @default(now())
 
   @@index([userId])
+  @@map("refresh_token")
 }
 
 model TaskLog {
   id        String   @id @default(cuid())
-  taskId    String
+  taskId    String  
   userId    String   
   level     String
-  message   String
+  message   String    @db.Text()
   timestamp DateTime @default(now())
 
   @@index([taskId])
   @@index([userId]) 
+  @@map("task_log")
 }
 
 model POS_BasicReport {
   // --- Metadata (Bắt buộc) ---
-  pkId      String   @id @default(dbgenerated("gen_random_uuid()"))
+  pkId      String   @id @default(uuid())
   user_id   String
   task_id   String?
   createdAt DateTime @default(now()) 
@@ -1751,8 +1795,8 @@ model POS_BasicReport {
   is_wholesale_item  Boolean?
 
   // --- 10. Khác ---
-  internal_note      String?
-  printed_note       String?
+  internal_note      String? @db.Text()
+  printed_note       String? @db.Text()
   tags               String?
   is_livestream      Boolean?
   is_live_shopping   Boolean?
@@ -1764,6 +1808,7 @@ model POS_BasicReport {
   // --- Index ---
   @@index([user_id])
   @@unique([user_id, order_id, item_id])
+  @@map("pos_basic_report")
 }
 
 model TaskSchedule {
@@ -1786,6 +1831,7 @@ model TaskSchedule {
   executions     TaskMetric[] 
 
   @@index([userId])
+  @@map("task_schedule")
 }
 
 model TaskMetric {
@@ -1807,4 +1853,5 @@ model TaskMetric {
   @@index([userId])
   @@index([scheduleId]) 
   @@index([createdAt]) 
+  @@map("task_metric")
 }
