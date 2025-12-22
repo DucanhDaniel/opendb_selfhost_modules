@@ -1,12 +1,16 @@
+import 'dotenv/config';
 import { jest } from '@jest/globals';
 import Redis from 'ioredis';
 import RedisRateLimiter from '../../src/utils/rate_limiter.js'; 
 
 const sleep = (ms) => new Promise((resolve) => setTimeout(resolve, ms));
 
+console.log(process.env.REDIS_PASSWORD);
+
 const REDIS_CONFIG = {
   host: process.env.REDIS_HOST,
   port: process.env.REDIS_PORT,
+  password: process.env.REDIS_PASSWORD,
   maxRetriesPerRequest: 3,
 };
 

@@ -31,6 +31,7 @@ jobs:
           
           echo "REDIS_HOST=redis" >> .env
           echo "REDIS_PORT=6379" >> .env
+          echo "REDIS_PASSWORD=redis_secret_pass_123" >> .env
           
           # Các Key Bí mật (Cài trong Repo Settings > Secrets)
           echo "ACCESS_TOKEN_SECRET=${{ secrets.ACCESS_TOKEN_SECRET || 'test_secret' }}" >> .env

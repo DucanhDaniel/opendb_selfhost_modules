@@ -1,11 +1,9 @@
 import Redis from 'ioredis';
 
-// Sử dụng chung cấu hình Redis với project của bạn
-// Nếu bạn đã có file export redis client thì import vào, nếu chưa thì tạo mới
 const redis = new Redis({
   host: process.env.REDIS_HOST || 'localhost',
   port: process.env.REDIS_PORT || 6379,
-  // password: ...
+  password: process.env.REDIS_PASSWORD
 });
 
 const PREFIX = 'task:stop:';
