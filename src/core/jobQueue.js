@@ -8,7 +8,7 @@ const QUEUE_NAME = 'task-queue';
 const connectionOptions = {
   host: process.env.REDIS_HOST || '127.0.0.1',
   port: process.env.REDIS_PORT || 6379,
-  // Thêm password nếu có: password: process.env.REDIS_PASSWORD
+  password: process.env.REDIS_PASSWORD
 };
 
 // 3. Tạo và Export đối tượng QUEUE

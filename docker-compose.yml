@@ -1,4 +1,4 @@
-# version: '3.8'
+version: '3.8'
 
 services:
   # === 1. Node.js API ===
@@ -13,15 +13,14 @@ services:
       - ./.env
     depends_on:
       redis:
-        condition: service_healthy # Chỉ chạy Node khi Redis đã Healthcheck OK (ghi được)
+        condition: service_healthy
       postgres:
         condition: service_started
 
   watchdog:
-    build: . # Dùng chung source code
+    build: .
     container_name: opendb_watchdog
-    # Ghi đè lệnh khởi động để chạy file entrypoint mới tạo
-    command: ["node", "src/schedule-entry.js"] 
+    command: ["node", "src/schedule-entry.js"]
     restart: always
     env_file:
       - ./.env
@@ -30,7 +29,7 @@ services:
       - postgres
       - redis
 
-  # === 2. Redis  ===
+  # === 2. Redis ===
   redis:
     container_name: opendb_redis
     image: redis:7-alpine
@@ -38,17 +37,16 @@ services:
       - "6379:6379"
     volumes:
       - opendb_redis_data:/data
+    command: redis-server --requirepass ${REDIS_PASSWORD}
     
-    # Kiểm tra sức khỏe bằng cách thử GHI dữ liệu
     healthcheck:
-      # Lệnh này thử set key 'health_check'. Nếu Redis bị Read-only -> Lỗi -> Unhealthy
-      test: ["CMD-SHELL", "redis-cli set health_check 'ok' || exit 1"]
-      interval: 10s       # Kiểm tra mỗi 10 giây
-      timeout: 5s         # Chờ tối đa 5 giây
-      retries: 3          # Thử 3 lần liên tiếp nếu lỗi mới coi là chết
-      start_period: 10s   # Chờ 10s đầu khi khởi động
+      # [NEW] Thêm tham số -a ${REDIS_PASSWORD} để xác thực 
+      test: ["CMD-SHELL", "redis-cli -a ${REDIS_PASSWORD} set health_check 'ok' || exit 1"]
+      interval: 10s
+      timeout: 5s
+      retries: 3
+      start_period: 10s
 
-    # Gắn nhãn để Autoheal nhận diện và restart
     labels:
       autoheal: "true"
 
@@ -59,20 +57,21 @@ services:
     ports:
       - "5433:5432"
     environment:
-      - POSTGRES_DB=opendb
-      - POSTGRES_PASSWORD=opendb_123
+      # [NEW] Lấy giá trị từ file .env
+      - POSTGRES_DB=${POSTGRES_DB}
+      - POSTGRES_USER=${POSTGRES_USER}
+      - POSTGRES_PASSWORD=${POSTGRES_PASSWORD}
     volumes:
       - opendb-data:/var/lib/postgresql/data
 
-  # Service này sẽ theo dõi và restart các container bị đánh dấu unhealthy
   autoheal:
     image: willfarrell/autoheal
     container_name: autoheal
     restart: always
     environment:
-      - AUTOHEAL_CONTAINER_LABEL=all # Theo dõi tất cả container có label autoheal
+      - AUTOHEAL_CONTAINER_LABEL=all
     volumes:
-      - /var/run/docker.sock:/var/run/docker.sock # Cần quyền docker socket để restart container khác
+      - /var/run/docker.sock:/var/run/docker.sock
 
   redis-insight:
       image: redis/redisinsight:latest
