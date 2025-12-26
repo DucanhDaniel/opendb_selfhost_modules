@@ -3,6 +3,7 @@ import jwt from 'jsonwebtoken';
 import { randomBytes, createHash } from 'crypto';
 import bcrypt from 'bcryptjs';
 import axios from 'axios';
+import { sendForgotPasswordToken } from '../emailer/emailer.service.js'
 
 const ACCESS_SECRET = process.env.ACCESS_TOKEN_SECRET;
 const ACCESS_EXP = process.env.ACCESS_TOKEN_EXPIRATION;
@@ -91,11 +92,11 @@ async function verifyRefreshToken(plainToken) {
     throw new Error('Refresh token không hợp lệ hoặc đã hết hạn');
   }
   
-  return dbToken.user; // Trả về user
+  return dbToken.user; 
 }
 
 /**
- * [MỚI] Kiểm tra License và Quyền hạn cho Task
+ * Kiểm tra License và Quyền hạn cho Task
  * @param {string} userId - ID của user
  * @param {string} taskType - Loại task (VD: 'FACEBOOK_FAD', 'TIKTOK_GMV')
  * @returns {Promise<boolean>} - True nếu hợp lệ, Ném lỗi nếu không hợp lệ
@@ -157,6 +158,70 @@ async function checkUserLicensePermission(userId, taskType) {
   }
 }
 
+  
+  // 1. YÊU CẦU RESET (FORGOT PASSWORD)
+  async function forgotPassword(email) {
+    const user = await prisma.user.findUnique({ where: { email } });
+    
+    if (!user) return true; 
+
+    // Tạo token ngẫu nhiên (32 bytes hex)
+    const resetToken = randomBytes(4).toString('hex');
+    
+    // hết hạn sau 15 phút
+    const expiresAt = new Date(Date.now() + 15 * 60 * 1000); 
+
+    await prisma.passwordResetToken.create({
+      data: {
+        userId: user.id,
+        token: resetToken,
+        expiresAt: expiresAt
+      }
+    });
+
+    sendForgotPasswordToken(
+      user.email,
+      resetToken
+    );
+
+    return true;
+  }
+
+  // 2. ĐẶT LẠI MẬT KHẨU (RESET PASSWORD)
+  async function resetPassword(token, newPassword) {
+    // Tìm token trong DB
+    const storedToken = await prisma.passwordResetToken.findUnique({
+      where: { token },
+      include: { user: true } // Join bảng User để lấy info
+    });
+
+    // Validate Token
+    if (!storedToken) {
+      throw new Error('Token không hợp lệ hoặc không tồn tại.');
+    }
+
+    if (storedToken.expiresAt < new Date()) {
+      throw new Error('Token đã hết hạn. Vui lòng yêu cầu lại.');
+    }
+
+    // Hash mật khẩu mới
+    const hashedPassword = await bcrypt.hash(newPassword, 10);
+
+    // Transaction: Cập nhật pass + Xóa token cũ (và các token khác của user này để bảo mật)
+    await prisma.$transaction([
+      prisma.user.update({
+        where: { id: storedToken.userId },
+        data: { password: hashedPassword },
+      }),
+      // Xóa tất cả token reset của user này để tránh tái sử dụng
+      prisma.passwordResetToken.deleteMany({
+        where: { userId: storedToken.userId }
+      })
+    ]);
+
+    return { success: true };
+  }
+
 export const authService = {
   hashPassword,
   comparePassword,
@@ -165,5 +230,7 @@ export const authService = {
   saveRefreshToken,
   deleteRefreshToken,
   verifyRefreshToken,
-  checkUserLicensePermission
+  checkUserLicensePermission,
+  forgotPassword,
+  resetPassword
 };

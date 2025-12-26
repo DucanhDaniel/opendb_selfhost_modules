@@ -114,3 +114,43 @@ export const handleLogout = async (req, res, next) => {
     next(error);
   }
 };
+
+export const handleForgotPassword = async (req, res, next) => {
+  try {
+    const { email } = req.body;
+    if (!email) return res.status(400).json({ message: "Vui lòng nhập email" });
+
+    await authService.forgotPassword(email);
+
+    res.status(200).json({ 
+      success: true, 
+      message: "Chúng tôi đã gửi OTP đặt lại mật khẩu. Nếu không nhận được email, vui lòng kiểm tra lại email và thư rác." 
+    });
+  } catch (error) {
+    next(error);
+  }
+};
+
+export const handleResetPassword = async (req, res, next) => {
+  try {
+    const { token, newPassword } = req.body;
+    
+    if (!token || !newPassword) {
+        return res.status(400).json({ message: "Thiếu thông tin" });
+    }
+    
+    if (newPassword.length < 6) {
+        return res.status(400).json({ message: "Mật khẩu quá ngắn" });
+    }
+
+    await authService.resetPassword(token, newPassword);
+
+    res.status(200).json({ 
+      success: true, 
+      message: "Đặt lại mật khẩu thành công. Vui lòng đăng nhập lại." 
+    });
+  } catch (error) {
+    // Xử lý lỗi token hết hạn/sai
+    res.status(400).json({ success: false, message: error.message });
+  }
+};

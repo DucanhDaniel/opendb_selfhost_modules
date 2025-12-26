@@ -5,8 +5,12 @@ import {
   handleRegister, 
   handleLogin, 
   handleRefreshToken,
-  handleLogout 
+  handleLogout,
+  handleForgotPassword,
+  handleResetPassword
 } from '../controllers/auth.controller.js';
+
+import { forgotPasswordLimiter } from '../middleware/rateLimiter.js'
 
 const router = Router();
 
@@ -16,5 +20,6 @@ router.post('/register', validate(registerSchema), handleRegister);
 router.post('/login', validate(loginSchema), handleLogin);
 router.post('/refresh', handleRefreshToken);
 router.post('/logout', handleLogout);
-
+router.post('/forgot-password', forgotPasswordLimiter, handleForgotPassword);
+router.post('/reset-password', handleResetPassword);
 export default router;

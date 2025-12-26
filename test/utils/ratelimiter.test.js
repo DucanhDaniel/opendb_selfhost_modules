@@ -5,7 +5,6 @@ import RedisRateLimiter from '../../src/utils/rate_limiter.js';
 
 const sleep = (ms) => new Promise((resolve) => setTimeout(resolve, ms));
 
-console.log(process.env.REDIS_PASSWORD);
 
 const REDIS_CONFIG = {
   host: process.env.REDIS_HOST,
