@@ -1633,6 +1633,8 @@ model User {
   
   settings  Json?   @default("{}") 
 
+  passwordResetToken PasswordResetToken[]
+
   refreshTokens RefreshToken[] 
 
   taskSchedules TaskSchedule[] // một user có thể có nhiều taskSchedules
@@ -1854,4 +1856,16 @@ model TaskMetric {
   @@index([scheduleId]) 
   @@index([createdAt]) 
   @@map("task_metric")
+}
+
+model PasswordResetToken {
+  id        String   @id @default(uuid())
+  token     String   @unique // Token gửi qua email
+  expiresAt DateTime // Thời gian hết hạn
+  userId    String
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  createdAt DateTime @default(now())
+
+  @@index([userId])
+  @@map("password_reset_token")
 }

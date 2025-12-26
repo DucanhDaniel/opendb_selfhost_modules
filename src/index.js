@@ -2,7 +2,6 @@ import 'dotenv/config';
 import logger from './utils/logger.js';
 import { createApiServer } from './api/server.js';
 import { initializeWorker } from './core/jobQueue.js';
-import { runSchedulerWatchdog } from './core/schedulerWatchdog.js';
 
 const API_PORT = process.env.PORT || 3000;
 
