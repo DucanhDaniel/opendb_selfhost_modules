@@ -153,10 +153,11 @@ async function sendTaskStatusEmail(task, userId, taskId, status, rowsWritten, du
             }).join('');
 
             // 4. Nội dung email
-            const subject = `[OpenDB] Báo cáo Task: ${task.params.templateName} - ${new Date().toLocaleString('vi-VN')}`;
+            const subject = `[OpenDB] Báo cáo Task: ${task.params.templateName}`;
             const htmlContent = `
               <h3>Kết quả chạy Task</h3>
               <ul>
+                <li><b>Thời gian:</b> ${new Date().toLocaleString('vi-VN')}</li>
                 <li><b>Task ID:</b> ${taskId}</li>
                 <li><b>Trạng thái:</b> ${status}</li>
                 <li><b>Số dòng dữ liệu mới:</b> ${rowsWritten}</li>

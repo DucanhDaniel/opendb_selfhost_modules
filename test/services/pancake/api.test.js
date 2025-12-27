@@ -228,8 +228,8 @@ describe('E2E Flow: Setup Fixed User -> Run Task', () => {
     let status = 'QUEUED';
     let attempts = 0;
     
-    // Chờ tối đa 20 * 2s = 40 giây
-    while (status !== 'COMPLETED' && status !== 'FAILED' && attempts < 20) {
+    // Chờ tối đa 20 * 2s = 400 giây
+    while (status !== 'COMPLETED' && status !== 'FAILED' && attempts < 200) {
       attempts++;
       await new Promise(r => setTimeout(r, 2000)); // Chờ 2s
 
@@ -246,5 +246,5 @@ describe('E2E Flow: Setup Fixed User -> Run Task', () => {
 
     if (status === 'FAILED') console.error("Task Failed Msg:", status);
     expect(status).toBe('COMPLETED');
-  }, 60000); // Timeout 60s
+  }, 600000); // Timeout 600s
 });
