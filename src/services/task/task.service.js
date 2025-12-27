@@ -60,13 +60,14 @@ async function deleteTaskHistory(userId) {
 }
 
 async function initiateTask(userId, taskData) {
-  const { taskType, params, description, runType, scheduleId } = taskData;
+  const { taskType, params, description, runType, scheduleId, sendEmail } = taskData;
   
   // 1. Tạo Task ID và đối tượng Task mới
   const taskId = randomUUID(); 
   const createdAt = new Date().toISOString();
 
   const newTask = {
+    sendEmail: sendEmail,
     taskId: taskId,
     taskType: taskType,
     description: description,

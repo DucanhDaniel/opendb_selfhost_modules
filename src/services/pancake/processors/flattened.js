@@ -2,6 +2,7 @@ import { fetchPoscakeApi } from '../api.js';
 import { processPoscakeRow } from '../helpers.js';
 import { sleep } from '../../../utils/sleep.js';
 import { writeDataToDatabase } from '../../../db/dataWriter.js';
+import { taskSignal } from '../../../utils/taskSignal.js';
 
 export async function processFlattenedReport(options, config, maps, apiKey, taskId, task_logger, userId) {
   const { shopId, startDate, endDate, selectedFields, templateName } = options;
@@ -64,6 +65,7 @@ export async function processFlattenedReport(options, config, maps, apiKey, task
   };
 
   const writeBatchToDb = async (data) => {
+    if (taskId && await taskSignal.checkStopSignal(taskId)) throw new Error('CANCELLED');
       if (data.length === 0) return 0;
       const dbResult = await writeDataToDatabase(
           templateName,
