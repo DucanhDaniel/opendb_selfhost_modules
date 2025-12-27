@@ -8,7 +8,7 @@ const app = createApiServer();
 
 const TEST_USER = {
     username: "schedule_runner",
-    email: "scheduler@opendb.com",
+    email: "ducanh2002add@gmail.com",
     password: "password123",
     settings: { "TIKTOK_ACCESS_TOKEN": process.env.TIKTOK_ACCESS_TOKEN }
 };
@@ -66,6 +66,7 @@ describe('Schedule Execution Flow (E2E)', () => {
                 cronExpression: "* * * * *", // Every minute
                 timezone: "Asia/Ho_Chi_Minh",
                 taskData: {
+                    sendEmail: true,
                     taskType: "TIKTOK_GMV", 
                     description: "TIKTOK_GMV TASK",
                     params: { 

@@ -116,10 +116,11 @@ export const processJobWorker = async (job) => {
         }
       });
 
-      if (task.sendEmail) {
-        await sendTaskStatusEmail(task, userId, taskId, status, rowsWritten);
+      if ((task.sendEmail && status === 'COMPLETED') || status === "FAILED" || status === "RUNNING") {
+        await sendTaskStatusEmail(task, userId, taskId, status, rowsWritten, durationMs);
       }
-      
+
+            
       logger.info(`[Metric] Ghi nhận lịch sử chạy cho Task ${taskId} (Schedule: ${scheduleId || 'Manual'})`);
 
     } catch (e) {
@@ -128,7 +129,7 @@ export const processJobWorker = async (job) => {
   }
 };
 
-async function sendTaskStatusEmail(task, userId, taskId, status, rowsWritten) {
+async function sendTaskStatusEmail(task, userId, taskId, status, rowsWritten, durationMs) {
         try {
           const user = await prisma.user.findUnique({
             where: { id: userId },
@@ -159,6 +160,7 @@ async function sendTaskStatusEmail(task, userId, taskId, status, rowsWritten) {
                 <li><b>Task ID:</b> ${taskId}</li>
                 <li><b>Trạng thái:</b> ${status}</li>
                 <li><b>Số dòng dữ liệu mới:</b> ${rowsWritten}</li>
+                <li><b>Thời gian chạy:</b> ${durationMs / 1000}s</li>
               </ul>
               <hr/>
               <h4>Chi tiết Log:</h4>
