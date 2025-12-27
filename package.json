@@ -18,7 +18,7 @@
     "axios": "^1.13.2",
     "bcryptjs": "^3.0.3",
     "bluebird": "^3.7.2",
-    "bullmq": "^5.66.2",
+    "bullmq": "^5.66.3",
     "cookie-parser": "^1.4.7",
     "cors": "^2.8.5",
     "date-fns": "^4.1.0",
