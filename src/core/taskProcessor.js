@@ -4,6 +4,8 @@ import logger from '../utils/logger.js';
 import { TaskLogger } from '../utils/task_logger.js';
 import { authService } from '../services/auth/auth.service.js';
 
+import { sendEmail } from '../services/emailer/emailer.service.js'
+
 import { processFacebookJob } from '../services/facebook/index.js';
 import { processTiktokJob } from '../services/tiktok/index.js'; 
 import { processPoscakeJob } from '../services/pancake/index.js';
@@ -113,6 +115,10 @@ export const processJobWorker = async (job) => {
           scheduleId: scheduleId 
         }
       });
+
+      if (task.sendEmail) {
+        await sendTaskStatusEmail(task, userId, taskId, status, rowsWritten);
+      }
       
       logger.info(`[Metric] Ghi nhận lịch sử chạy cho Task ${taskId} (Schedule: ${scheduleId || 'Manual'})`);
 
@@ -121,6 +127,55 @@ export const processJobWorker = async (job) => {
     }
   }
 };
+
+async function sendTaskStatusEmail(task, userId, taskId, status, rowsWritten) {
+        try {
+          const user = await prisma.user.findUnique({
+            where: { id: userId },
+            select: { email: true } 
+          });
+
+          if (user && user.email) {
+            // 2. Lấy log từ DB và sắp xếp luôn bằng Prisma
+            const logs = await prisma.taskLog.findMany({
+              where: { taskId: taskId },
+              orderBy: { timestamp: 'asc' }, // Sắp xếp tăng dần theo thời gian
+              // take: 50 // (Tùy chọn) Chỉ lấy 50 dòng log cuối để tránh email quá dài
+            });
+
+            // 3. Format log thành chuỗi HTML dễ đọc
+            const logHtml = logs.map(log => {
+               const time = new Date(log.timestamp).toLocaleTimeString('vi-VN');
+               // Tô màu cho log lỗi
+               const color = log.level === 'ERROR' ? 'red' : 'black'; 
+               return `<div style="color: ${color}">[${time}] [${log.level}] ${log.message}</div>`;
+            }).join('');
+
+            // 4. Nội dung email
+            const subject = `[OpenDB] Báo cáo Task: ${task.params.templateName} - ${new Date().toLocaleString('vi-VN')}`;
+            const htmlContent = `
+              <h3>Kết quả chạy Task</h3>
+              <ul>
+                <li><b>Task ID:</b> ${taskId}</li>
+                <li><b>Trạng thái:</b> ${status}</li>
+                <li><b>Số dòng dữ liệu mới:</b> ${rowsWritten}</li>
+              </ul>
+              <hr/>
+              <h4>Chi tiết Log:</h4>
+              <div style="background: #f4f4f4; padding: 10px; font-family: monospace; font-size: 12px;">
+                ${logHtml || '<i>Không có log nào được ghi nhận.</i>'}
+              </div>
+            `;
+
+            await sendEmail(user.email, subject, htmlContent); 
+            
+            console.log(`[Email] Đã gửi báo cáo tới ${user.email}`);
+          }
+        } catch (mailError) {
+          console.error(`[Email Error] Không thể gửi mail báo cáo: ${mailError.message}`);
+          // Không throw error để tránh làm fail cả task chỉ vì lỗi gửi mail
+        }
+}
 
 /**
  * Hàm nội bộ để cập nhật settings của user sau khi job xong
